@@ -2,8 +2,9 @@ from random import random
 import openrouteservice
 import requests
 import json
+import secrets
 
-api_key = ""
+api_key = secrets.apikey
 client = openrouteservice.Client(key=api_key)
 CENTRAL_LONDON = [-0.1279, 51.5077]
 
