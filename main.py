@@ -1,9 +1,7 @@
-from utilities import generate_coordinates, get_travel_time
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    coordinates = generate_coordinates(10)
-    for coordinate in coordinates:
-        print(coordinate)
+from utilities import generate_training_datum
 
-    graph = get_travel_time(coordinates)
-    print(graph)
+if __name__ == '__main__':
+    while True:
+        response = generate_training_datum()
+        if response == 1:
+            break
