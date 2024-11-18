@@ -67,7 +67,8 @@ def create_graph(coordinate_array: list[list[float]]):
     response_json = json.loads(call.text)
 
     if 'error' in response_json:
-        if response_json['error'] == 'Rate limit exceeded':
+        if response_json['error'] == 'Rate limit exceeded' \
+                or response_json['error'] == 'Quota exceeded':
             return 1  # Maxed out api calls
         else:
             raise ValueError("Invalid response from API call\n"
