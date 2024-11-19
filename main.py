@@ -1,13 +1,16 @@
 import time
 from concurrent.futures import ProcessPoolExecutor
-from utilities import generate_test_datum, save_test_datum, reset_database
+import h5py
+import numpy as np
+
+import utilities
 
 
 def collect_test_data():
     while True:
-        datum = generate_test_datum()
+        datum = utilities.generate_test_datum()
         if not isinstance(datum[0], int):
-            save_test_datum(datum)
+            utilities.save_test_datum(datum)
         if datum[0] == 1:
             print("Waiting 1 minute for api.")
             time.sleep(60)  # Wait 1 minute before trying again
@@ -19,6 +22,10 @@ def collect_test_data():
 
 
 if __name__ == '__main__':
-    with ProcessPoolExecutor() as executor:
-        future = executor.submit(collect_test_data)
-        print("test")
+    #with ProcessPoolExecutor() as executor:
+    #    future = executor.submit(collect_test_data)
+    #    print("test")
+    coordinates = [[0,0], [0,1], [1,0], [1,1]]
+    route = [[0, 1, 5], [1, 2, 5], [2, 3, 5], [2, 1, 3]]
+    # utilities.display_coordinates(coordinates)
+    utilities.display_route(coordinates, route, True)

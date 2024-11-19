@@ -5,9 +5,14 @@ import json
 import numpy as np
 import h5py
 import math
+import networkx as nx
+import matplotlib
+import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 
 import secrets
+
+matplotlib.use('TkAgg')
 
 
 api_key = secrets.apikey
@@ -133,7 +138,6 @@ def openrouteservice_api_call(coordinate_array: list[list[float]]):
 
 def generate_test_datum(days: float = None,
                         free_time: float = None,
-                        graph: list[list[float]] = None,
                         coordinates: list[list[float]] = None,
                         number_of_nodes: float = None,
                         centre: list[float] = None,
@@ -143,7 +147,6 @@ def generate_test_datum(days: float = None,
 
     :param days: Number of days visiting.
     :param free_time: Amount of free time per day.
-    :param graph: Complete digraph between each visited location.
     :param coordinates: Used to generate graph (if none given).
     :param number_of_nodes: Number of locations (if no graph or coords given).
     :param centre: Starting point, i.e., hotel. (if no graph or coords given).
@@ -156,23 +159,22 @@ def generate_test_datum(days: float = None,
         free_time = float(random.randrange(97)) * 15
     if number_of_nodes is None:
         number_of_nodes = random.randrange(4, 26)
-    if graph is None:
-        if coordinates is None:
-            if centre is None:
-                city_coordinates = np.load('data/city_coordinates.npz')[
-                    'coordinates']
-                index = random.randrange(len(city_coordinates))
-                centre = city_coordinates[index]
-            coordinates = generate_coordinates(number_of_nodes, centre)
-        if durations is None:
-            durations = generate_durations(free_time, days, number_of_nodes)
-        graph = create_graph(coordinates, durations)
-        if graph == 1:
-            return 1
-        if graph == 0:
-            return 0
+    if coordinates is None:
+        if centre is None:
+            city_coordinates = np.load('data/city_coordinates.npz')[
+                'coordinates']
+            index = random.randrange(len(city_coordinates))
+            centre = city_coordinates[index]
+        coordinates = generate_coordinates(number_of_nodes, centre)
+    if durations is None:
+        durations = generate_durations(free_time, days, number_of_nodes)
+    graph = create_graph(coordinates, durations)
+    if graph == 1:
+        return 1
+    if graph == 0:
+        return 0
 
-    return [graph, days, free_time]
+    return [graph, days, free_time, coordinates]
 
 
 def generate_training_datum():
@@ -212,9 +214,12 @@ def save_test_datum(datum):
     with h5py.File("data/training_data.h5", 'a') as f:
         group = f['graphs']
         i = len(group)
-        graph = group.create_dataset(str(i), data=np.array(datum[0], dtype=np.float64), compression="gzip")
+        graph = group.create_dataset(str(i), compression="gzip",
+                                     data=np.array(datum[0], dtype=np.float64))
+
         graph.attrs['days'] = datum[1]
         graph.attrs['free_time'] = datum[2]
+        graph.attrs['coordinates'] = datum[3]
 
 
 def reset_database():
@@ -227,3 +232,61 @@ def reset_database():
     with h5py.File("data/training_data.h5", "w") as f:
         f.create_dataset("city_coordinates", data=city_coordinates)
         f.create_group("graphs")
+
+
+def display_coordinates(coordinates: list[list[float]]):
+    """
+    Displays a scatter plot of the given coordinates.
+
+    :param coordinates: The coordinates to display.
+    :return:
+    """
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
+    plt.scatter(x_coordinates, y_coordinates)
+    [plt.text(coordinate[0], coordinate[1],
+              f"({coordinate[0]}, {coordinate[1]})")
+     for coordinate in coordinates]
+    plt.show()
+
+
+def display_route(coordinates: list[list[float]],
+                  route: list[list[float]],
+                  show_weights: bool = False):
+    """
+
+
+    Credit to:
+    https://stackoverflow.com/questions/64986306/how-to-plot-a-networkx-graph-using-the-x-y-coordinates-of-the-points-list
+
+    :param coordinates:
+    :param route:
+    :param show_weights:
+    :return:
+    """
+    G = nx.DiGraph()
+    points = list(map(tuple, coordinates))
+    edges = list(map(tuple, route))
+
+    for i in range(len(route)):
+        if show_weights:
+            G.add_edge(points[edges[i][0]], points[edges[i][1]], weight=edges[i][2])
+        else:
+            G.add_edge(points[edges[i][0]], points[edges[i][1]])
+
+    pos = {point: point for point in points}
+
+    fig, ax = plt.subplots()
+    nx.draw(G, pos=pos, node_color='k', ax=ax)
+    nx.draw(G, pos=pos, node_size=1500, ax=ax)  # draw nodes and edges
+    nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
+
+    # Draw edge weights (if present)
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, ax=ax,
+                                 rotate=False, label_pos=0.825)
+
+    plt.axis("on")
+    ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
+    plt.show()
+
