@@ -238,8 +238,7 @@ def display_coordinates(coordinates: list[list[float]]):
     """
     Displays a scatter plot of the given coordinates.
 
-    :param coordinates: The coordinates to display.
-    :return:
+    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
     """
     x_coordinates = coordinates[:, 0]
     y_coordinates = coordinates[:, 1]
@@ -259,10 +258,10 @@ def display_route(coordinates: list[list[float]],
     Credit to:
     https://stackoverflow.com/questions/64986306/how-to-plot-a-networkx-graph-using-the-x-y-coordinates-of-the-points-list
 
-    :param coordinates:
-    :param route:
-    :param show_weights:
-    :return:
+    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
+    :param route: The route visiting coordinates (e.g. [[0, 1, 5], [1, 2, 5],
+                                                        [2, 3, 5], [2, 1, 3]])
+    :param show_weights: Whether to display the edge weights or not.
     """
     G = nx.DiGraph()
     points = list(map(tuple, coordinates))
