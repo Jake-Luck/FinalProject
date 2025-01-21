@@ -52,7 +52,8 @@ def generate_durations(time: float, days: float, number_of_locations):
     free_time = time * 0.75  # Gives some leeway for travel time.
     total_time = free_time * days
 
-    # Random duration in 15 minute intervals
+    # Center doesn't have a duration, so is set to 0.
+    # Other points are a random duration in 15 minute intervals
     durations = [0.0] + [float(random.randrange(97)) * 15
                          for _ in range(number_of_locations - 1)]
     time_taken = sum(durations)
@@ -87,7 +88,7 @@ def create_graph(coordinate_array: list[list[float]],
             if i == j:
                 continue
             # Converts graph to minutes before adding durations
-            graph[j][i] = (graph[j][i] / 60) + durations[i]
+            graph[j][i] = math.ceil((graph[j][i] / 60) + durations[i])
 
     return graph
 
@@ -240,14 +241,37 @@ def display_coordinates(coordinates: list[list[float]]):
 
     :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
     """
-    x_coordinates = coordinates[:, 0]
-    y_coordinates = coordinates[:, 1]
-    plt.scatter(x_coordinates, y_coordinates)
+    x_coordinates = [coordinate[0] for coordinate in coordinates]
+    y_coordinates = [coordinate[1] for coordinate in coordinates]
+
+    colors = ['red' if i == 0 else 'blue' for i in range(len(coordinates))]
+
+    plt.scatter(x_coordinates, y_coordinates, c=colors)
     [plt.text(coordinate[0], coordinate[1],
               f"({coordinate[0]}, {coordinate[1]})")
      for coordinate in coordinates]
     plt.show()
 
+
+def display_graph(coordinates: list[list[float]],
+                  graph: list[list[float]]):
+    G = nx.from_numpy_array(graph, create_using=nx.DiGraph())
+
+    pos = {i: coordinates[i] for i in range(len(coordinates))}
+
+    fig, ax = plt.subplots()
+    nx.draw(G, pos=pos, node_color='k', ax=ax)
+    nx.draw(G, pos=pos, node_size=1500, ax=ax)  # draw nodes and edges
+    nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
+
+    # Draw edge weights (if present)
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, ax=ax,
+                                 rotate=False, label_pos=0.825)
+
+    plt.axis("on")
+    ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
+    plt.show()
 
 def display_route(coordinates: list[list[float]],
                   route: list[list[float]],
@@ -269,7 +293,8 @@ def display_route(coordinates: list[list[float]],
 
     for i in range(len(route)):
         if show_weights:
-            G.add_edge(points[edges[i][0]], points[edges[i][1]], weight=edges[i][2])
+            G.add_edge(points[edges[i][0]], points[edges[i][1]],
+                       weight=edges[i][2])
         else:
             G.add_edge(points[edges[i][0]], points[edges[i][1]])
 
