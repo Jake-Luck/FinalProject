@@ -2,7 +2,10 @@
 #include <thrust/execution_policy.h>
 
 #include <chrono>
+#include ""
+#include "E:\Visual Studio Projects\Algorithms\boost_wrapper.h"
 
+/*
 __device__ void generatePermutation(int n, int threadId, char* permutation) {
     // Generate permutation using thread id and n
     for (int i = 0; i < n; i++) {
@@ -12,7 +15,7 @@ __device__ void generatePermutation(int n, int threadId, char* permutation) {
 
 __device__ void evaluatePermutation(int n, char* permutation, float** graph, int* evaluation, int threadId) {
     // Evaluate permutation
-    *evaluation = threadId;
+    *evaluation = threadId + 1;
 }
 
 __global__ void generateAndEvaluatePermutations(const int n, const unsigned long long int nPermutations,
@@ -23,12 +26,10 @@ __global__ void generateAndEvaluatePermutations(const int n, const unsigned long
         char* permutation = (char*)malloc(n * sizeof(char));
         int* evaluation = (int*)malloc(sizeof(int));
 
-        generatePermutation(n, threadId, permutation);
+        generatePermutation<<<>>>(n, threadId, permutation);
         evaluatePermutation(n, permutation, graph, evaluation, threadId);
 
-        assert(*evaluation == threadId);
         if (*evaluation > *bestEvaluation) {
-            
             atomicMax(bestEvaluation, *evaluation);
             *bestPermutation = *permutation;
         }
@@ -38,7 +39,7 @@ __global__ void generateAndEvaluatePermutations(const int n, const unsigned long
     }
 }
 
-char* BruteForce(const int n, int d, float** graph) {
+char* brute_force(const int n, int d, float** graph) {
     //
     const unsigned long long int n_permutations = tgamma(n+d+1);
 
@@ -53,7 +54,7 @@ char* BruteForce(const int n, int d, float** graph) {
 
     cudaMemcpy(threadEvaluation, &initialEvaluation, sizeof(float), cudaMemcpyHostToDevice);
 
-    constexpr int blockSize = 256;
+    constexpr int blockSize = 1024;
     int numBlocks = ceil(n_permutations / (float)blockSize);
 
     generateAndEvaluatePermutations<<<numBlocks, blockSize>>>(n, n_permutations, graph,
@@ -72,35 +73,63 @@ char* BruteForce(const int n, int d, float** graph) {
 
     return bestPermutation;
 }
+*/
+
+__device__ void generateRoute(char n, char d, int threadId, char* permutation);
+
+__device__ void evaluateRoute(char* permutation, char routeLength);
+
+__global__ void generateAndEvaluateRoutes(char routeLength, cpp_int nPermutations, 
+                                                int* globalBestPerm, int* globalBestEval) {
+
+}
+
+char* brute_force(const char routeLength, int** graph) {
+    constexpr int blockSize = 1024;
+    constexpr int initialEvaluation = INT_MAX;
+
+    cpp_int nRoutes = (int)tgamma(routeLength + 1); // cpp_int is big (128 bits)
+    // Should work up to routeLength = 34 (even if calculations take eternity)
+
+    char* globalBestRoute;
+    int* globalBestEvaluation;
+
+    cudaMalloc(&globalBestRoute, routeLength * sizeof(char));
+    cudaMalloc(&globalBestEvaluation, sizeof(int));
+
+    cudaFree(globalBestRoute);
+    cudaFree(globalBestEvaluation);
+}
 
 int main() {
-    int n = 3;
-    int d = 1;
+    constexpr char n = 3;
+    constexpr char d = 1;
+    const char routeLength = n + d;
 
-    char* route = (char*)malloc(sizeof(char) * (n+d));
+    char* route = new char[n+d];
 
     // adjacency matrix
-    float init[4][4] = {
+    int init[4][4] = {
         {0, 1, 1, 1},
         {1, 0, 1, 1},
         {1, 1, 0, 1},
         {1, 1, 1, 0}
     };
 
-    float** graph = (float**)malloc(n * sizeof(float*));
-    for (int i = 0; i < n; i++) {
+    int** graph = new int*[n];
+    for (char i = 0; i < n; i++) {
         graph[i] = init[i];
     }
 
-    route = BruteForce(n, d, graph);
+    route = brute_force(routeLength, graph);
 
-    for (int i = 0; i < (n + d); i++) {
-        std::cout << route[i] << " ";
+    for (char i = 0; i < routeLength; i++) {
+        std::cout << +route[i] << " ";
     }
     std::cout << std::endl;
 
-    free(graph);
-    free(route);
+    for (char i = 0; i < n; i++) delete[] graph[i];
+    delete[] graph;
 }
 
 /*
