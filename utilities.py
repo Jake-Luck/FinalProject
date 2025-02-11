@@ -9,6 +9,7 @@ import networkx as nx
 import matplotlib
 import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 
 import secrets
 
@@ -147,17 +148,17 @@ def generate_test_datum(days: float = None,
     Generates a new training datum, using given values or randomly generated.
 
     :param days: Number of days visiting.
-    :param free_time: Amount of free time per day.
+    :param free_time: Amount of free time per day, in minutes.
     :param coordinates: Used to generate graph (if none given).
     :param number_of_nodes: Number of locations (if no graph or coords given).
     :param centre: Starting point, i.e., hotel. (if no graph or coords given).
-    :param durations: Amount of time spent at each location
+    :param durations: Amount of time spent at each location, in minutes.
     :return: Returns a new training datum, including days, time and the graph.
     """
     if days is None:
         days = float(random.randrange(1, 8))
     if free_time is None:
-        free_time = float(random.randrange(97)) * 15
+        free_time = float(random.randrange(73)) * 15
     if number_of_nodes is None:
         number_of_nodes = random.randrange(4, 26)
     if coordinates is None:
@@ -205,22 +206,32 @@ def generate_training_datum():
                                   [number_of_nodes]*number_of_nodes))
     return [graph, days, free_time]
 
+class DataGroups(Enum):
+    regular_graphs = 'graphs'
+    ordered_graphs = 'ordered graphs'
+    algorithm_performance = 'algorithm performance'
 
-def save_test_datum(datum):
+
+class DataAttributes(Enum):
+    days = 'days'
+    free_time = 'free_time'
+    coordinates = 'coordinates'
+
+def save_test_datum(datum, group: DataGroups):
     """
     Saves a training datum to the hdf5 file.
 
     :param datum: A list containing graph, days, and free time per day.
     """
     with h5py.File("data/training_data.h5", 'a') as f:
-        group = f['graphs']
+        group = f[group.value]
         i = len(group)
         graph = group.create_dataset(str(i), compression="gzip",
                                      data=np.array(datum[0], dtype=np.float64))
 
-        graph.attrs['days'] = datum[1]
-        graph.attrs['free_time'] = datum[2]
-        graph.attrs['coordinates'] = datum[3]
+        graph.attrs[DataAttributes.days.value] = datum[1]
+        graph.attrs[DataAttributes.free_time.value] = datum[2]
+        graph.attrs[DataAttributes.coordinates.value] = datum[3]
 
 
 def reset_database():
@@ -232,7 +243,8 @@ def reset_database():
 
     with h5py.File("data/training_data.h5", "w") as f:
         f.create_dataset("city_coordinates", data=city_coordinates)
-        f.create_group("graphs")
+        f.create_group(DataGroups.regular_graphs.value)
+        f.create_group(DataGroups.ordered_graphs.value)
 
 
 def display_coordinates(coordinates: list[list[float]]):
