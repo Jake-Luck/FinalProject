@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
-import secrets
+from core import secrets
 
 matplotlib.use('TkAgg')
 

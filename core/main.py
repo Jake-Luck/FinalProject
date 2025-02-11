@@ -1,8 +1,6 @@
 import time
 from time import perf_counter
-from concurrent.futures import ProcessPoolExecutor
 import h5py
-import numpy as np
 
 import utilities
 
@@ -32,8 +30,8 @@ def collect_ordered_data():
     for num_locations in range(2, 26):
         num_days = 1
         while num_days < num_locations:
-            datum=utilities.generate_test_datum(days=num_days, free_time=1080,
-                                                number_of_nodes=num_locations)
+            datum= utilities.generate_test_datum(days=num_days, free_time=1080,
+                                                 number_of_nodes=num_locations)
             if not isinstance(datum, int):
                 utilities.save_test_datum(datum, utilities.DataGroups.ordered_graphs)
                 num_days += 1
