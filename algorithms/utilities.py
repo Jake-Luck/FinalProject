@@ -1,7 +1,10 @@
 import numpy as np
 
-def evaluate_route(route: list[int], num_days: int, graph: np.ndarray) -> float:
-    evaluation = previous_index = current_day = 0
+
+def evaluate_route(route: np.ndarray, num_days: int,
+                   graph: np.ndarray) -> float:
+    evaluation = 0.0
+    previous_index = current_day = 0
     evaluation_per_day = np.zeros(num_days)
 
     # Sum durations in route
