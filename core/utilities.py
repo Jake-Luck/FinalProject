@@ -2,12 +2,13 @@ import random
 import openrouteservice
 import requests
 import json
-import numpy as np
 import h5py
 import math
 import networkx as nx
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+from numpy import ndarray
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
@@ -21,7 +22,7 @@ client = openrouteservice.Client(key=api_key)
 
 
 def generate_coordinates(number_of_nodes: int = None,
-                         centre: list[float] = None):
+                         centre: list[float] = None) -> list[list[float]]:
     """
     Randomly generates N latitude & longitude coordinate pairs around a
     central point.
@@ -40,7 +41,9 @@ def generate_coordinates(number_of_nodes: int = None,
     return coordinate_array
 
 
-def generate_durations(time: float, days: float, number_of_locations):
+def generate_durations(time: float,
+                       days: float,
+                       number_of_locations) -> list[float]:
     """
     Generates durations for each location and scales them down to ensure they
     don't exceed three quarters of all time available.
@@ -64,7 +67,7 @@ def generate_durations(time: float, days: float, number_of_locations):
 
 
 def create_graph(coordinate_array: list[list[float]],
-                 durations: list[float]):
+                 durations: list[float]) -> ndarray:
     """
     Takes a set of coordinates and converts them into a complete digraph, with
     each edge being the time taken to travel by car.
@@ -75,10 +78,6 @@ def create_graph(coordinate_array: list[list[float]],
     :param durations: The amount of time to be taken at each location
     :return: Graph as a 2d array, or integers representing API failings.
     """
-
-
-    # Add time spent at location to edges ending at location. i.e. edge is
-    # travel time + time spent at destination
     graph = openrouteservice_api_call(coordinate_array)
     if isinstance(graph, int):
         return graph
@@ -94,7 +93,7 @@ def create_graph(coordinate_array: list[list[float]],
     return graph
 
 
-def openrouteservice_api_call(coordinate_array: list[list[float]]):
+def openrouteservice_api_call(coordinate_array: list[list[float]]) -> ndarray:
     """
     Makes a POST request to the OpenRouteService API to retrieve a distance
     matrix.
@@ -135,7 +134,7 @@ def openrouteservice_api_call(coordinate_array: list[list[float]]):
            [item for row in graph for item in row]):
         return 0
 
-    return graph
+    return np.array(graph)
 
 
 def generate_test_datum(days: float = None,
@@ -143,7 +142,7 @@ def generate_test_datum(days: float = None,
                         coordinates: list[list[float]] = None,
                         number_of_nodes: float = None,
                         centre: list[float] = None,
-                        durations: list[float] = None):
+                        durations: list[float] = None) -> list:
     """
     Generates a new training datum, using given values or randomly generated.
 
@@ -179,19 +178,20 @@ def generate_test_datum(days: float = None,
     return [graph, days, free_time, coordinates]
 
 
-def generate_training_datum():
+def generate_training_datum() -> list:
     """
     Generates a training datum using random inputs for the graph, days and free
     time.
 
     :return: a training datum.
     """
-    def generate_training_distances(i, num_nodes):
+    def generate_training_distances(num_nodes,
+                                    i):
         """
         Generates a list of distances for a given node.
 
-        :param i: The index of the given node.
         :param num_nodes: Total number of nodes in the graph.
+        :param i: The index of the given node.
         :return: A list containing distances from 'i' to other nodes in graph
         """
         return [0 if i == j else random.randrange(15, 960)
@@ -202,9 +202,10 @@ def generate_training_datum():
     number_of_nodes = random.randrange(4, 26)
     with ThreadPoolExecutor() as executor:
         graph = list(executor.map(generate_training_distances,
-                                  range(number_of_nodes),
-                                  [number_of_nodes]*number_of_nodes))
+                                  [number_of_nodes] * number_of_nodes,
+                                  range(number_of_nodes)))
     return [graph, days, free_time]
+
 
 class DataGroups(Enum):
     regular_graphs = 'graphs'
@@ -217,11 +218,13 @@ class DataAttributes(Enum):
     free_time = 'free_time'
     coordinates = 'coordinates'
 
+
 def save_test_datum(datum, group: DataGroups):
     """
     Saves a training datum to the hdf5 file.
 
     :param datum: A list containing graph, days, and free time per day.
+    :param group: Which data group to save to.
     """
     with h5py.File("data/training_data.h5", 'a') as f:
         group = f[group.value]
@@ -234,7 +237,7 @@ def save_test_datum(datum, group: DataGroups):
         graph.attrs[DataAttributes.coordinates.value] = datum[3]
 
 
-def reset_database():
+def reset_database() -> None:
     """
     In case of emergency (I mess something up and corrupt the file),
     delete h5 file and run this.
@@ -247,27 +250,28 @@ def reset_database():
         f.create_group(DataGroups.ordered_graphs.value)
 
 
-def display_coordinates(coordinates: list[list[float]]):
+def display_coordinates(coordinates: ndarray) -> None:
     """
     Displays a scatter plot of the given coordinates.
 
     :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
     """
-    x_coordinates = [coordinate[0] for coordinate in coordinates]
-    y_coordinates = [coordinate[1] for coordinate in coordinates]
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
 
-    colors = ['red' if i == 0 else 'blue' for i in range(len(coordinates))]
+    colours = ['red' if i == 0 else 'blue' for i in range(len(coordinates))]
 
-    plt.scatter(x_coordinates, y_coordinates, c=colors)
+    plt.scatter(x_coordinates, y_coordinates, c=colours)
     [plt.text(coordinate[0], coordinate[1],
               f"({coordinate[0]}, {coordinate[1]})")
      for coordinate in coordinates]
     plt.show()
 
 
-def display_graph(coordinates: list[list[float]],
-                  graph: list[list[float]]):
+def display_graph(coordinates: ndarray,
+                  graph: ndarray) -> None:
     G = nx.from_numpy_array(graph, create_using=nx.DiGraph())
+
 
     pos = {i: coordinates[i] for i in range(len(coordinates))}
 
@@ -277,21 +281,60 @@ def display_graph(coordinates: list[list[float]],
     nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
 
     # Draw edge weights (if present)
-    labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, ax=ax,
+    nx.draw_networkx_edge_labels(G, pos, ax=ax,
                                  rotate=False, label_pos=0.825)
 
     plt.axis("on")
     ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
     plt.show()
 
-def display_route(coordinates: list[list[float]],
-                  route: list[list[float]],
-                  show_weights: bool = False):
+"""
+colour_set = [
+              "#ff0000", "#00ff00", "#0000ff","#ff7f00", "#ff007f", "#7fff00",
+              "#ffff00", "#ff00ff", "#00ffff","#ffff7f", "#ff7fff", "#7fffff",
+              "#7f7f00", "#7f007f", "#007f7f", "#00ff7f", "#7f00ff", "#007fff",
+              "#ff7f7f", "#7fff7f", "#7f7fff", "#7f0000", "#007f00", "#00007f",
+              "#7f7f7f"
+              ]
+"""
+
+colour_set = [
+    "#ff0000", "#00ff00", "#0000ff", "#ff7f7f", "#7fff7f", "#7f7fff",
+    "#00ff7f", "#7f00ff", "#007fff", "#7f0000", "#007f00", "#00007f",
+    "#7f7f00", "#7f007f", "#007f7f", "#ff7f00", "#ff007f", "#7fff00",
+    "#ffff00", "#ff00ff", "#00ffff",
+    "#ffff7f", "#ff7fff", "#7fffff", "#7f7f7f"
+]
+
+
+def display_k_means(coordinates: ndarray,
+                    clusters: ndarray,
+                    means: ndarray) -> None:
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
+    x_means = means[:, 0]
+    y_means = means[:, 1]
+
+    colour_map = np.empty(coordinates.shape[0], dtype='<U7')
+    for i in range(coordinates.shape[0]):
+        colour_map[i] = colour_set[clusters[i]]
+
+    plt.scatter(x_coordinates, y_coordinates, c=colour_map)
+    plt.scatter(x_means, y_means, c=colour_set[:means.shape[0]], marker=',')
+    #[plt.text(coordinate[0], coordinate[1],
+    #          f"({coordinate[0]}, {coordinate[1]})")
+    # for coordinate in coordinates]
+    plt.show()
+
+
+def display_route(coordinates: ndarray,
+                  route: ndarray,
+                  show_weights: bool = False,
+                  show_labels: bool = False) -> None:
     """
 
 
-    Credit to:
+    Partial credit to:
     https://stackoverflow.com/questions/64986306/how-to-plot-a-networkx-graph-using-the-x-y-coordinates-of-the-points-list
 
     :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
@@ -300,22 +343,33 @@ def display_route(coordinates: list[list[float]],
     :param show_weights: Whether to display the edge weights or not.
     """
     G = nx.DiGraph()
-    points = list(map(tuple, coordinates))
-    edges = list(map(tuple, route))
+    points = [(x.item(), y.item()) for x, y in map(tuple, coordinates)]
+    edges = [(a.item(), b.item()) for a, b in zip(route[:-1], route[1:])]
+    edges.insert(0, (0, edges[0][0]))
 
-    for i in range(len(route)):
+    cluster_index = -1
+    colour_map = np.empty(coordinates.shape[0], dtype='<U7')
+
+    for i in range(len(edges)):
         if show_weights:
             G.add_edge(points[edges[i][0]], points[edges[i][1]],
                        weight=edges[i][2])
         else:
             G.add_edge(points[edges[i][0]], points[edges[i][1]])
 
+        if edges[i][0] == 0:
+            cluster_index += 1
+        else:
+            colour_map[i - cluster_index] = colour_set[cluster_index]
+    colour_map[0] = '#000000'
+
     pos = {point: point for point in points}
 
     fig, ax = plt.subplots()
     nx.draw(G, pos=pos, node_color='k', ax=ax)
-    nx.draw(G, pos=pos, node_size=1500, ax=ax)  # draw nodes and edges
-    nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
+    nx.draw(G, pos=pos, node_color=colour_map, node_size=1500, ax=ax)  # draw nodes and edges
+    if show_labels:
+        nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
 
     # Draw edge weights (if present)
     labels = nx.get_edge_attributes(G, 'weight')
@@ -325,4 +379,3 @@ def display_route(coordinates: list[list[float]],
     plt.axis("on")
     ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
     plt.show()
-

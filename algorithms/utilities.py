@@ -1,8 +1,19 @@
 import numpy as np
+from numpy import ndarray
+from enum import Enum
 
 
-def evaluate_route(route: np.ndarray, num_days: int,
-                   graph: np.ndarray) -> float:
+class ClusteringMethods(Enum):
+    K_MEANS = 0
+
+
+class RoutingMethods(Enum):
+    BRUTE_FORCE = 0
+
+
+def evaluate_route(route: ndarray,
+                   num_days: int,
+                   graph: ndarray) -> float:
     evaluation = 0.0
     previous_index = current_day = 0
     evaluation_per_day = np.zeros(num_days)
@@ -15,7 +26,8 @@ def evaluate_route(route: np.ndarray, num_days: int,
         evaluation += graph[previous_index][index]
         evaluation_per_day[current_day] += graph[previous_index][index]
 
-        if index == 0: current_day += 1
+        if index == 0:
+            current_day += 1
         previous_index = index
 
     # Multiply durations by 1 + the standard deviation of time spent each day
