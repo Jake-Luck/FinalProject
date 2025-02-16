@@ -78,7 +78,7 @@ def cluster_and_solve(coordinates: ndarray,
     :param num_days: Number of days in the route (number of clusters).
     :param clustering_method: Clustering method to use.
     :param routing_method: Routing method to use.
-    :return:
+    :return: Returns a 1D np array representing the route found.
     """
     centre = np.array(coordinates[0], copy=True)
 

@@ -8,6 +8,14 @@ def generate_route(base_set: list[int],
                    route_number: int,
                    n_routes: int,
                    route_length: int) -> ndarray:
+    """
+    Generates a route using factorial based division.
+    :param base_set: Set to permutate.
+    :param route_number: The route number/index of permutation.
+    :param n_routes: The total number of routes (route_length - 1)!
+    :param route_length: The length of the route.
+    :return: Returns a 1D np array representing the generated route.
+    """
     n_factorial = int(n_routes / (route_length - 1))
     route = np.empty(route_length, dtype=int)
     for i in range(route_length - 2, -1, -1):
@@ -25,6 +33,14 @@ def generate_route(base_set: list[int],
 def brute_force(num_locations: int,
                 num_days: int,
                 graph: ndarray) -> ndarray:
+    """
+    A brute force solver for the problem. Can be used on its own or with
+    clustering. When num_days equals 1, this becomes a TSP solver.
+    :param num_locations: The number of locations in the route.
+    :param num_days: The number of days in the route.
+    :param graph: The adjacency matrix for the graph.
+    :return: Returns a 1D np array representing the best route.
+    """
     route_length = num_locations + num_days - 1
 
     best_evaluation = float('inf')

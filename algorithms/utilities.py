@@ -15,6 +15,14 @@ class RoutingMethods(Enum):
 def evaluate_route(route: ndarray,
                    num_days: int,
                    graph: ndarray) -> float:
+    """
+    Evaluates a given route using the time taken and deviation between day
+    lengths.
+    :param route: Route to be evaluated.
+    :param num_days: Number of days in the route.
+    :param graph: Graph as an adjacency matrix.
+    :return: Route evaluation
+    """
     evaluation = 0.0
     previous_index = current_day = 0
     evaluation_per_day = np.zeros(num_days)

@@ -270,6 +270,12 @@ def display_coordinates(coordinates: ndarray) -> None:
 
 def display_graph(coordinates: ndarray,
                   graph: ndarray) -> None:
+    """
+    Displays a graph using coordinates for node position and the graph's
+    adjacency matrix for edges.
+    :param coordinates: Graph node coordinates (e.g. [[0,0], [0,1], [1,0]]).
+    :param graph: Graph to display, as an adjacency matrix.
+    """
     G = nx.from_numpy_array(graph, create_using=nx.DiGraph())
 
 
@@ -310,6 +316,12 @@ colour_set = [
 def display_k_means(coordinates: ndarray,
                     clusters: ndarray,
                     means: ndarray) -> None:
+    """
+    Displays coordinates grouped into clusters, alongside each cluster's mean.
+    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
+    :param clusters: Each node's cluster assignment (in a 1D array).
+    :param means: Each clusters' x & y mean.
+    """
     x_coordinates = coordinates[:, 0]
     y_coordinates = coordinates[:, 1]
     x_means = means[:, 0]

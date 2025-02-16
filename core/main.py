@@ -77,6 +77,7 @@ if __name__ == '__main__':
         graph = np.array(graphs['299'], copy=True, dtype=int)
         coordinates = graphs['299'].attrs['coordinates'][:]
 
+    utilities.display_coordinates(coordinates)
     #clusters = k_means(coordinates, 7, 25)
     #utilities.display_clusters(coordinates, clusters)
     route = cluster_and_solve(coordinates, graph, 7,
