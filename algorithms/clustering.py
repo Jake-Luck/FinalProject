@@ -1,9 +1,11 @@
+from typing import Callable, Any
+
 from algorithms.utilities import ClusteringMethods, RoutingMethods
 from algorithms.brute_force import brute_force
-from core.utilities import display_k_means
+from algorithms.greedy import greedy
 
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray  # For type hints
 
 
 def k_means(coordinates: ndarray,
@@ -17,6 +19,7 @@ def k_means(coordinates: ndarray,
     :param n: Number of locations.
     :return: A 1D array of shape (n). Represents the chosen clusters.
     """
+
     def assign_clusters(coordinates: ndarray,
                         means: ndarray,
                         k: int,
@@ -58,8 +61,6 @@ def k_means(coordinates: ndarray,
 
         means = compute_means(coordinates, k)
 
-        display_k_means(coordinates, cluster_assignments, means)
-
     return cluster_assignments
 
 
@@ -98,18 +99,16 @@ def cluster_and_solve(coordinates: ndarray,
     # Which can they be used to access graphs
     graphs = [graph[np.ix_(indexes, indexes)] for indexes in cluster_indexes]
 
+    routing_function: Callable[[Any, Any], ndarray]
     route = np.empty(0, dtype=int)
     match routing_method:
-        case RoutingMethods.BRUTE_FORCE:
-            for sub_graph, cluster_index in zip(graphs, cluster_indexes):
-                n = sub_graph.shape[0]
-                sub_route = brute_force(n, 1, sub_graph)
+        case RoutingMethods.GREEDY:
+            routing_function = greedy
+        case _:
+            routing_function = lambda n, g: brute_force(n, 1, g)
+    for sub_graph, cluster_index in zip(graphs, cluster_indexes):
+        n = sub_graph.shape[0]
+        sub_route = routing_function(n, sub_graph)
 
-                route = np.concatenate((route, cluster_index[sub_route]))
-
+        route = np.concatenate((route, cluster_index[sub_route]))
     return route
-
-
-
-
-

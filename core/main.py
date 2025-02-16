@@ -2,7 +2,7 @@ import time
 from time import perf_counter
 import h5py
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray  # For type hints
 
 from algorithms.brute_force import brute_force
 from algorithms.clustering import cluster_and_solve, k_means
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     #utilities.display_clusters(coordinates, clusters)
     route = cluster_and_solve(coordinates, graph, 7,
                               ClusteringMethods.K_MEANS,
-                              RoutingMethods.BRUTE_FORCE)
+                              RoutingMethods.GREEDY)
 
     # route = brute_force(6, 2, graph)
     utilities.display_route(coordinates, route)

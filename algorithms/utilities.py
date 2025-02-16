@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray  # For type hints
 from enum import Enum
 
 
@@ -9,6 +9,7 @@ class ClusteringMethods(Enum):
 
 class RoutingMethods(Enum):
     BRUTE_FORCE = 0
+    GREEDY = 1
 
 
 def evaluate_route(route: ndarray,

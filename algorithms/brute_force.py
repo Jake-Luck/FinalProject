@@ -1,7 +1,7 @@
-from . import utilities
-
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray  # For type hints
+
+from .utilities import evaluate_route
 
 
 def generate_route(base_set: list[int],
@@ -44,8 +44,7 @@ def brute_force(num_locations: int,
     for i in range(n_routes):  # yikes
         temp_set = base_set[:]
         route = generate_route(temp_set, i, n_routes, route_length)
-        evaluation = utilities.evaluate_route(
-            route, num_days, graph)
+        evaluation = evaluate_route(route, num_days, graph)
 
         if evaluation < best_evaluation:
             best_route = np.array(route, copy=True)

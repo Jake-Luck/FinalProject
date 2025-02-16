@@ -8,7 +8,7 @@ import networkx as nx
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import ndarray
+from numpy import ndarray  # For type hints
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
