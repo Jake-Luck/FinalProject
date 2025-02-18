@@ -1,6 +1,7 @@
 % Preamble
 \documentclass[a4paper,12pt]{article}
 
+% Prevents line breaks mid-word
 \tolerance=1
 \emergencystretch=\maxdimen
 \hyphenpenalty=10000
@@ -12,12 +13,13 @@
 \usepackage{blindtext}
 \usepackage{titlesec}
 \graphicspath{{images/}}
-
 \usepackage{todonotes}
+
+ % Set inline as default for todos
 \usepackage{regexpatch}
 \usepackage{amsfonts}
 \makeatletter
-\xpatchcmd{\@todo}{\setkeys{todonotes}{#1}}{\setkeys{todonotes}{inline,#1}}{}{} % Set inline as default for todos
+\xpatchcmd{\@todo}{\setkeys{todonotes}{#1}}{\setkeys{todonotes}{inline,#1}}{}{}
 \makeatother
 
 % Document
@@ -91,8 +93,7 @@
     \pagebreak
 
     \section{Algorithms Investigated}\label{sec:algorithms-investigated}
-    \todo{Paragraph describing different types of algorithm used (Routing, Cluster and Routing, Evolutionary,
-        etc.)}
+    \todo{Paragraph describing different types of algorithm used (Routing, Cluster and Routing, Evolutionary, etc.)}
     \subsection{Brute Force}\label{subsec:brute-force}
     \todo{Write brute force explanation}
 
