@@ -1,0 +1,69 @@
+\subsection{Problem Description}\label{subsec:problem-description}
+Given a positive integer $d$ and a graph $G = (V, E)$, where $V$ is set of locations including a designated
+starting point $s$ and $E$ is a set of weighted edges linking every location to every other location, find a route
+that:
+\begin{enumerate}
+    \item Visits all nodes $V \setminus c$ once.
+    \item Starts and finishes at $s$, having visited it $d$ times, without ever visiting consecutively.
+    \item Minimizes both the cumulative edge weights in the route and the variance in cumulative weight between
+    each visit to $s$.
+\end{enumerate}
+
+\subsection{Inputs and Outputs}\label{subsec:inputs-and-outputs}
+Inputs:
+\begin{itemize}
+    \item $d$: The number of times $s$ should be visited in a route.
+    Contextually, $d$ represents the number of days a tourist will spend on their trip. $d \in \mathbb{Z}, d > 0$
+    \item $G = (V, E)$: A pair comprising of:
+    \begin{itemize}
+        \item[\textbullet] $V$: A set of nodes representing locations the tourist would like to visit.
+        $v \in V, v = (x, y, t)$, a triple comprising of:
+        \begin{itemize}
+            \item[\textbullet]$x$: Longitude, indicating the location's geographic east-west position on the
+            earth\footnote{\label{latitude-longitude-note}While the coordinates of our locations are
+            included in $V$, they are not directly tied to the weight of our edges $E$, which are based on
+            time and not distance.}.\\
+            $x \in \mathbb{Q}, -180 \leq x \leq 180$.
+            \item[\textbullet]$y$: Latitude, indicating the location's geographic north-south position on
+            the earth\footnote{See footnote \ref{latitude-longitude-note}}.\\
+            $y \in \mathbb{Q}, -90 \leq y \leq 90$.
+            \item[\textbullet]$t$: Duration, in minutes, indicating how much time to spend at this location.\\
+            $t \in \mathbb{Z}, t > 0$.
+        \end{itemize}
+        \item[\textbullet] $E$: A set of edges $e \in E$ that connects every node to every other node,
+        bidirectionally. $e = (v_1, v_2, w)$, a triple comprising of:
+        \begin{itemize}
+            \item[\textbullet]$v_1$: A location representing the origin of the edge.\\
+            $v_1 \in V$.
+            \item[\textbullet]$v_2$: A location representing the destination of the edge.\\
+            $v_2 \in V$.
+            \item[\textbullet]$w$: A weight indicating the sum of the time it takes to travel from $v_1$ to $v_2$
+            and the time the tourist wishes to spent at $v_2$.\\
+            $w \in Z, w > 0$.
+        \end{itemize}
+    \end{itemize}
+    \item $s$: Starting point that should be visited $d$ times.
+    Contextually, $s$ represents where the tourist is staying and will return to at the end of each day.\\
+    $s \in V$.
+\end{itemize}
+Outputs:
+    \begin{itemize}
+    \item $R$: A valid route satisfying all constraints, represented as an ordered sequence of locations.\\
+    $R = [r_1, r_2, \dots, r_n]$, $r_i \in V$.
+\end{itemize}
+
+\subsection{Optimisation}\label{subsec:optimisation}
+As previously mentioned in the \hyperref[subsec:problem-description]{Problem Description}, our goal is to find a
+route that minimises the cumulative weight and the variance in route weight between each visit to $s$.
+To accomplish this the following cost function is applied to each route:
+\begin{equation}
+    Cost(R) = W \times (1 + \sigma)\label{eq:cost}
+\end{equation}
+Where $W$ is the sum of the weights of all edges traversed in the route and $\sigma$ is the standard deviation of the
+sum of weights between each visit to $s$:
+\begin{equation}
+    \sigma = \sqrt{\frac{\sum_{i=0}^{d}(x_i-\mu)}{d}}, x_i \in X\label{eq:standard-deviation}
+\end{equation}
+Where $R$ is divided into sections between each visit to $s$ and $X$ is a list of the sum of weights within these
+sections.
+$\mu$ is the mean cumulative weight of each $x_i$.\\\\
