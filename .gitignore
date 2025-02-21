@@ -161,6 +161,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
+report/aux/*
 report/out/*
 !report/out/*.pdf
 
