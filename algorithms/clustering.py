@@ -19,19 +19,14 @@ def k_means(coordinates: ndarray,
     :param n: Number of locations.
     :return: A 1D array of shape (n). Represents the chosen clusters.
     """
-
     def assign_clusters(coordinates: ndarray,
-                        means: ndarray,
-                        k: int,
-                        n: int) -> ndarray:
+                        means: ndarray) -> ndarray:
         """
         Assigns each coordinate a cluster by computing distance from each
         coordinate to each mean and choosing the smallest distance.
 
         :param coordinates: Coordinates of each location.
         :param means: Coordinates of each cluster's mean.
-        :param k: Number of clusters.
-        :param n: Number of locations.
         :return: A 1D array of shape (n). Represents the chosen clusters.
         """
         distances = np.linalg.norm(
@@ -40,7 +35,15 @@ def k_means(coordinates: ndarray,
         coordinates[:, 2] = clusters
         return clusters
 
-    def compute_means(coordinates: ndarray, k: int) -> ndarray:
+    def compute_means(coordinates: ndarray,
+                      k: int) -> ndarray:
+        """
+        Computes the mean coordinate of each cluster.
+        :param coordinates: Coordinates of each cluster, a 2D array with shape
+        (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
+        :param k: The number of clusters/means to compute.
+        :return: Returns a list of means, 1D array.
+        """
         computed_means = np.empty((k, 2))
 
         for i in range(k):

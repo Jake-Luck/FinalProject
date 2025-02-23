@@ -1,33 +1,7 @@
 import numpy as np
 from numpy import ndarray  # For type hints
 
-from .utilities import evaluate_route
-
-
-def generate_route(base_set: list[int],
-                   route_number: int,
-                   n_routes: int,
-                   route_length: int) -> ndarray:
-    """
-    Generates a route using factorial based division.
-    :param base_set: Set to permutate.
-    :param route_number: The route number/index of permutation.
-    :param n_routes: The total number of routes (route_length - 1)!
-    :param route_length: The length of the route.
-    :return: Returns a 1D np array representing the generated route.
-    """
-    n_factorial = int(n_routes / (route_length - 1))
-    route = np.empty(route_length, dtype=int)
-    for i in range(route_length - 2, -1, -1):
-        selected_index = int(route_number / n_factorial)
-        route[i] = base_set.pop(selected_index)
-
-        if i == 0: continue
-
-        route_number %= n_factorial
-        n_factorial /= i
-    route[route_length - 1] = 0  # All routes end going back to centre
-    return route
+from .utilities import evaluate_route, generate_route
 
 
 def brute_force(num_locations: int,
@@ -51,15 +25,9 @@ def brute_force(num_locations: int,
     for i in range(2, route_length):
         n_routes *= i
 
-    base_set = list()
-    for _ in range(num_days - 1):  # -1 because 0 added to end of all routes
-        base_set.append(0)
-    for i in range(1, num_locations):
-        base_set.append(i)
-
     for i in range(n_routes):  # yikes
-        temp_set = base_set[:]
-        route = generate_route(temp_set, i, n_routes, route_length)
+        route = generate_route(i, n_routes, num_locations, num_days,
+                               route_length)
         evaluation = evaluate_route(route, num_days, graph)
 
         if evaluation < best_evaluation:

@@ -12,6 +12,40 @@ class RoutingMethods(Enum):
     GREEDY = 1
 
 
+def generate_route(route_number: int,
+                   n_routes: int,
+                   num_locations: int,
+                   num_days: int,
+                   route_length: int) -> ndarray:
+    """
+    Generates a route using factorial based division.
+    :param route_number: The route number/index of permutation.
+    :param n_routes: The total number of routes (route_length - 1)!
+    :param num_locations: The number of locations in the route.
+    :param num_days: The number of days in the route.
+    :param route_length: The length of the route.
+    :return: Returns a 1D np array representing the generated route.
+    """
+    base_set = list()
+    for _ in range(num_days - 1):  # -1 because 0 added to end of all routes
+        base_set.append(0)
+    for i in range(1, num_locations):
+        base_set.append(i)
+
+    n_factorial = int(n_routes / (route_length - 1))
+    route = np.empty(route_length, dtype=int)
+    for i in range(route_length - 2, -1, -1):
+        selected_index = int(route_number / n_factorial)
+        route[i] = base_set.pop(selected_index)
+
+        if i == 0: continue
+
+        route_number %= n_factorial
+        n_factorial /= i
+    route[route_length - 1] = 0  # All routes end going back to centre
+    return route
+
+
 def evaluate_route(route: ndarray,
                    num_days: int,
                    graph: ndarray) -> float:
