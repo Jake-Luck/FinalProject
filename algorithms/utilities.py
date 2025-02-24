@@ -12,6 +12,9 @@ class RoutingMethods(Enum):
     GREEDY = 1
 
 
+# TODO: Move base_set construction outside of method. In case generate route is
+# to be run in parallel, in which want that computation to be done outside and
+# used repeatedly. Make sure to copy based set within generate route.
 def generate_route(route_number: int,
                    n_routes: int,
                    num_locations: int,

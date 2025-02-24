@@ -19,36 +19,36 @@ def k_means(coordinates: ndarray,
     :param n: Number of locations.
     :return: A 1D array of shape (n). Represents the chosen clusters.
     """
-    def assign_clusters(coordinates: ndarray,
-                        means: ndarray) -> ndarray:
+    def assign_clusters(_coordinates: ndarray,
+                        _means: ndarray) -> ndarray:
         """
         Assigns each coordinate a cluster by computing distance from each
         coordinate to each mean and choosing the smallest distance.
 
-        :param coordinates: Coordinates of each location.
-        :param means: Coordinates of each cluster's mean.
+        :param _coordinates: Coordinates of each location.
+        :param _means: Coordinates of each cluster's mean.
         :return: A 1D array of shape (n). Represents the chosen clusters.
         """
         distances = np.linalg.norm(
-            coordinates[:, np.newaxis, :2] - means[:, :2], axis=2)
+            _coordinates[:, np.newaxis, :2] - _means[:, :2], axis=2)
         clusters = np.argmin(distances, axis=1)
-        coordinates[:, 2] = clusters
+        _coordinates[:, 2] = clusters
         return clusters
 
-    def compute_means(coordinates: ndarray,
-                      k: int) -> ndarray:
+    def compute_means(_coordinates: ndarray,
+                      _k: int) -> ndarray:
         """
         Computes the mean coordinate of each cluster.
-        :param coordinates: Coordinates of each cluster, a 2D array with shape
+        :param _coordinates: Coordinates of each cluster, a 2D array with shape
         (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
-        :param k: The number of clusters/means to compute.
+        :param _k: The number of clusters/means to compute.
         :return: Returns a list of means, 1D array.
         """
-        computed_means = np.empty((k, 2))
+        computed_means = np.empty((_k, 2))
 
-        for i in range(k):
-            cluster_coordinates = coordinates[coordinates[:, 2] == i, :2]
-            computed_means[i] = cluster_coordinates.mean(axis=0)
+        for i in range(_k):
+            cluster_assignments = _coordinates[_coordinates[:, 2] == i, :2]
+            computed_means[i] = cluster_assignments.mean(axis=0)
         return computed_means
 
     means = np.array(coordinates[:k], copy=True)
@@ -85,31 +85,35 @@ def cluster_and_solve(coordinates: ndarray,
     """
     centre = np.array(coordinates[0], copy=True)
 
-    clusters = list[ndarray]
+    cluster_assignments = ndarray
     match clustering_method:
         case ClusteringMethods.K_MEANS:
             cluster_coordinates = np.array(coordinates[1:], copy=True)
             num_locations = cluster_coordinates.shape[0]
-            clusters = k_means(cluster_coordinates, num_days, num_locations)
+            cluster_assignments = k_means(cluster_coordinates, num_days,
+                                          num_locations)
 
-    cluster_indexes = list[ndarray]()
+    clusters = list[ndarray]()
     for i in range(num_days):
-        indexes_in_cluster = np.where(clusters == i)[0] + 1
-        cluster_indexes.append(np.concatenate(([0], indexes_in_cluster)))
+        indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
+        clusters.append(np.concatenate(([0], indexes_in_cluster)))
 
     # numpy magic
     # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
     # Which can they be used to access graphs
-    graphs = [graph[np.ix_(indexes, indexes)] for indexes in cluster_indexes]
+    graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
 
     routing_function: Callable[[Any, Any], ndarray]
     route = np.empty(0, dtype=int)
     match routing_method:
         case RoutingMethods.GREEDY:
             routing_function = greedy
+        case RoutingMethods.BRUTE_FORCE:
+            routing_function = lambda _n, _g: brute_force(_n, 1, _g)
         case _:
-            routing_function = lambda n, g: brute_force(n, 1, g)
-    for sub_graph, cluster_index in zip(graphs, cluster_indexes):
+            print("No routing function specified, defaulting to brute force.")
+            routing_function = lambda _n, _g: brute_force(_n, 1, _g)
+    for sub_graph, cluster_index in zip(graphs, clusters):
         n = sub_graph.shape[0]
         sub_route = routing_function(n, sub_graph)
 
