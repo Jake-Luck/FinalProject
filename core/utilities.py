@@ -12,12 +12,12 @@ from numpy import ndarray  # For type hints
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
-from core import secrets
+from core import hidden
 
 matplotlib.use('TkAgg')
 
 
-api_key = secrets.apikey
+api_key = hidden.apikey
 client = openrouteservice.Client(key=api_key)
 
 
@@ -67,7 +67,7 @@ def generate_durations(time: float,
 
 
 def create_graph(coordinate_array: list[list[float]],
-                 durations: list[float]) -> ndarray:
+                 durations: list[float]) -> ndarray :
     """
     Takes a set of coordinates and converts them into a complete digraph, with
     each edge being the time taken to travel by car.
@@ -142,7 +142,7 @@ def generate_test_datum(days: float = None,
                         coordinates: list[list[float]] = None,
                         number_of_nodes: float = None,
                         centre: list[float] = None,
-                        durations: list[float] = None) -> list:
+                        durations: list[float] = None) -> list | int:
     """
     Generates a new training datum, using given values or randomly generated.
 
@@ -170,12 +170,12 @@ def generate_test_datum(days: float = None,
     if durations is None:
         durations = generate_durations(free_time, days, number_of_nodes)
     graph = create_graph(coordinates, durations)
-    if graph == 1:
-        return 1
-    if graph == 0:
-        return 0
+
+    if isinstance(graph, int):
+        return graph
 
     return [graph, days, free_time, coordinates]
+
 
 
 def generate_training_datum() -> list:

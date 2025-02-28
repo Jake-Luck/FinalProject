@@ -2,7 +2,8 @@ import random
 
 import numpy as np
 from numpy import ndarray
-from .utilities import RoutingMethods, generate_route
+
+from .utilities import RoutingMethods, generate_route, evaluate_route
 
 
 def genetic(num_generations: int,
@@ -16,15 +17,7 @@ def genetic(num_generations: int,
     def initialise_clusters(_population: ndarray,
                             _num_locations: int,
                             _num_days: int) -> list[ndarray]:
-        cluster_assignments = np.empty(_num_locations)
-        for _i in range(_num_locations):
-            cluster_assignments[_i] = random.randrange(_num_days)
-
-        _clusters = list[ndarray]()
-        for _i in range(num_days):
-            indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
-            _clusters.append(np.concatenate(([0], indexes_in_cluster)))
-        return _clusters
+        pass
 
     def initialise_routes(_population: ndarray,
                           _num_locations: int,
@@ -53,6 +46,17 @@ def genetic(num_generations: int,
                           route_length)  # Sets population in place, no return
     else:
         clusters = initialise_clusters()
+
+    for generation_number in range(num_generations):
+        for individual in range(population_size):
+            evaluations[individual] = evaluate_route(population[individual],
+                                                     graph)
+
+        index1, index2 = np.argpartition(evaluations, 2)[:2]
+        parent1 = population[index1]
+        parent2 = population[index2]
+
+        # Keep parents, mutate rest of population
 
 
 

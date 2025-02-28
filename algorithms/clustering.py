@@ -1,6 +1,7 @@
 from typing import Callable, Any
 
-from algorithms.utilities import ClusteringMethods, RoutingMethods
+from algorithms.utilities import ClusteringMethods, RoutingMethods, \
+    find_route_from_cluster_assignments
 from algorithms.brute_force import brute_force
 from algorithms.greedy import greedy
 
@@ -56,7 +57,7 @@ def k_means(coordinates: ndarray,
 
     previous_clusters = np.zeros(n)
     while True:
-        cluster_assignments = assign_clusters(coordinates, means, k, n)
+        cluster_assignments = assign_clusters(coordinates, means)
 
         if (cluster_assignments == previous_clusters).all():
             break
@@ -94,28 +95,7 @@ def cluster_and_solve(coordinates: ndarray,
                                           num_locations)
 
     clusters = list[ndarray]()
-    for i in range(num_days):
-        indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
-        clusters.append(np.concatenate(([0], indexes_in_cluster)))
+    route = find_route_from_cluster_assignments(cluster_assignments, num_days,
+                                                routing_method, graph)
 
-    # numpy magic
-    # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
-    # Which can they be used to access graphs
-    graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
-
-    routing_function: Callable[[Any, Any], ndarray]
-    route = np.empty(0, dtype=int)
-    match routing_method:
-        case RoutingMethods.GREEDY:
-            routing_function = greedy
-        case RoutingMethods.BRUTE_FORCE:
-            routing_function = lambda _n, _g: brute_force(_n, 1, _g)
-        case _:
-            print("No routing function specified, defaulting to brute force.")
-            routing_function = lambda _n, _g: brute_force(_n, 1, _g)
-    for sub_graph, cluster_index in zip(graphs, clusters):
-        n = sub_graph.shape[0]
-        sub_route = routing_function(n, sub_graph)
-
-        route = np.concatenate((route, cluster_index[sub_route]))
     return route

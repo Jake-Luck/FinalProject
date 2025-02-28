@@ -6,7 +6,9 @@ from numpy import ndarray  # For type hints
 
 from algorithms.brute_force import brute_force
 from algorithms.clustering import cluster_and_solve, k_means
-from algorithms.utilities import ClusteringMethods, RoutingMethods
+from algorithms.genetic_clustering import genetic_clustering
+from algorithms.utilities import ClusteringMethods, RoutingMethods, \
+    evaluate_route
 
 import utilities
 
@@ -33,7 +35,7 @@ def test_bruteforce_timings() -> None:
 
 
 def collect_ordered_data() -> None:
-    for num_locations in range(2, 26):
+    for num_locations in range(3, 26):
         num_days = 1
         while num_days < num_locations:
             datum = utilities.generate_test_datum(days=num_days,
@@ -41,7 +43,7 @@ def collect_ordered_data() -> None:
                                                   number_of_nodes=num_locations)
             if not isinstance(datum, int):
                 utilities.save_test_datum(datum,
-                                          utilities.DataGroups.ordered_graphs)
+                                          utilities.DataGroups.regular_graphs)
                 num_days += 1
             if datum == 1:
                 print("Waiting 1 minute for api.")
@@ -72,20 +74,26 @@ def collect_test_data() -> None:
 if __name__ == '__main__':
     # utilities.reset_database()
     # collect_test_data()
+    #collect_ordered_data()
     with h5py.File('data/training_data.h5', 'r') as f:
         graphs = f[utilities.DataGroups.ordered_graphs.value]
         graph = np.array(graphs['299'], copy=True, dtype=int)
         coordinates = graphs['299'].attrs['coordinates'][:]
 
-    utilities.display_coordinates(coordinates)
+    #utilities.display_coordinates(coordinates)
     #clusters = k_means(coordinates, 7, 25)
     #utilities.display_clusters(coordinates, clusters)
-    route = cluster_and_solve(coordinates, graph, 7,
-                              ClusteringMethods.K_MEANS,
-                              RoutingMethods.GREEDY)
+    route1 = cluster_and_solve(coordinates, graph, 7,
+                               ClusteringMethods.K_MEANS,
+                               RoutingMethods.GREEDY)
 
+    route2 = genetic_clustering(10000, 50, 0.9, 0.1, graph, 25, 7, 31, RoutingMethods.GREEDY)
+
+    print(f"K-Means evaluation: {evaluate_route(route1, 7, graph)}")
+    utilities.display_route(coordinates, route1)
+    utilities.display_route(coordinates, route2)
     # route = brute_force(6, 2, graph)
-    utilities.display_route(coordinates, route)
+    #utilities.display_route(coordinates, route)
     #    graphs = f['graphs']
     #    coordinates = graphs['0'].attrs['coordinates'][:]
     #    graph = graphs['0'][:]

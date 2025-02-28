@@ -2,14 +2,29 @@ import numpy as np
 from numpy import ndarray  # For type hints
 from enum import Enum
 
+from algorithms import brute_force
+from algorithms import greedy
+
 
 class ClusteringMethods(Enum):
-    K_MEANS = 0
+    """
+    These are clustering methods for use alongside routing algorithms.
+    """
+    K_MEANS = 0,
+    'Assigns random \'centroids\' and assign individuals to their closest, \
+    then update centroids based on cluster\'s mean and repeat the process.'
 
 
 class RoutingMethods(Enum):
-    BRUTE_FORCE = 0
-    GREEDY = 1
+    """
+    These are travelling salesmen solvers for use with clustering.
+    """
+    # Brute force needs lambda for num_days (it has num_days as a parameter)
+    # because it can be used without clustering too.
+    BRUTE_FORCE = lambda _n, _g: brute_force.brute_force(_n, 1, _g)
+    'Compares every possible route to find the best.'
+    GREEDY = greedy.greedy
+    'Always chooses the shortest path from any given position.'
 
 
 # TODO: Move base_set construction outside of method. In case generate route is
@@ -46,6 +61,30 @@ def generate_route(route_number: int,
         route_number %= n_factorial
         n_factorial /= i
     route[route_length - 1] = 0  # All routes end going back to centre
+    return route
+
+
+def find_route_from_cluster_assignments(cluster_assignments: ndarray,
+                                        num_days: int,
+                                        routing_method: RoutingMethods,
+                                        graph: ndarray) -> ndarray:
+    clusters = list[ndarray]()
+    for i in range(num_days):
+        indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
+        clusters.append(np.concatenate(([0], indexes_in_cluster)))
+
+    # numpy magic
+    # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
+    # Which can they be used to access graphs
+    graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
+
+    route = np.empty(0, dtype=int)
+
+    for sub_graph, cluster_index in zip(graphs, clusters):
+        n = sub_graph.shape[0]
+        sub_route = routing_method(n, sub_graph)
+
+        route = np.concatenate((route, cluster_index[sub_route]))
     return route
 
 
