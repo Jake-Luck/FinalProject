@@ -6,7 +6,7 @@ __pycache__/
 *$py.class
 
 # To hide api key
-core/secrets.py
+core/hidden.py
 
 #change
 
