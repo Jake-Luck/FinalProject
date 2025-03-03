@@ -17,15 +17,16 @@ def brute_force(num_locations: int,
     """
     route_length = num_locations + num_days - 1
 
-    best_evaluation = float('inf')
-    best_route = np.empty(route_length, dtype=int)
-
     # get (route_length - 1)! Do -1 because all routes end at '0'
     n_routes = 1
     for i in range(2, route_length):
         n_routes *= i
 
-    for i in range(n_routes):  # yikes
+    best_route = generate_route(0, n_routes, num_locations, num_days,
+                                route_length)
+    best_evaluation = evaluate_route(best_route, num_days, graph)
+
+    for i in range(1, n_routes):  # yikes
         route = generate_route(i, n_routes, num_locations, num_days,
                                route_length)
         evaluation = evaluate_route(route, num_days, graph)
