@@ -344,9 +344,7 @@ def display_route(coordinates: ndarray,
                   show_weights: bool = False,
                   show_labels: bool = False) -> None:
     """
-
-
-    Partial credit to:
+    Partial credit to: 'Sparky05'
     https://stackoverflow.com/questions/64986306/how-to-plot-a-networkx-graph-using-the-x-y-coordinates-of-the-points-list
 
     :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
