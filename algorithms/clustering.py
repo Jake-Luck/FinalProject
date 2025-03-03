@@ -48,8 +48,8 @@ def k_means(coordinates: ndarray,
         computed_means = np.empty((_k, 2))
 
         for i in range(_k):
-            cluster_assignments = _coordinates[_coordinates[:, 2] == i, :2]
-            computed_means[i] = cluster_assignments.mean(axis=0)
+            _cluster_assignments = _coordinates[_coordinates[:, 2] == i, :2]
+            computed_means[i] = _cluster_assignments.mean(axis=0)
         return computed_means
 
     means = np.array(coordinates[:k], copy=True)
