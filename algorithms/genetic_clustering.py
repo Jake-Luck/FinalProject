@@ -21,26 +21,43 @@ def assign_nodes_to_centroid(_coordinates: ndarray,
     distances = np.linalg.norm(
         _coordinates[:, np.newaxis, :2] - _centroids[:, :2], axis=2)
     _clusters = np.argmin(distances, axis=1)
-    _coordinates[:, 2] = _clusters
     return _clusters
 
 
 def genetic_centroid_clustering(num_generations: int,
-                       population_size: int,
-                       crossover_probability: float,
-                       mutation_probability: float,
-                       coordinates: ndarray,
-                       graph: ndarray,
-                       num_locations: int,
-                       num_days: int,
-                       route_length: int,
-                       routing_method: RoutingMethods,
-                       random_seed: int | None = None) -> ndarray:
+                                population_size: int,
+                                crossover_probability: float,
+                                mutation_probability: float,
+                                coordinates: ndarray,
+                                graph: ndarray,
+                                num_locations: int,
+                                num_days: int,
+                                route_length: int,
+                                routing_method: RoutingMethods,
+                                random_seed: int | None = None) -> ndarray:
     def crossover(_parent1: ndarray,
-                  _parent2: ndarray) -> ndarray:
-        pass
+                  _parent2: ndarray,
+                  _num_days: int) -> ndarray:
+        offspring = np.empty_like(_parent2)
+        reordered_parent2 = np.empty_like(_parent2)
 
+        # Get distances between parent1 & parent2 centroids
+        distances = np.linalg.norm(_parent1[:, np.newaxis] - _parent2,
+                                         axis=2)
 
+        # Reorder parent2 so clusters are similar to parent1
+        for i in range(_num_days):
+            best_match = np.argmin(distances[i])
+            reordered_parent2[i] = _parent2[best_match]
+
+            distances[:, best_match] = np.inf
+
+        # Create centroids in-between parents'
+        for i in range(_num_days):
+            weight = random.random()
+            offspring[i] = weight * _parent1[i] + (1-weight) * _parent2[i]
+
+        return offspring
     if random_seed is not None:
         random.seed(random_seed)
         np.random.seed(random_seed)
@@ -60,10 +77,12 @@ def genetic_centroid_clustering(num_generations: int,
                                       (population_size, num_days))
 
     population = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
+    cluster_coordinates = np.array(coordinates[1:], copy=True)
 
     for generation_number in range(num_generations):
         for individual in range(population_size):
-            clusters = assign_nodes_to_centroid(coordinates, population[individual])
+            clusters = assign_nodes_to_centroid(cluster_coordinates,
+                                                population[individual])
 
             route = find_route_from_cluster_assignments(clusters, num_days,
                                                         routing_method, graph)
@@ -87,7 +106,7 @@ def genetic_centroid_clustering(num_generations: int,
                                   (num_days, 2))
                 continue
 
-            population[individual] = crossover(parent1, parent2)
+            population[individual] = crossover(parent1, parent2, num_days)
 
             for cluster in range(num_days):
                 mutate = random.random() < mutation_probability
@@ -99,10 +118,11 @@ def genetic_centroid_clustering(num_generations: int,
               f"{evaluations[index1]}")
 
     print(f"Evolution completed, best evaluation: {evaluations[index1]}")
-    route = find_route_from_cluster_assignments(population[0],
-                                                num_days,
-                                                routing_method,
-                                                graph)
+    clusters = assign_nodes_to_centroid(cluster_coordinates,
+                                        population[individual])
+
+    route = find_route_from_cluster_assignments(clusters, num_days,
+                                                routing_method, graph)
     return route
 
 def genetic_clustering(num_generations: int,
