@@ -12,6 +12,8 @@ from numpy import ndarray  # For type hints
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 
+import plotly.graph_objects as go
+
 from core import hidden
 
 matplotlib.use('TkAgg')
@@ -22,7 +24,7 @@ client = openrouteservice.Client(key=api_key)
 
 
 def generate_coordinates(number_of_nodes: int = None,
-                         centre: list[float] = None) -> list[list[float]]:
+                         centre: list[float] = None) -> ndarray:
     """
     Randomly generates N latitude & longitude coordinate pairs around a
     central point.
@@ -31,12 +33,12 @@ def generate_coordinates(number_of_nodes: int = None,
     :param centre: Central point around which to generate coordinates.
     :return: Coordinates as a 2d array
     """
-    coordinate_array = [centre.tolist()]
+    coordinate_array = np.empty((number_of_nodes, 2))
 
-    for i in range(number_of_nodes - 1):
+    for i in range(number_of_nodes):
         latitude = round(centre[0] + random.uniform(-0.1, 0.1), 4)
         longitude = round(centre[1] + random.uniform(-0.1, 0.1), 4)
-        coordinate_array.append([latitude, longitude])
+        coordinate_array[i] = [latitude, longitude]
 
     return coordinate_array
 
@@ -174,7 +176,7 @@ def generate_test_datum(days: float = None,
     if isinstance(graph, int):
         return graph
 
-    return [graph, days, free_time, coordinates]
+    return [graph, days, free_time, coordinates, centre]
 
 
 
@@ -217,13 +219,15 @@ class DataAttributes(Enum):
     days = 'days'
     free_time = 'free_time'
     coordinates = 'coordinates'
+    city_centre = 'centre'
 
 
 def save_test_datum(datum, group: DataGroups):
     """
     Saves a training datum to the hdf5 file.
 
-    :param datum: A list containing graph, days, and free time per day.
+    :param datum: A list containing graph, days, free time, location coordinates
+     and centre coordinates
     :param group: Which data group to save to.
     """
     with h5py.File("data/training_data.h5", 'a') as f:
@@ -235,6 +239,7 @@ def save_test_datum(datum, group: DataGroups):
         graph.attrs[DataAttributes.days.value] = datum[1]
         graph.attrs[DataAttributes.free_time.value] = datum[2]
         graph.attrs[DataAttributes.coordinates.value] = datum[3]
+        graph.attrs[DataAttributes.city_centre.value] = datum[4]
 
 
 def reset_database() -> None:
@@ -249,143 +254,162 @@ def reset_database() -> None:
         f.create_group(DataGroups.regular_graphs.value)
         f.create_group(DataGroups.ordered_graphs.value)
 
-
-def display_coordinates(coordinates: ndarray) -> None:
-    """
-    Displays a scatter plot of the given coordinates.
-
-    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
-    """
-    x_coordinates = coordinates[:, 0]
-    y_coordinates = coordinates[:, 1]
-
-    colours = ['red' if i == 0 else 'blue' for i in range(len(coordinates))]
-
-    plt.scatter(x_coordinates, y_coordinates, c=colours)
-    [plt.text(coordinate[0], coordinate[1],
-              f"({coordinate[0]}, {coordinate[1]})")
-     for coordinate in coordinates]
-    plt.show()
-
-
-def display_graph(coordinates: ndarray,
-                  graph: ndarray) -> None:
-    """
-    Displays a graph using coordinates for node position and the graph's
-    adjacency matrix for edges.
-    :param coordinates: Graph node coordinates (e.g. [[0,0], [0,1], [1,0]]).
-    :param graph: Graph to display, as an adjacency matrix.
-    """
-    G = nx.from_numpy_array(graph, create_using=nx.DiGraph())
-
-
-    pos = {i: coordinates[i] for i in range(len(coordinates))}
-
-    fig, ax = plt.subplots()
-    nx.draw(G, pos=pos, node_color='k', ax=ax)
-    nx.draw(G, pos=pos, node_size=1500, ax=ax)  # draw nodes and edges
-    nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
-
-    # Draw edge weights (if present)
-    nx.draw_networkx_edge_labels(G, pos, ax=ax,
-                                 rotate=False, label_pos=0.825)
-
-    plt.axis("on")
-    ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
-    plt.show()
-
-"""
 colour_set = [
-              "#ff0000", "#00ff00", "#0000ff","#ff7f00", "#ff007f", "#7fff00",
-              "#ffff00", "#ff00ff", "#00ffff","#ffff7f", "#ff7fff", "#7fffff",
-              "#7f7f00", "#7f007f", "#007f7f", "#00ff7f", "#7f00ff", "#007fff",
-              "#ff7f7f", "#7fff7f", "#7f7fff", "#7f0000", "#007f00", "#00007f",
-              "#7f7f7f"
-              ]
-"""
-
-colour_set = [
-    "#ff0000", "#00ff00", "#0000ff", "#ff7f7f", "#7fff7f", "#7f7fff",
-    "#00ff7f", "#7f00ff", "#007fff", "#7f0000", "#007f00", "#00007f",
-    "#7f7f00", "#7f007f", "#007f7f", "#ff7f00", "#ff007f", "#7fff00",
-    "#ffff00", "#ff00ff", "#00ffff",
-    "#ffff7f", "#ff7fff", "#7fffff", "#7f7f7f"
+    "#ff0000", "#00ff00", "#0000ff", "#00ffff", "#ff3fff", "#3f7f7f",
+    "#ff7fff", "#7f7f00", "#7f007f", "#000000", "#999999", "#7f0000",
+    "#3f3f3f", "#007f00", "#00007f", "#7f00ff", "#007f7f", "#ff3f3f",
+    "#007fff", "#ff7f00", "#ff007f", "#7fff00", "#ff7f7f", "#7f7fff",
 ]
 
-
-def display_k_means(coordinates: ndarray,
-                    clusters: ndarray,
-                    means: ndarray) -> None:
+def display_coordinates(coordinates: ndarray,
+                        centre: ndarray | None = None) -> None:
     """
-    Displays coordinates grouped into clusters, alongside each cluster's mean.
-    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
-    :param clusters: Each node's cluster assignment (in a 1D array).
-    :param means: Each clusters' x & y mean.
+    # todo: fill in this docstring
+    :param coordinates:
+    :param centre:
+    :return:
     """
-    x_coordinates = coordinates[:, 0]
-    y_coordinates = coordinates[:, 1]
-    x_means = means[:, 0]
-    y_means = means[:, 1]
+    if centre is None:
+        centre = coordinates[0]
+    figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
+                                     lon=coordinates[:, 0],
+                                     mode='markers',
+                                     marker=dict(
+                                         size = 10,
+                                         color = colour_set[0]
+                                     )))
 
-    colour_map = np.empty(coordinates.shape[0], dtype='<U7')
-    for i in range(coordinates.shape[0]):
-        colour_map[i] = colour_set[clusters[i]]
+    figure.update_layout(autosize=True,
+                         map=dict(
+                             bearing=0,
+                             center=dict(
+                                 lat=centre[1],
+                                 lon=centre[0]
+                             ),
+                             pitch=0,
+                             zoom=11,
+                             style='carto-voyager'
+                         ))
 
-    plt.scatter(x_coordinates, y_coordinates, c=colour_map)
-    plt.scatter(x_means, y_means, c=colour_set[:means.shape[0]], marker=',')
-    #[plt.text(coordinate[0], coordinate[1],
-    #          f"({coordinate[0]}, {coordinate[1]})")
-    # for coordinate in coordinates]
-    plt.show()
+    figure.show()
 
-
-def display_route(coordinates: ndarray,
-                  route: ndarray,
-                  show_weights: bool = False,
-                  show_labels: bool = False) -> None:
+def display_route(route: ndarray,
+                  coordinates: ndarray,
+                  centre: ndarray | None = None) -> None:
     """
-    Partial credit to: 'Sparky05'
-    https://stackoverflow.com/questions/64986306/how-to-plot-a-networkx-graph-using-the-x-y-coordinates-of-the-points-list
-
-    :param coordinates: The coordinates (e.g. [[0,0], [0,1], [1,0], [1,1]])
-    :param route: The route visiting coordinates (e.g. [[0, 1, 5], [1, 2, 5],
-                                                        [2, 3, 5], [2, 1, 3]])
-    :param show_weights: Whether to display the edge weights or not.
+    # todo: fill in this docstring
+    :param route:
+    :param coordinates:
+    :param centre:
+    :return:
     """
-    G = nx.DiGraph()
-    points = [(x.item(), y.item()) for x, y in map(tuple, coordinates)]
-    edges = [(a.item(), b.item()) for a, b in zip(route[:-1], route[1:])]
-    edges.insert(0, (0, edges[0][0]))
+    if centre is None:
+        centre = coordinates[0]
 
-    cluster_index = -1
-    colour_map = np.empty(coordinates.shape[0], dtype='<U7')
+    route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
-    for i in range(len(edges)):
-        if show_weights:
-            G.add_edge(points[edges[i][0]], points[edges[i][1]],
-                       weight=edges[i][2])
-        else:
-            G.add_edge(points[edges[i][0]], points[edges[i][1]])
+    # Add zeroes where necessary
+    route_per_day[0] = np.concatenate(([0], route_per_day[0]))
+    route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
+    print(route_per_day)
 
-        if edges[i][0] == 0:
-            cluster_index += 1
-        else:
-            colour_map[i - cluster_index] = colour_set[cluster_index]
-    colour_map[0] = '#000000'
+    coordinates_per_day = [coordinates[day] for day in route_per_day]
 
-    pos = {point: point for point in points}
+    figure = go.Figure(go.Scattermap(
+        mode = "markers+lines",
+        lat=coordinates_per_day[0][:, 1],
+        lon=coordinates_per_day[0][:, 0],
+        marker=dict(
+            size=10,
+            color=colour_set[0]
+        )))
 
-    fig, ax = plt.subplots()
-    nx.draw(G, pos=pos, node_color='k', ax=ax)
-    nx.draw(G, pos=pos, node_color=colour_map, node_size=1500, ax=ax)  # draw nodes and edges
-    if show_labels:
-        nx.draw_networkx_labels(G, pos=pos)  # draw node labels/names
+    for i in range(1, len(coordinates_per_day)):
+        figure.add_trace(go.Scattermap(
+            mode = "markers+lines",
+            lat=coordinates_per_day[i][:, 1],
+            lon=coordinates_per_day[i][:, 0],
+            marker = dict(
+                size = 10,
+                color = colour_set[i]
+            )))
 
-    # Draw edge weights (if present)
-    labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, ax=ax,
-                                 rotate=False, label_pos=0.825)
 
-    plt.axis("on")
-    ax.tick_params(left=True, bottom=True, labelleft=True, labelbottom=True)
-    plt.show()
+    figure.update_layout(
+        autosize=True,
+        map=dict(
+            bearing=0,
+            center=dict(
+                lat=centre[1],
+                lon=centre[0]
+            ),
+            pitch=0,
+            zoom=11,
+            style='carto-voyager'
+         ))
+
+    figure.show()
+
+
+def display_clusters(coordinates: ndarray,
+                     cluster_assignments: ndarray,
+                     num_days: int,
+                     centroids: ndarray | None = None,
+                     centre: ndarray | None = None) -> None:
+    """
+    # todo: fill in this docstring
+    :param coordinates:
+    :param cluster_assignments:
+    :param num_days:
+    :param centroids:
+    :param centre:
+    :return:
+    """
+    if centre is None:
+        centre = coordinates[0]
+
+    clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
+
+    figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 1][0],
+                                     lon=coordinates[clusters[0], 0][0],
+                                     mode='markers',
+                                     marker=dict(
+                                          size = 10,
+                                          color = colour_set[0]
+                                     )))
+
+    for i in range (1, num_days):
+        figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
+                              lon=coordinates[clusters[i], 0][0],
+                              mode='markers',
+                              marker=dict(
+                                  size = 10, 
+                                  color = colour_set[i]
+                              ))
+
+    figure.update_layout(autosize=True,
+                         map=dict(
+                             bearing=0,
+                             center=dict(
+                                 lat=centre[1],
+                                 lon=centre[0]
+                             ),
+                             pitch=0,
+                             zoom=11,
+                             style='carto-voyager'
+                         ))
+
+    if centroids is None:
+        figure.show()
+        return
+
+    for i in range(num_days):
+        figure.add_scattermap(lat=[centroids[i, 1]],
+                              lon=[centroids[i, 0]],
+                              mode='markers',
+                              marker=dict(
+                                  size = 20,
+                                  color = colour_set[i],
+                                  opacity = 0.5
+                              ))
+    figure.show()

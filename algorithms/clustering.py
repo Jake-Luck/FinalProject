@@ -1,9 +1,13 @@
 from typing import Callable, Any
 
+from sympy import false
+
 from algorithms.utilities import ClusteringMethods, RoutingMethods, \
     find_route_from_cluster_assignments
 from algorithms.brute_force import brute_force
 from algorithms.greedy import greedy
+
+from core.utilities import display_clusters
 
 import numpy as np
 from numpy import ndarray  # For type hints
@@ -11,7 +15,8 @@ from numpy import ndarray  # For type hints
 
 def k_means(coordinates: ndarray,
             k: int,
-            n: int) -> ndarray:
+            n: int,
+            show_stages: bool = False) -> ndarray:
     """
     Sorts n coordinates into k clusters.
 
@@ -59,6 +64,9 @@ def k_means(coordinates: ndarray,
     while True:
         cluster_assignments = assign_clusters(coordinates, means)
 
+        if show_stages:
+            display_clusters(coordinates, cluster_assignments, k, means)
+
         if (cluster_assignments == previous_clusters).all():
             break
         previous_clusters = np.array(cluster_assignments, copy=True)
@@ -72,7 +80,8 @@ def cluster_and_solve(coordinates: ndarray,
                       graph: ndarray,
                       num_days: int,
                       clustering_method: ClusteringMethods,
-                      routing_method: RoutingMethods) -> ndarray:
+                      routing_method: RoutingMethods,
+                      show_stages: bool = False) -> ndarray:
     """
     Sorts coordinates into clusters using specified clustering method, then
     creates a route by applying a travelling salesman problem algorithm to each
@@ -82,6 +91,7 @@ def cluster_and_solve(coordinates: ndarray,
     :param num_days: Number of days in the route (number of clusters).
     :param clustering_method: Clustering method to use.
     :param routing_method: Routing method to use.
+    :param show_stages: Whether to plot clusters each step
     :return: Returns a 1D np array representing the route found.
     """
     centre = np.array(coordinates[0], copy=True)
