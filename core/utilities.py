@@ -62,7 +62,7 @@ def generate_durations(time: float,
 
 
 def create_graph(coordinate_array: list[list[float]],
-                 durations: list[float]) -> ndarray :
+                 durations: list[float]) -> ndarray | int:
     """
     Takes a set of coordinates and converts them into a complete digraph, with
     each edge being the time taken to travel by car.
@@ -88,7 +88,7 @@ def create_graph(coordinate_array: list[list[float]],
     return graph
 
 
-def openrouteservice_api_call(coordinate_array: list[list[float]]) -> ndarray:
+def openrouteservice_api_call(coordinate_array: list[list[float]]) -> ndarray | int:
     """
     Makes a POST request to the OpenRouteService API to retrieve a distance
     matrix.
@@ -256,12 +256,6 @@ colour_set = [
 
 def display_coordinates(coordinates: ndarray,
                         centre: ndarray | None = None) -> None:
-    """
-    # todo: fill in this docstring
-    :param coordinates:
-    :param centre:
-    :return:
-    """
     if centre is None:
         centre = coordinates[0]
     figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
@@ -289,13 +283,6 @@ def display_coordinates(coordinates: ndarray,
 def display_route(route: ndarray,
                   coordinates: ndarray,
                   centre: ndarray | None = None) -> None:
-    """
-    # todo: fill in this docstring
-    :param route:
-    :param coordinates:
-    :param centre:
-    :return:
-    """
     if centre is None:
         centre = coordinates[0]
 
@@ -349,15 +336,6 @@ def display_clusters(coordinates: ndarray,
                      num_days: int,
                      centroids: ndarray | None = None,
                      centre: ndarray | None = None) -> None:
-    """
-    # todo: fill in this docstring
-    :param coordinates:
-    :param cluster_assignments:
-    :param num_days:
-    :param centroids:
-    :param centre:
-    :return:
-    """
     if centre is None:
         centre = coordinates[0]
 
