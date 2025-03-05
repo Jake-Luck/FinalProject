@@ -4,9 +4,6 @@ import requests
 import json
 import h5py
 import math
-import networkx as nx
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray  # For type hints
 from concurrent.futures import ThreadPoolExecutor
@@ -16,12 +13,8 @@ import plotly.graph_objects as go
 
 from core import hidden
 
-matplotlib.use('TkAgg')
-
-
 api_key = hidden.apikey
 client = openrouteservice.Client(key=api_key)
-
 
 def generate_coordinates(number_of_nodes: int = None,
                          centre: list[float] = None) -> ndarray:
@@ -247,7 +240,7 @@ def reset_database() -> None:
     In case of emergency (I mess something up and corrupt the file),
     delete h5 file and run this.
     """
-    city_coordinates = np.load('data/city_coordinates.npz')['coordinates']
+    city_coordinates = np.load('../data/city_coordinates.npz')['coordinates']
 
     with h5py.File("data/training_data.h5", "w") as f:
         f.create_dataset("city_coordinates", data=city_coordinates)
