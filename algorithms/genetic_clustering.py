@@ -1,9 +1,9 @@
 import random
-from typing import Callable
 
 import numpy as np
 from numpy import ndarray  # For type hints
 
+from core.plotting import display_clusters
 from .utilities import RoutingMethods, evaluate_route, \
     find_route_from_cluster_assignments
 
@@ -30,11 +30,11 @@ def genetic_centroid_clustering(num_generations: int,
                                 mutation_probability: float,
                                 coordinates: ndarray,
                                 graph: ndarray,
-                                num_locations: int,
                                 num_days: int,
                                 route_length: int,
                                 routing_method: RoutingMethods,
-                                random_seed: int | None = None) -> ndarray:
+                                generations_per_plot: int,
+                                random_seed: int | None = None,) -> ndarray:
     def crossover(_parent1: ndarray,
                   _parent2: ndarray,
                   _num_days: int) -> ndarray:
@@ -65,10 +65,6 @@ def genetic_centroid_clustering(num_generations: int,
     evaluations = np.empty(population_size)
     evaluations[:] = float('inf')
 
-    n_routes = 1
-    for individual in range(2, route_length):
-        n_routes *= individual
-
     # Randomly Assign Centroids
     centre = coordinates[0]
     centroid_x_coordinates = np.random.uniform(centre[0] -0.1, centre[0] + 0.1,
@@ -79,6 +75,11 @@ def genetic_centroid_clustering(num_generations: int,
     population = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
     cluster_coordinates = np.array(coordinates[1:], copy=True)
 
+    # Assign these before loop just in case num_generations is 0 and these are
+    # used before initialisation
+    clusters = np.empty(population_size)
+    index1 = 0
+
     for generation_number in range(num_generations):
         for individual in range(population_size):
             clusters = assign_nodes_to_centroid(cluster_coordinates,
@@ -88,6 +89,9 @@ def genetic_centroid_clustering(num_generations: int,
                                                         routing_method, graph)
 
             evaluations[individual] = evaluate_route(route, num_days, graph)
+
+        if generation_number % generations_per_plot == 0:
+            display_clusters(coordinates, clusters, num_days, population[0])
 
         index1, index2 = np.argpartition(evaluations, 2)[:2]
         parent1 = population[index1]
@@ -119,7 +123,7 @@ def genetic_centroid_clustering(num_generations: int,
 
     print(f"Evolution completed, best evaluation: {evaluations[index1]}")
     clusters = assign_nodes_to_centroid(cluster_coordinates,
-                                        population[individual])
+                                        population[index1])
 
     route = find_route_from_cluster_assignments(clusters, num_days,
                                                 routing_method, graph)
@@ -135,8 +139,28 @@ def genetic_clustering(num_generations: int,
                        route_length: int,
                        routing_method: RoutingMethods,
                        random_seed: int | None = None) -> ndarray:
+    """
+    # todo: fill in this docstring
+    :param num_generations:
+    :param population_size:
+    :param crossover_probability:
+    :param mutation_probability:
+    :param graph:
+    :param num_locations:
+    :param num_days:
+    :param route_length:
+    :param routing_method:
+    :param random_seed:
+    :return:
+    """
     def crossover(_parent1: ndarray,
                   _parent2: ndarray) -> ndarray:
+        """
+        # todo: fill in this docstring
+        :param _parent1:
+        :param _parent2:
+        :return:
+        """
         # Keeps value if parents the same, otherwise sets to -1
         offspring = np.where(_parent1 == _parent2, parent1, -1)
 
@@ -161,6 +185,10 @@ def genetic_clustering(num_generations: int,
     # Assign random clusters to each location
     population = np.random.randint(num_days,
                                    size=(population_size, num_locations-1))
+
+    # Assign these before loop just in case num_generations is 0 and these are
+    # used before initialisation
+    index1 = 0
 
     for generation_number in range(num_generations):
         for i in range(population_size):
@@ -198,7 +226,7 @@ def genetic_clustering(num_generations: int,
               f"{evaluations[index1]}")
 
     print(f"Evolution completed, best evaluation: {evaluations[index1]}")
-    route = find_route_from_cluster_assignments(population[0],
+    route = find_route_from_cluster_assignments(population[index1],
                                                 num_days,
                                                 routing_method,
                                                 graph)

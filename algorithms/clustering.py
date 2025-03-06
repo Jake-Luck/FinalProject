@@ -1,13 +1,7 @@
-from typing import Callable, Any
-
-from sympy import false
-
 from algorithms.utilities import ClusteringMethods, RoutingMethods, \
     find_route_from_cluster_assignments
-from algorithms.brute_force import brute_force
-from algorithms.greedy import greedy
 
-from core.utilities import display_clusters
+from core.plotting import display_clusters
 
 import numpy as np
 from numpy import ndarray  # For type hints
@@ -23,6 +17,7 @@ def k_means(coordinates: ndarray,
     :param coordinates: Coordinates of each location.
     :param k: Number of clusters.
     :param n: Number of locations.
+    :param show_stages: Whether to plot clusters after each stage.
     :return: A 1D array of shape (n). Represents the chosen clusters.
     """
     def assign_clusters(_coordinates: ndarray,
@@ -67,7 +62,7 @@ def k_means(coordinates: ndarray,
         if show_stages:
             display_clusters(coordinates, cluster_assignments, k, means)
 
-        if (cluster_assignments == previous_clusters).all():
+        if np.array_equal(cluster_assignments, previous_clusters):
             break
         previous_clusters = np.array(cluster_assignments, copy=True)
 
@@ -94,17 +89,14 @@ def cluster_and_solve(coordinates: ndarray,
     :param show_stages: Whether to plot clusters each step
     :return: Returns a 1D np array representing the route found.
     """
-    centre = np.array(coordinates[0], copy=True)
-
     cluster_assignments = ndarray
     match clustering_method:
         case ClusteringMethods.K_MEANS:
             cluster_coordinates = np.array(coordinates[1:], copy=True)
             num_locations = cluster_coordinates.shape[0]
             cluster_assignments = k_means(cluster_coordinates, num_days,
-                                          num_locations)
+                                          num_locations, show_stages)
 
-    clusters = list[ndarray]()
     route = find_route_from_cluster_assignments(cluster_assignments, num_days,
                                                 routing_method, graph)
 

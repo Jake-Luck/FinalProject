@@ -26,6 +26,9 @@ class RoutingMethods(Enum):
     GREEDY = greedy.greedy
     'Always chooses the shortest path from any given position.'
 
+    def __call__(self, *args, **kwargs):
+        return self.value(*args, **kwargs)
+
 
 # TODO: Move base_set construction outside of method. In case generate route is
 # to be run in parallel, in which want that computation to be done outside and
