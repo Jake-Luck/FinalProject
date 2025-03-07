@@ -4,8 +4,8 @@ from abc import abstractmethod
 import numpy as np
 from numpy import ndarray  # For type hints
 
-from algorithms_oop.algorithm import Algorithm
-from algorithms_oop.clustering import Clustering
+from algorithms.algorithm import Algorithm
+from algorithms.clustering import Clustering
 
 from core.plotting import display_clusters
 

@@ -2,8 +2,8 @@ import numpy as np
 from numpy import ndarray  # For type hints
 from enum import Enum
 
-from algorithms_oop.algorithm import Algorithm
-from algorithms_oop.routing import Routing
+from algorithms.algorithm import Algorithm
+from algorithms.routing import Routing
 from core import plotting
 
 

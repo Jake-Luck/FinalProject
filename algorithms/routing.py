@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
-from algorithms_oop.algorithm import Algorithm
+from algorithms.algorithm import Algorithm
 
 
 class Routing(Algorithm):
