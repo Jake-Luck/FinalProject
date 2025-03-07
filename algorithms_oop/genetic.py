@@ -5,11 +5,15 @@ import numpy as np
 from numpy import ndarray  # For type hints
 
 from .algorithm import Algorithm
+from .clustering import Clustering
 
 from core.plotting import display_clusters
 
 
 class Genetic(Algorithm):
+    """
+    Base class for genetic algorithms, includes abstract method for crossover.
+    """
     def __init__(self,
                  num_generations: int,
                  population_size: int,
@@ -18,6 +22,17 @@ class Genetic(Algorithm):
                  generations_per_update: int | None = 1,
                  plotting: bool = True,
                  random_seed: int | None = None):
+        """
+        Initialises genetic algorithm with given parameters.
+        :param num_generations: Number of generations to run.
+        :param population_size: Number of individuals in each population.
+        :param crossover_probability: Probability of crossover (0-1).
+        :param mutation_probability: Probability of mutation (0-1).
+        :param generations_per_update: Number of generations between each
+        progress update. If None or less than 0, no updates given.
+        :param plotting: Whether to display plots on each update.
+        :param random_seed: Specified seed for random number generators.
+        """
         self.num_generations = num_generations
         self.population_size = population_size
         self.crossover_probability = crossover_probability
@@ -40,10 +55,21 @@ class Genetic(Algorithm):
     def _crossover(self,
                   parent1: ndarray,
                   parent2: ndarray) -> ndarray:
+        """
+        Create offspring by performing crossover on two given individuals.
+
+        Abstract method to be implemented by subclasses.
+        :param parent1: First parent's genetic representation.
+        :param parent2: Second parent's genetic representation.
+        """
         pass
 
+
 # Pretty bad
-class GeneticClustering(Genetic):
+class GeneticClustering(Genetic, Clustering):
+    """
+
+    """
     def __init__(self,
                  num_generations: int,
                  population_size: int,
@@ -59,10 +85,10 @@ class GeneticClustering(Genetic):
     def _evaluate_population(self,
                              population: ndarray,
                              num_days: int,
-                             routing_method: RoutingMethods,
+                             routing_method: Clustering.RoutingMethods,
                              graph: ndarray):
         for individual in range(self.population_size):
-            route = find_route_from_cluster_assignments(
+            route = self.find_route_from_cluster_assignments(
                 population[individual], num_days, routing_method, graph
             )
             self.evaluations[individual] = self.evaluate_route(route, num_days,
@@ -87,7 +113,7 @@ class GeneticClustering(Genetic):
                    num_locations: int,
                    num_days: int,
                    route_length: int,
-                   routing_method: RoutingMethods,
+                   routing_method: Clustering.RoutingMethods,
                    coordinates: ndarray | None = None) -> ndarray:
         if coordinates is None:
             print("No coordinates provided, setting plotting to False")
@@ -145,13 +171,13 @@ class GeneticClustering(Genetic):
 
         print(f"Evolution completed, best evaluation: "
               f"{self.evaluations[index1]}")
-        route = find_route_from_cluster_assignments(population[index1],
+        route = self.find_route_from_cluster_assignments(population[index1],
                                                     num_days,
                                                     routing_method,
                                                     graph)
         return route
 
-class GeneticCentroidClustering(Genetic):
+class GeneticCentroidClustering(Genetic, Clustering):
     def __init__(self,
                  num_generations: int,
                  population_size: int,
@@ -189,44 +215,29 @@ class GeneticCentroidClustering(Genetic):
 
         return offspring
 
-    @staticmethod
-    def _assign_nodes_to_centroid(coordinates: ndarray,
-                                  centroids: ndarray) -> ndarray:
-        """
-        Assigns each coordinate a cluster by computing distance from each
-        coordinate to each centroid and choosing the smallest distance.
-
-        :param coordinates: Coordinates of each location.
-        :param centroids: Coordinates of each cluster's centroid.
-        :return: A 1D array of shape (n). Represents the chosen clusters.
-        """
-        distances = np.linalg.norm(
-            coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
-        clusters = np.argmin(distances, axis=1)
-        return clusters
 
     def _evaluate_population(self,
                              coordinates: ndarray,
                              population: ndarray,
                              num_days: int,
-                             routing_method: RoutingMethods,
+                             routing_method: Clustering.RoutingMethods,
                              graph: ndarray):
         for individual in range(self.population_size):
             clusters = self._assign_nodes_to_centroid(coordinates,
                                                      population[individual])
 
-            route = find_route_from_cluster_assignments(clusters, num_days,
-                                                        routing_method, graph)
+            route = self.find_route_from_cluster_assignments(clusters, num_days,
+                                                             routing_method, graph)
 
             self.evaluations[individual] = self.evaluate_route(route, num_days,
                                                                graph)
 
-    def find_route(self,
+    def find_clusters(self,
                    coordinates: ndarray,
                    graph: ndarray,
                    num_days: int,
-                   routing_method: RoutingMethods
-                   ):    # Randomly Assign Centroids
+                   routing_method: Clustering.RoutingMethods) -> ndarray:
+        # Randomly Assign Centroids
         centre = coordinates[0]
         centroid_x_coordinates = np.random.uniform(centre[0] -0.1, centre[0] + 0.1,
                                           (self.population_size, num_days))
@@ -280,9 +291,7 @@ class GeneticCentroidClustering(Genetic):
                         population[individual, cluster] += mutation
 
         print(f"Evolution completed, best evaluation: {self.evaluations[index1]}")
-        clusters = self._assign_nodes_to_centroid(cluster_coordinates,
-                                                  population[index1])
+        cluster_assignments = self._assign_nodes_to_centroid(cluster_coordinates,
+                                                             population[index1])
 
-        route = find_route_from_cluster_assignments(clusters, num_days,
-                                                    routing_method, graph)
-        return route
+        return cluster_assignments

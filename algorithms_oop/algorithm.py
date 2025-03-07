@@ -1,30 +1,7 @@
 import numpy as np
 from numpy import ndarray  # For type hints
-from enum import Enum
 
 class Algorithm():
-    class ClusteringMethods(Enum):
-        """
-        These are clustering methods for use alongside routing algorithms.
-        """
-        K_MEANS = 0,
-        'Assigns random \'centroids\' and assign individuals to their closest, \
-        then update centroids based on cluster\'s mean and repeat the process.'
-
-    class RoutingMethods(Enum):
-        """
-        These are travelling salesmen solvers for use with clustering.
-        """
-        # Brute force needs lambda for num_days (it has num_days as a parameter)
-        # because it can be used without clustering too.
-        BRUTE_FORCE = 0
-        'Compares every possible route to find the best.'
-        GREEDY = 1
-        'Always chooses the shortest path from any given position.'
-
-        def __call__(self, *args, **kwargs):
-            return self.value(*args, **kwargs)
-
     @staticmethod
     def evaluate_route(route: ndarray,
                        num_days: int,
@@ -59,25 +36,38 @@ class Algorithm():
         return evaluation
 
     @staticmethod
-    def find_route_from_cluster_assignments(cluster_assignments: ndarray,
-                                            num_days: int,
-                                            routing_method: RoutingMethods,
-                                            graph: ndarray) -> ndarray:
-        clusters = list[ndarray]()
-        for i in range(num_days):
-            indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
-            clusters.append(np.concatenate(([0], indexes_in_cluster)))
+    # TODO: Move base_set construction outside of method. In case generate route is
+    # to be run in parallel, in which want that computation to be done outside and
+    # used repeatedly. Make sure to copy based set within generate route.
+    def generate_route(route_number: int,
+                       n_routes: int,
+                       num_locations: int,
+                       num_days: int,
+                       route_length: int) -> ndarray:
+        """
+        Generates a route using factorial based division.
+        :param route_number: The route number/index of permutation.
+        :param n_routes: The total number of routes (route_length - 1)!
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param route_length: The length of the route.
+        :return: Returns a 1D np array representing the generated route.
+        """
+        base_set = list()
+        for _ in range(num_days - 1):  # -1 because 0 added to end of all routes
+            base_set.append(0)
+        for i in range(1, num_locations):
+            base_set.append(i)
 
-        # numpy magic
-        # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
-        # Which can they be used to access graphs
-        graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
+        n_factorial = int(n_routes / (route_length - 1))
+        route = np.empty(route_length, dtype=int)
+        for i in range(route_length - 2, -1, -1):
+            selected_index = int(route_number / n_factorial)
+            route[i] = base_set.pop(selected_index)
 
-        route = np.empty(0, dtype=int)
+            if i == 0: continue
 
-        for sub_graph, cluster_index in zip(graphs, clusters):
-            n = sub_graph.shape[0]
-            sub_route = routing_method(n, sub_graph)
-
-            route = np.concatenate((route, cluster_index[sub_route]))
+            route_number %= n_factorial
+            n_factorial /= i
+        route[route_length - 1] = 0  # All routes end going back to centre
         return route
