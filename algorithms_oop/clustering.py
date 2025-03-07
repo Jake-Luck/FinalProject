@@ -2,7 +2,6 @@ import numpy as np
 from numpy import ndarray  # For type hints
 from enum import Enum
 
-from algorithms.utilities import RoutingMethods
 from algorithms_oop.algorithm import Algorithm
 from algorithms_oop.routing import Routing
 from core import plotting
@@ -37,8 +36,8 @@ class Clustering(Algorithm):
         clusters = np.argmin(distances, axis=1)
         return clusters
 
-    @staticmethod
-    def find_route_from_cluster_assignments(cluster_assignments: ndarray,
+    def find_route_from_cluster_assignments(self,
+                                            cluster_assignments: ndarray,
                                             num_days: int,
                                             routing_method: RoutingMethods,
                                             graph: ndarray) -> ndarray:
@@ -56,9 +55,9 @@ class Clustering(Algorithm):
 
         routing = Routing()
         match routing_method:
-            case RoutingMethods.BRUTE_FORCE:
+            case self.RoutingMethods.BRUTE_FORCE:
                 routing_function = lambda _n, _g: routing.brute_force(_n, 1, _g)
-            case RoutingMethods.GREEDY:
+            case self.RoutingMethods.GREEDY:
                 routing_function = routing.greedy
             case _:
                 print("Invalid routing method, defaulting to greedy")
@@ -71,14 +70,15 @@ class Clustering(Algorithm):
             route = np.concatenate((route, cluster_index[sub_route]))
         return route
 
+
 class KMeans(Clustering):
     def __init__(self,
                  show_stages: bool = False):
         self.show_stages = show_stages
 
     @staticmethod
-    def _compute_means(_coordinates: ndarray,
-                      _k: int) -> ndarray:
+    def _compute_means(coordinates: ndarray,
+                       k: int) -> ndarray:
         """
         Computes the mean coordinate of each cluster.
         :param _coordinates: Coordinates of each cluster, a 2D array with shape
@@ -86,10 +86,10 @@ class KMeans(Clustering):
         :param _k: The number of clusters/means to compute.
         :return: Returns a list of means, 1D array.
         """
-        computed_means = np.empty((_k, 2))
+        computed_means = np.empty((k, 2))
 
-        for i in range(_k):
-            _cluster_assignments = _coordinates[_coordinates[:, 2] == i, :2]
+        for i in range(k):
+            _cluster_assignments = coordinates[coordinates[:, 2] == i, :2]
             computed_means[i] = _cluster_assignments.mean(axis=0)
         return computed_means
 
@@ -106,13 +106,16 @@ class KMeans(Clustering):
         :param show_stages: Whether to plot clusters after each stage.
         :return: A 1D array of shape (n). Represents the chosen clusters.
         """
+        # Todo: Change so centre can be specified instead of assuming index 0
+        coordinates = np.append(coordinates[1:], np.zeros((n-1, 1)), axis=1)
+
+        # Todo: Change so initial means are random and non-deterministic
         means = np.array(coordinates[:k], copy=True)
-        coordinates = np.append(coordinates, np.zeros((n, 1)), axis=1)
 
         previous_clusters = np.zeros(n)
         while True:
-            cluster_assignments = self._assign_nodes_to_centroid(coordinates,
-                                                                 means)
+            coordinates[:, 2] = cluster_assignments = (
+                self._assign_nodes_to_centroid(coordinates, means))
 
             if self.show_stages:
                 plotting.display_clusters(coordinates, cluster_assignments, k,

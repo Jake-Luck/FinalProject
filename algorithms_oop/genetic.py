@@ -4,8 +4,8 @@ from abc import abstractmethod
 import numpy as np
 from numpy import ndarray  # For type hints
 
-from .algorithm import Algorithm
-from .clustering import Clustering
+from algorithms_oop.algorithm import Algorithm
+from algorithms_oop.clustering import Clustering
 
 from core.plotting import display_clusters
 
@@ -108,7 +108,7 @@ class GeneticClustering(Genetic, Clustering):
                                                     else parent2[conflict]
         return offspring
 
-    def find_route(self,
+    def find_clusters(self,
                    graph: ndarray,
                    num_locations: int,
                    num_days: int,
@@ -169,13 +169,8 @@ class GeneticClustering(Genetic, Clustering):
                     if mutate:
                         population[i][j] = random.randrange(num_days)
 
-        print(f"Evolution completed, best evaluation: "
-              f"{self.evaluations[index1]}")
-        route = self.find_route_from_cluster_assignments(population[index1],
-                                                    num_days,
-                                                    routing_method,
-                                                    graph)
-        return route
+        print(f"Evolution completed, best evaluation: {self.evaluations[index1]}")
+        return parent1
 
 class GeneticCentroidClustering(Genetic, Clustering):
     def __init__(self,
@@ -249,7 +244,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
         # Assign these before loop just in case num_generations is 0 and these are
         # used before initialisation
-        clusters = np.empty(self.population_size)
+        parent1 = np.empty_like(num_days)
         index1 = 0
 
         for generation_number in range(self.num_generations):
@@ -265,8 +260,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
                       f"evaluation: {self.evaluations[index1]}")
 
                 if self.plotting:
-                    clusters = self._assign_nodes_to_centroid(cluster_coordinates, parent1)
-                    display_clusters(cluster_coordinates, clusters, num_days, parent1)
+                    cluster_assignments = self._assign_nodes_to_centroid(cluster_coordinates, parent1)
+                    display_clusters(cluster_coordinates, cluster_assignments, num_days, parent1)
 
             # Crossover
             population[0] = parent1
@@ -291,7 +286,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
                         population[individual, cluster] += mutation
 
         print(f"Evolution completed, best evaluation: {self.evaluations[index1]}")
-        cluster_assignments = self._assign_nodes_to_centroid(cluster_coordinates,
-                                                             population[index1])
+        cluster_assignments = self._assign_nodes_to_centroid(
+            cluster_coordinates, parent1)
 
         return cluster_assignments

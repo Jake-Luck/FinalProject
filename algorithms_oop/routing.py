@@ -36,6 +36,12 @@ class Routing(Algorithm):
         :param graph: The adjacency matrix for the graph.
         :return: Returns a 1D np array representing the best route.
         """
+        if num_locations < 2:
+            raise ValueError(f"num_locations={num_locations}, "
+                             f"must be at least 2.")
+        if num_days < 1:
+            raise ValueError(f"num_days={num_days}, must be at least 1.")
+
         route_length = num_locations + num_days - 1
 
         # get (route_length - 1)! Do -1 because all routes end at '0'

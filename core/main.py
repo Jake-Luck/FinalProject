@@ -1,24 +1,14 @@
+import threading
 import time
 from time import perf_counter
 import h5py
 import numpy as np
 
-from algorithms.brute_force import brute_force
-from algorithms.clustering import (
-    cluster_and_solve,
-    k_means
-)
-from algorithms.genetic_clustering import genetic_centroid_clustering
-from algorithms.genetic_clustering import genetic_clustering
-from algorithms.utilities import (
-    ClusteringMethods,
-    RoutingMethods,
-    evaluate_route
-)
-
 from algorithms_oop import genetic
+from algorithms_oop import clustering
+from algorithms_oop.routing import Routing
 
-import utilities
+from core import utilities
 from core import plotting
 
 
@@ -81,72 +71,41 @@ def collect_test_data() -> None:
 
 
 if __name__ == '__main__':
-    #data_collection_thread = threading.Thread(target=collect_ordered_data)
-   # data_collection_thread.start()
+    data_collection_thread = threading.Thread(target=collect_ordered_data)
+    data_collection_thread.start()
+
     with h5py.File('data/training_data.h5', 'r') as f:
         graphs = f[utilities.DataGroups.ordered_graphs.value]
-        graph = np.array(graphs['299'], copy=True, dtype=int)
-        coordinates = graphs['299'].attrs['coordinates'][:]
+        graph = np.array(graphs['12'], copy=True, dtype=int)
+        coordinates = graphs['12'].attrs['coordinates'][:]
 
-    # GeneticCentroidClustering = genetic.GeneticCentroidClustering(1000, 30, 0.9, 0.1, 100,False)
-    # route = GeneticCentroidClustering.find_route(coordinates, graph, 7, RoutingMethods.GREEDY)
+    num_days = 3
+    num_locations = 6
+    route_length = 31
 
-    # GeneticClustering = genetic.GeneticClustering(1000, 30, 0.9, 0.1, 100, False)
-    # route = GeneticClustering.find_route(graph, 25, 7, 31, RoutingMethods.GREEDY)
+    routing = Routing()
+    route = routing.brute_force(num_locations, num_days, graph)
 
-    #route = cluster_and_solve(coordinates, graph, 7, ClusteringMethods.K_MEANS, RoutingMethods.GREEDY)
+#    clustering_algorithm = genetic.GeneticCentroidClustering(1000, 30, 0.9,
+#                                                             0.1, 100, False)
+#    cluster_assignments = clustering_algorithm.find_clusters(
+#        coordinates, graph, num_days,
+#        clustering_algorithm.RoutingMethods.GREEDY)
+
+#    clustering_algorithm = genetic.GeneticClustering(1000, 30, 0.9, 0.1, 100,
+#                                                     False)
+#    cluster_assignments = clustering_algorithm.find_clusters(
+#        graph, num_locations, num_days, route_length,
+#        clustering_algorithm.RoutingMethods.GREEDY)
+
+#    clustering_algorithm = clustering.KMeans()
+#    cluster_assignments = clustering_algorithm.find_clusters(
+#        coordinates, num_days, num_locations)
+
+#    route = clustering_algorithm.find_route_from_cluster_assignments(
+#        cluster_assignments, num_days,
+#        clustering_algorithm.RoutingMethods.GREEDY, graph)
 
     plotting.display_route(route, coordinates)
 
-    #compare_bruteforce_to_bab()
-    #with h5py.File('data/training_data.h5', 'r') as f:
-    #    graphs = f[utilities.DataGroups.ordered_graphs.value]
-    #    graph = np.array(graphs['1'], copy=True, dtype=int)
-    '''
-    graph =  np.array([
-        [0, 10, 15, 20, 25],  # From start to other locations
-        [10, 0, 35, 25, 30],  # From location 1 to others
-        [15, 35, 0, 30, 10],  # From location 2 to others
-        [20, 25, 30, 0, 15],  # From location 3 to others
-        [25, 30, 10, 15, 0]   # From location 4 to others
-    ])
-
-
-    route = optimize_tourist_route(3, 5, graph)
-    print(f"Solution: {route}")
-    '''
-
-    #utilities.display_coordinates(coordinates)
-    #clusters = k_means(coordinates, 7, 25)
-    #utilities.display_clusters(coordinates, clusters)
-    '''
-    _
-    with h5py.File('data/training_data.h5', 'r') as f:
-        graphs = f[utilities.DataGroups.ordered_graphs.value]
-        graph = np.array(graphs['299'], copy=True, dtype=int)
-        coordinates = graphs['299'].attrs['coordinates'][:]
-        
-    route1 = cluster_and_solve(coordinates, graph, 7,
-                               ClusteringMethods.K_MEANS,
-                               RoutingMethods.GREEDY)
-
-    route2 = genetic_clustering(10000, 50, 0.9, 0.1, graph, 25, 7, 31, RoutingMethods.GREEDY)
-    print(f"K-Means evaluation: {evaluate_route(route1, 7, graph)}")
-    utilities.display_route(coordinates, route1)
-    utilities.display_route(coordinates, route2)
-    '''
-    # route = brute_force(6, 2, graph)
-    #utilities.display_route(coordinates, route)
-    #    graphs = f['graphs']
-    #    coordinates = graphs['0'].attrs['coordinates'][:]
-    #    graph = graphs['0'][:]
-
-    #utilities.generate_test_datum(number_of_nodes=5)
-
-    # utilities.display_coordinates(coordinates)
-    # utilities.display_graph(coordinates, graph)
-    # graph = np.array([[0,1,4,2],[4,0,1,4],[1,4,0,4],[1,4,4,0]], dtype=np.int32)
-    # route = algorithms.bruteForce(4,2, graph)
-    # test_bruteforce_timings()
-
-    #data_collection_thread.join()
+    data_collection_thread.join()
