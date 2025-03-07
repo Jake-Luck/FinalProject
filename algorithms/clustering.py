@@ -1,6 +1,7 @@
+from enum import Enum
+
 import numpy as np
 from numpy import ndarray  # For type hints
-from enum import Enum
 
 from algorithms.algorithm import Algorithm
 from algorithms.routing import Routing
