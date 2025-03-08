@@ -90,8 +90,7 @@ def openrouteservice_api_call(coordinate_array: ndarray) -> ndarray | int:
     :param coordinate_array: List of coordinates to include in the api call.
     :return: A 2d list representing the distance matrix.
     """
-    # For some reason ORS takes coordinates as longitude, latitude. So flip.
-    body = {"locations": np.flip(coordinate_array).tolist()}
+    body = {"locations": coordinate_array.tolist()}
     headers = {
         'Accept': 'application/json, application/geo+json, '
                   'application/gpx+xml, img/png; charset=utf-8',

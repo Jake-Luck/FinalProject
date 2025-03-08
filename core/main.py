@@ -70,10 +70,8 @@ def collect_test_data() -> None:
 
 
 def main():
-    datum = utilities.generate_test_datum(centre=np.array([51.5074, -0.1277]))
-
-   # data_collection_thread = threading.Thread(target=collect_ordered_data)
-    #data_collection_thread.start()
+    data_collection_thread = threading.Thread(target=collect_ordered_data)
+    data_collection_thread.start()
 
     #with h5py.File('data/training_data.h5', 'r') as f:
     #    graphs = f[utilities.DataGroups.ordered_graphs.value]
@@ -99,20 +97,17 @@ def main():
     #        graph, num_locations, num_days, route_length,
     #        clustering_algorithm.RoutingMethods.GREEDY)
 
-    graph = datum[0]
-    coordinates = datum[1]
+    #clustering_algorithm = clustering.KMeans()
+    #cluster_assignments = clustering_algorithm.find_clusters(
+    #    coordinates, num_days, num_locations)
 
-    clustering_algorithm = clustering.KMeans()
-    cluster_assignments = clustering_algorithm.find_clusters(
-        coordinates, num_days, num_locations)
+    #route = clustering_algorithm.find_route_from_cluster_assignments(
+    #    cluster_assignments, num_days,
+    #    clustering_algorithm.RoutingMethods.BRUTE_FORCE, graph)
 
-    route = clustering_algorithm.find_route_from_cluster_assignments(
-        cluster_assignments, num_days,
-        clustering_algorithm.RoutingMethods.BRUTE_FORCE, graph)
+    #plotting.display_route(route, coordinates)
 
-    plotting.display_route(route, coordinates)
-
-    #data_collection_thread.join()
+    data_collection_thread.join()
 
 
 if __name__ == '__main__':
