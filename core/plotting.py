@@ -26,8 +26,8 @@ def display_coordinates(coordinates: ndarray,
                                      lon=coordinates[:, 1],
                                      mode='markers',
                                      marker=dict(
-                                         size = 10,
-                                         color = colour_set[0]
+                                         size=10,
+                                         color=colour_set[0]
                                      )))
 
     figure.update_layout(autosize=True,
@@ -68,7 +68,7 @@ def display_route(route: ndarray,
     coordinates_per_day = [coordinates[day] for day in route_per_day]
 
     figure = go.Figure(go.Scattermap(
-        mode = "markers+lines",
+        mode="markers+lines",
         lat=coordinates_per_day[0][:, 0],
         lon=coordinates_per_day[0][:, 1],
         marker=dict(
@@ -78,14 +78,13 @@ def display_route(route: ndarray,
 
     for i in range(1, len(coordinates_per_day)):
         figure.add_trace(go.Scattermap(
-            mode = "markers+lines",
+            mode="markers+lines",
             lat=coordinates_per_day[i][:, 0],
             lon=coordinates_per_day[i][:, 1],
-            marker = dict(
-                size = 10,
-                color = colour_set[i]
+            marker=dict(
+                size=10,
+                color=colour_set[i]
             )))
-
 
     figure.update_layout(
         autosize=True,
@@ -131,7 +130,7 @@ def display_clusters(coordinates: ndarray,
                                           color=colour_set[0]
                                      )))
 
-    for i in range (1, num_days):
+    for i in range(1, num_days):
         figure.add_scattermap(lat=coordinates[clusters[i], 0][0],
                               lon=coordinates[clusters[i], 1][0],
                               mode='markers',
@@ -161,8 +160,8 @@ def display_clusters(coordinates: ndarray,
                               lon=[centroids[i, 1]],
                               mode='markers',
                               marker=dict(
-                                  size = 20,
-                                  color = colour_set[i],
-                                  opacity = 0.5
+                                  size=20,
+                                  color=colour_set[i],
+                                  opacity=0.5
                               ))
     figure.show()
