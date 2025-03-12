@@ -5,7 +5,7 @@ that:
 \begin{enumerate}
     \item Visits all nodes $V \setminus c$ once.
     \item Starts and finishes at $s$, having visited it $d$ times, without ever visiting consecutively.
-    \item Minimizes both the cumulative edge weights in the route and the variance in cumulative weight between
+    \item Minimises both the cumulative edge weights in the route and the variance in cumulative weight between
     each visit to $s$.
 \end{enumerate}
 
@@ -14,10 +14,10 @@ Inputs:
 \begin{itemize}
     \item $d$: The number of times $s$ should be visited in a route.
     Contextually, $d$ represents the number of days a tourist will spend on their trip. $d \in \mathbb{Z}, d > 0$
-    \item $G = (V, E)$: A pair comprising of:
+    \item $G = (V, E)$: A pair comprising:
     \begin{itemize}
         \item[\textbullet] $V$: A set of nodes representing locations the tourist would like to visit.
-        $v \in V, v = (x, y, t)$, a triple comprising of:
+        $v \in V, v = (x, y, t)$, a triple comprising:
         \begin{itemize}
             \item[\textbullet]$x$: Longitude, indicating the location's geographic east-west position on the
             earth\footnote{\label{latitude-longitude-note}While the coordinates of our locations are
