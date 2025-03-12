@@ -1,6 +1,6 @@
 """
-Provides Shorthands class to easily run different algorithms with random/default
-inputs.
+Provides Shorthands class to easily run different algorithms with
+random/default inputs.
 """
 from core.data_handling import DataAttributes, DataGroups
 from core.plotting import Plotting
@@ -14,12 +14,15 @@ import numpy as np
 from numpy import ndarray  # For type hints
 import random
 
+
+# noinspection PyPep8
 class Shorthands:
     """
     Provides shorthand methods for running different algorithm with
     random/default inputs. Useful for demonstrating and quickly running
     algorithms.
     """
+
     @staticmethod
     def _setup_inputs(num_locations: int,
                       graph: ndarray | None = None,
@@ -27,8 +30,8 @@ class Shorthands:
         """
         Sets up our inputs so that if either our graph or coordinates aren't
         provided, random ones will be chosen.
-        :param graph: The graph input to use if given. If not, a randomly chosen
-        graph & coordinates will be used.
+        :param graph: The graph input to use if given. If not, a randomly
+        chosen graph & coordinates will be used.
         :param coordinates: The coordinates input to use if given. If not, a
         randomly chosen graph & coordinates will be used.
         """
@@ -36,7 +39,7 @@ class Shorthands:
         if graph is not None and coordinates is not None:
             return graph[:num_locations], coordinates[:num_locations]
 
-        #Chooses a random graph from saved data.
+        # Chooses a random graph from saved data.
         with h5py.File('data/training_data.h5', 'r') as f:
             graphs = f[DataGroups.graphs]
             chosen_index = random.randrange(len(graphs))
@@ -72,7 +75,6 @@ class Shorthands:
             Plotting.display_route(route, coordinates)
         return route
 
-
     @staticmethod
     def genetic_clustering(
             num_locations: int,
@@ -83,15 +85,15 @@ class Shorthands:
             population_size: int = 100,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
-            routing_algorithm: Clustering.RoutingMethods = \
+            routing_algorithm: Clustering.RoutingMethods =
                     Clustering.RoutingMethods.BRUTE_FORCE,
             generations_per_update: int | None = 200,
             plot: bool = True,
             seed: int | None = None) -> ndarray:
         """
-        Shorthand for performing genetic clustering and performing routing using
-        those clusters. Unless **both** graph and coordinates are provided,
-        random replacements will be chosen instead.
+        Shorthand for performing genetic clustering and performing routing
+        using those clusters. Unless **both** graph and coordinates are
+        provided, random replacements will be chosen instead.
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.
@@ -109,7 +111,7 @@ class Shorthands:
         """
         graph, coordinates = Shorthands._setup_inputs(num_locations, graph,
                                                       coordinates)
-        route_length = num_locations+num_days-1
+        route_length = num_locations + num_days - 1
 
         genetic_algorithm = GeneticClustering(
             num_generations, population_size, crossover_probability,
@@ -135,7 +137,7 @@ class Shorthands:
             population_size: int = 100,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
-            routing_algorithm: Clustering.RoutingMethods = \
+            routing_algorithm: Clustering.RoutingMethods =
                     Clustering.RoutingMethods.BRUTE_FORCE,
             generations_per_update: int | None = 200,
             plot: bool = True,
@@ -180,13 +182,13 @@ class Shorthands:
                 num_days: int,
                 graph: ndarray | None = None,
                 coordinates: ndarray | None = None,
-                routing_algorithm: Clustering.RoutingMethods = \
+                routing_algorithm: Clustering.RoutingMethods =
                         Clustering.RoutingMethods.BRUTE_FORCE,
                 plot: bool = True) -> ndarray:
         """
-        Shorthand for performing k-means clustering and performing routing using
-        those clusters. Unless **both** graph and coordinates are provided,
-        random replacements will be chosen instead.
+        Shorthand for performing k-means clustering and performing routing
+        using those clusters. Unless **both** graph and coordinates are
+        provided, random replacements will be chosen instead.
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.

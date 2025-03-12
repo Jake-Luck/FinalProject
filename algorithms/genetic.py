@@ -10,6 +10,7 @@ import numpy as np
 from numpy import ndarray  # For type hints
 import random
 
+
 class Genetic(Algorithm):
     """
     Base class for genetic algorithms, includes abstract method for crossover.
@@ -43,14 +44,15 @@ class Genetic(Algorithm):
             random.seed(random_seed)
             np.random.seed(random_seed)
 
-        if not isinstance(generations_per_update, int) or generations_per_update < 1:
+        if (not isinstance(generations_per_update, int)
+                or generations_per_update < 1):
             generations_per_update = None
         self.generations_per_update = generations_per_update
 
     @abstractmethod
     def _crossover(self,
-                  parent1: ndarray,
-                  parent2: ndarray) -> ndarray:
+                   parent1: ndarray,
+                   parent2: ndarray) -> ndarray:
         """
         Create offspring by performing crossover on two given individuals.
 
@@ -91,8 +93,8 @@ class GeneticClustering(Genetic, Clustering):
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
 
-    # todo: The same cluster might be given a different number and be considered
-    #       a conflict when there shouldn't be one, needs fixing.
+    # todo: The same cluster might be given a different number and be
+    #  considered a conflict when there shouldn't be one, needs fixing.
     def _crossover(self,
                    parent1: ndarray,
                    parent2: ndarray) -> ndarray:
@@ -110,8 +112,10 @@ class GeneticClustering(Genetic, Clustering):
         conflicts = np.argwhere(offspring == -1)
         for conflict in conflicts:
             chosen_parent = random.randrange(2)
-            offspring[conflict] = parent1[conflict] if chosen_parent == 0 \
-                                                    else parent2[conflict]
+            if chosen_parent == 0:
+                offspring[conflict] = parent1[conflict]
+            else:
+                offspring[conflict] = parent2[conflict]
         return offspring
 
     def _evaluate_population(self,
@@ -135,20 +139,20 @@ class GeneticClustering(Genetic, Clustering):
                 population[individual], num_days, routing_method, graph
             )
             evaluations[individual] = self.evaluate_route(route, num_days,
-                                                               graph)
+                                                          graph)
         return evaluations
 
     def find_clusters(self,
-                   graph: ndarray,
-                   num_locations: int,
-                   num_days: int,
-                   route_length: int,
-                   routing_method: Clustering.RoutingMethods,
-                   coordinates: ndarray | None = None) -> ndarray:
+                      graph: ndarray,
+                      num_locations: int,
+                      num_days: int,
+                      route_length: int,
+                      routing_method: Clustering.RoutingMethods,
+                      coordinates: ndarray | None = None) -> ndarray:
         """
-        Sorts `num_locations` coordinates into `num_days` clusters via a genetic
-        algorithm approach. Genome contains the assignment of each location to a
-        cluster.
+        Sorts `num_locations` coordinates into `num_days` clusters via a
+        genetic algorithm approach. Genome contains the assignment of each
+        location to a cluster.
         :param graph: The graph input as an adjacency matrix.
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
@@ -174,8 +178,8 @@ class GeneticClustering(Genetic, Clustering):
                                        size=(self.population_size,
                                              num_locations - 1))
 
-        # Assign these before loop just in case num_generations is 0 and these are
-        # used before initialisation
+        # Assign these before loop just in case num_generations is 0 and these
+        # are used before initialisation
         index1 = 0
         parent1 = None
 
@@ -194,7 +198,6 @@ class GeneticClustering(Genetic, Clustering):
 
                 if self.plotting:
                     Plotting.display_clusters(coordinates, parent1, num_days)
-
 
             # Crossover
             population[0] = parent1
@@ -219,6 +222,7 @@ class GeneticClustering(Genetic, Clustering):
         print(f"Evolution completed, best evaluation: {evaluations[index1]}")
         return parent1
 
+
 class GeneticCentroidClustering(Genetic, Clustering):
     """
     Class for genetic centroid clustering. Genome contains the coordinates of
@@ -233,14 +237,15 @@ class GeneticCentroidClustering(Genetic, Clustering):
                  plotting: bool = True,
                  random_seed: int | None = None):
         """
-
-        :param num_generations:
-        :param population_size:
-        :param crossover_probability:
-        :param mutation_probability:
-        :param generations_per_update:
-        :param plotting:
-        :param random_seed:
+        Initialises genetic centroid clustering with given parameters.
+        :param num_generations: Number of generations to run.
+        :param population_size: Number of individuals in each population.
+        :param crossover_probability: Probability of crossover (0-1).
+        :param mutation_probability: Probability of mutation (0-1).
+        :param generations_per_update: Number of generations between each
+        progress update. If None or less than 0, no updates given.
+        :param plotting: Whether to display plots on each update.
+        :param random_seed: Specified seed for random number generators.
         """
         super().__init__(num_generations, population_size,
                          crossover_probability, mutation_probability,
@@ -250,7 +255,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
                    parent1: ndarray,
                    parent2: ndarray,) -> ndarray:
         """
-
+        Performs crossover between two given individuals. For each location,
+        chooses a cluster from either parent.
         :param parent1: First parent's genome.
         :param parent2: Second parent's genome.
         :return: Offspring of each parent.
@@ -282,40 +288,45 @@ class GeneticCentroidClustering(Genetic, Clustering):
                              population: ndarray,
                              num_days: int,
                              routing_method: Clustering.RoutingMethods,
-                             graph: ndarray) -> ndarray[]:
+                             graph: ndarray) -> ndarray:
         """
-
-        :param coordinates:
-        :param population:
-        :param num_days:
-        :param routing_method:
-        :param graph:
+        Evaluates the fitness of a given population. This fitness is calculated
+        by evaluating the route that's found from passing each individual's
+        clusters to the given routing method.
+        :param coordinates: Coordinates of each location.
+        :param population: Population to evaluate.
+        :param num_days: The number of days in the route.
+        :param routing_method: The routing method to use on each cluster.
+        :param graph: The graph input as an adjacency matrix.
         :return: 1D ndarray representing each individual's fitness.
         """
         evaluations = np.zeros(self.population_size)
         for individual in range(self.population_size):
             clusters = self._assign_nodes_to_centroid(coordinates,
-                                                     population[individual])
+                                                      population[individual])
 
-            route = self.find_route_from_cluster_assignments(clusters, num_days,
-                                                             routing_method, graph)
+            route = self.find_route_from_cluster_assignments(
+                clusters, num_days, routing_method, graph)
 
-            evaluations[individual] = self.evaluate_route(route, num_days,
-                                                               graph)
+            evaluations[individual] = self.evaluate_route(
+                route, num_days, graph)
         return evaluations
 
     def find_clusters(self,
-                   coordinates: ndarray,
-                   graph: ndarray,
-                   num_days: int,
-                   routing_method: Clustering.RoutingMethods) -> ndarray:
+                      coordinates: ndarray,
+                      graph: ndarray,
+                      num_days: int,
+                      routing_method: Clustering.RoutingMethods) -> ndarray:
         """
-
-        :param coordinates:
-        :param graph:
-        :param num_days:
-        :param routing_method:
-        :return:
+        Sorts `num_locations` coordinates into `num_days` clusters via a genetic
+        algorithm approach.  Genome contains the coordinates of the centroid for
+        each class.
+        :param coordinates: Coordinates of each location.
+        :param graph: The graph input as an adjacency matrix.
+        :param num_days: The number of days in the route.
+        :param routing_method: The routing method to use on each cluster.
+        :return: Each location's cluster assignment. A 1D array of shape
+        (num_locations).
         """
         if coordinates is None:
             print("No coordinates provided, setting plotting to False")
@@ -326,21 +337,26 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
         # Randomly Assign Centroids
         centre = coordinates[0]
-        centroid_x_coordinates = np.random.uniform(centre[0] -0.1, centre[0] + 0.1,
-                                          (self.population_size, num_days))
-        centroid_y_coordinates = np.random.uniform(centre[1] -0.1, centre[1] + 0.1,
-                                      (self.population_size, num_days))
+        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
+                                                   centre[0] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
+        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
+                                                   centre[1] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
 
         population = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
         cluster_coordinates = np.array(coordinates[1:], copy=True)
 
-        # Assign these before loop just in case num_generations is 0 and these are
-        # used before initialisation
+        # Assign these before loop just in case num_generations is 0 and these
+        # are used before initialisation
         parent1 = np.empty_like(num_days)
         index1 = 0
 
         for generation_number in range(self.num_generations):
-            self._evaluate_population(cluster_coordinates, population, num_days, routing_method, graph)
+            self._evaluate_population(cluster_coordinates, population,
+                                      num_days, routing_method, graph)
 
             index1, index2 = np.argpartition(evaluations, 2)[:2]
             parent1 = population[index1]
@@ -377,7 +393,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
                     mutate = random.random() < self.mutation_probability
                     if mutate:
                         mutation = np.random.uniform(-0.01, 0.01, 2)
-                        # todo: change array indexing throughout project to below format:
+                        # todo: change array indexing throughout project to
+                        #  below format:
                         population[individual, cluster] += mutation
 
         print(f"Evolution completed, best evaluation: {evaluations[index1]}")

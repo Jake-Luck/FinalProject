@@ -4,6 +4,7 @@ Provides algorithm base class, which each algorithm will inherit from.
 import numpy as np
 from numpy import ndarray  # For type hints
 
+
 class Algorithm:
     """
     Algorithm base class. Provides methods for route evaluation and permutation
@@ -37,15 +38,16 @@ class Algorithm:
                 current_day += 1
             previous_index = index
 
-        # Multiply durations by 1 + the standard deviation of time spent each day
+        # Multiply durations by 1 + standard deviation of time spent each day
         evaluation *= 1 + np.std(evaluation_per_day)
 
         return evaluation
 
     @staticmethod
-    # TODO: Move base_set construction outside of method. In case generate route is
-    # to be run in parallel, in which want that computation to be done outside and
-    # used repeatedly. Make sure to copy based set within generate route.
+    # TODO: Move base_set construction outside of method. In case generate
+    #  route is to be run in parallel, in which want that computation to be
+    #  done outside and used repeatedly. Make sure to copy based set within
+    #  generate route.
     def generate_route(route_number: int,
                        n_routes: int,
                        num_locations: int,
@@ -61,7 +63,7 @@ class Algorithm:
         :return: Returns a 1D np array representing the generated route.
         """
         base_set = list()
-        for _ in range(num_days - 1):  # -1 because 0 added to end of all routes
+        for _ in range(num_days - 1):  # -1 because 0 added to end of routes
             base_set.append(0)
         for i in range(1, num_locations):
             base_set.append(i)
@@ -72,7 +74,8 @@ class Algorithm:
             selected_index = int(route_number / n_factorial)
             route[i] = base_set.pop(selected_index)
 
-            if i == 0: continue
+            if i == 0:
+                continue
 
             route_number %= n_factorial
             n_factorial /= i

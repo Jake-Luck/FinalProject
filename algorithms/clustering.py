@@ -20,13 +20,12 @@ class Clustering(Algorithm):
         """
         These are travelling salesmen solvers for use with clustering.
         """
-        # Brute force needs lambda for num_days (it has num_days as a parameter)
-        # because it can be used without clustering too.
+        # Brute force needs lambda for num_days (it has num_days as a
+        # parameter) because it can be used without clustering too.
         GREEDY = 0
         'Always chooses the shortest path from any given position.'
         BRUTE_FORCE = 1
         'Compares every possible route to find the best.'
-
 
     @staticmethod
     def _assign_nodes_to_centroid(coordinates: ndarray,
@@ -75,7 +74,8 @@ class Clustering(Algorithm):
         routing = Routing()
         match routing_method:
             case Clustering.RoutingMethods.BRUTE_FORCE:
-                routing_function = lambda _n, _g: routing.brute_force(_n, 1, _g)
+                routing_function = lambda _n, _g: routing.brute_force(
+                    _n, 1, _g)
             case Clustering.RoutingMethods.GREEDY:
                 routing_function = routing.greedy
             case _:

@@ -15,6 +15,7 @@ colour_set = [
     "#007fff", "#ff7f00", "#ff007f", "#7fff00", "#ff7f7f", "#7f7fff",
 ]
 
+
 class Plotting:
     """
     Provides static methods to display coordinates, clusters and

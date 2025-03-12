@@ -1,16 +1,22 @@
+"""
+Provides routing class that contains various routing algorithms.
+"""
+from algorithms.algorithm import Algorithm
+
 import numpy as np
 from numpy import ndarray
 
-from algorithms.algorithm import Algorithm
-
 
 class Routing(Algorithm):
+    """
+    Provides various routing algorithms as static methods.
+    """
     @staticmethod
     def greedy(num_locations: int,
-               graph: int):
+               graph: ndarray):
         """
-        A very simple solver for use with clustering, will not find a valid route
-        on its own. This is a conventional TSP solver.
+        A very simple solver for use with clustering, will not find a valid
+        route on its own. This is a conventional TSP solver.
         :param num_locations: The number of locations in the route.
         :param graph: The adjacency matrix for the graph.
         :return: 1D np array representing the route found.

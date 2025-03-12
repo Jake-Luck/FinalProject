@@ -19,12 +19,12 @@ def main():
     num_locations = 7
     num_days = 3
     Shorthands.brute_force(num_locations, num_days)
-    #brute_force_route = Shorthands.brute_force(num_locations, num_days)
-    #kmeans_route = Shorthands.k_means(num_locations, num_days)
-    #genetic_clustering_route = Shorthands.genetic_clustering(num_locations,
-    #                                                         num_days)
-    #genetic_centroid_clustering_route = \
-    #    Shorthands.genetic_centroid_clustering(num_locations, num_days)
+    # brute_force_route = Shorthands.brute_force(num_locations, num_days)
+    # kmeans_route = Shorthands.k_means(num_locations, num_days)
+    # genetic_clustering_route = Shorthands.genetic_clustering(num_locations,
+    #                                                          num_days)
+    # genetic_centroid_clustering_route = \
+    #     Shorthands.genetic_centroid_clustering(num_locations, num_days)
 
     data_collection_thread.join()
 
