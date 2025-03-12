@@ -18,20 +18,37 @@ NUMBER_OF_NODES = 25  # Max allowed by ORS api
 
 
 class DataGroups(Enum):
+    """
+    Provides values to access groups within h5 data file.
+    """
     graphs = 'graphs'
     algorithm_performance = 'algorithm_performance'
 
 
 class DataAttributes(Enum):
+    """
+    Provides values to access attributes within h5 data file.
+    """
     coordinates = 'coordinates'
 
 
 class DataHandling:
+    """
+    Provides various methods for creating/handling data. Uses hidden api key to
+    make calls to OpenRouteService.
+    """
     def __init__(self):
+        """
+        Sets up access to OpenRouteService API.
+        """
         self.api_key = hidden.apikey
         self.client = openrouteservice.Client(key=self.api_key)
 
     def collect_test_data(self) -> None:
+        """
+        Permanently loops, accessing the OpenRouteService API as often as
+        possible to collect data and save it to the project database.
+        """
         while True:
             datum = self.generate_test_datum()
             if not isinstance(datum, int):

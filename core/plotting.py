@@ -1,3 +1,8 @@
+"""
+Provides Plotting class to display coordinates, clusters and routes. Uses plotly
+to get a world map which plots are drawn onto
+"""
+
 import numpy as np
 from numpy import ndarray
 import plotly.graph_objects as go
@@ -10,158 +15,162 @@ colour_set = [
     "#007fff", "#ff7f00", "#ff007f", "#7fff00", "#ff7f7f", "#7f7fff",
 ]
 
-
-def display_coordinates(coordinates: ndarray,
-                        centre: ndarray | None = None) -> None:
+class Plotting:
     """
-    Uses plotly to display provided coordinates on a world map centred at a
-    given coordinate or the first item in coordinates.
-    :param coordinates: Coordinates to display.
-    :param centre: Point to centre the map on.
+    Provides static methods to display coordinates, clusters and
     """
-    if centre is None:
-        centre = coordinates[0]
+    @staticmethod
+    def display_coordinates(coordinates: ndarray,
+                            centre: ndarray | None = None) -> None:
+        """
+        Uses plotly to display provided coordinates on a world map centred at a
+        given coordinate or the first item in coordinates.
+        :param coordinates: Coordinates to display.
+        :param centre: Point to centre the map on.
+        """
+        if centre is None:
+            centre = coordinates[0]
 
-    figure = go.Figure(go.Scattermap(lat=coordinates[:, 0],
-                                     lon=coordinates[:, 1],
-                                     mode='markers',
-                                     marker=dict(
-                                         size=10,
-                                         color=colour_set[0]
-                                     )))
+        figure = go.Figure(go.Scattermap(lat=coordinates[:, 0],
+                                         lon=coordinates[:, 1],
+                                         mode='markers',
+                                         marker=dict(
+                                             size=10,
+                                             color=colour_set[0]
+                                         )))
 
-    figure.update_layout(autosize=True,
-                         map=dict(
-                             bearing=0,
-                             center=dict(
-                                 lat=centre[0],
-                                 lon=centre[1]
-                             ),
-                             pitch=0,
-                             zoom=11,
-                             style='carto-voyager'
-                         ))
+        figure.update_layout(autosize=True,
+                             map=dict(
+                                 bearing=0,
+                                 center=dict(
+                                     lat=centre[0],
+                                     lon=centre[1]
+                                 ),
+                                 pitch=0,
+                                 zoom=11,
+                                 style='carto-voyager'
+                             ))
 
-    figure.show()
+        figure.show()
 
+    @staticmethod
+    def display_route(route: ndarray,
+                      coordinates: ndarray,
+                      centre: ndarray | None = None) -> None:
+        """
+        Uses plotly to display provided route on a world map centred at a
+        given coordinate or the first item in coordinates.
+        :param route: Route to display.
+        :param coordinates: Coordinates to display.
+        :param centre: Point to centre the map on.
+        """
+        if centre is None:
+            centre = coordinates[0]
 
-def display_route(route: ndarray,
-                  coordinates: ndarray,
-                  centre: ndarray | None = None) -> None:
-    """
-    Uses plotly to display provided route on a world map centred at a
-    given coordinate or the first item in coordinates.
-    :param route: Route to display.
-    :param coordinates: Coordinates to display.
-    :param centre: Point to centre the map on.
-    """
-    if centre is None:
-        centre = coordinates[0]
+        route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
-    route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
+        # Add zeroes where necessary
+        route_per_day[0] = np.concatenate(([0], route_per_day[0]))
+        route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
+        print(route_per_day)
 
-    # Add zeroes where necessary
-    route_per_day[0] = np.concatenate(([0], route_per_day[0]))
-    route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
-    print(route_per_day)
+        coordinates_per_day = [coordinates[day] for day in route_per_day]
 
-    coordinates_per_day = [coordinates[day] for day in route_per_day]
-
-    figure = go.Figure(go.Scattermap(
-        mode="markers+lines",
-        lat=coordinates_per_day[0][:, 0],
-        lon=coordinates_per_day[0][:, 1],
-        marker=dict(
-            size=10,
-            color=colour_set[0]
-        )))
-
-    for i in range(1, len(coordinates_per_day)):
-        figure.add_trace(go.Scattermap(
+        figure = go.Figure(go.Scattermap(
             mode="markers+lines",
-            lat=coordinates_per_day[i][:, 0],
-            lon=coordinates_per_day[i][:, 1],
+            lat=coordinates_per_day[0][:, 0],
+            lon=coordinates_per_day[0][:, 1],
             marker=dict(
                 size=10,
-                color=colour_set[i]
+                color=colour_set[0]
             )))
 
-    figure.update_layout(
-        autosize=True,
-        map=dict(
-            bearing=0,
-            center=dict(
-                lat=centre[0],
-                lon=centre[1]
-            ),
-            pitch=0,
-            zoom=11,
-            style='carto-voyager'
-         ))
+        for i in range(1, len(coordinates_per_day)):
+            figure.add_trace(go.Scattermap(
+                mode="markers+lines",
+                lat=coordinates_per_day[i][:, 0],
+                lon=coordinates_per_day[i][:, 1],
+                marker=dict(
+                    size=10,
+                    color=colour_set[i]
+                )))
 
-    figure.show()
+        figure.update_layout(
+            autosize=True,
+            map=dict(
+                bearing=0,
+                center=dict(
+                    lat=centre[0],
+                    lon=centre[1]
+                ),
+                pitch=0,
+                zoom=11,
+                style='carto-voyager'
+             ))
 
-
-def display_clusters(coordinates: ndarray,
-                     cluster_assignments: ndarray,
-                     num_days: int,
-                     centroids: ndarray | None = None,
-                     centre: ndarray | None = None) -> None:
-    """
-    Uses plotly to display provided clusters on a world map centred at a
-    given coordinate or the first item in coordinates.
-    :param coordinates: Coordinates to display.
-    :param cluster_assignments: Cluster assigned to each coordinate.
-    :param num_days: Number of days/clusters.
-    :param centroids: Central points of clusters, useful for step by step
-    plotting of centroid best clustering (such as kmeans).
-    :param centre: Point to centre the map on.
-    """
-    if centre is None:
-        centre = coordinates[0]
-
-    clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
-
-    figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 0][0],
-                                     lon=coordinates[clusters[0], 1][0],
-                                     mode='markers',
-                                     marker=dict(
-                                          size=10,
-                                          color=colour_set[0]
-                                     )))
-
-    for i in range(1, num_days):
-        figure.add_scattermap(lat=coordinates[clusters[i], 0][0],
-                              lon=coordinates[clusters[i], 1][0],
-                              mode='markers',
-                              marker=dict(
-                                  size=10,
-                                  color=colour_set[i]
-                              ))
-
-    figure.update_layout(autosize=True,
-                         map=dict(
-                             bearing=0,
-                             center=dict(
-                                 lat=centre[0],
-                                 lon=centre[1]
-                             ),
-                             pitch=0,
-                             zoom=11,
-                             style='carto-voyager'
-                         ))
-
-    if centroids is None:
         figure.show()
-        return
 
-    for i in range(num_days):
-        figure.add_scattermap(lat=[centroids[i, 0]],
-                              lon=[centroids[i, 1]],
-                              mode='markers',
-                              marker=dict(
-                                  size=20,
-                                  color=colour_set[i],
-                                  opacity=0.5
-                              ))
-    figure.show()
+    @staticmethod
+    def display_clusters(coordinates: ndarray,
+                         cluster_assignments: ndarray,
+                         num_days: int,
+                         centroids: ndarray | None = None,
+                         centre: ndarray | None = None) -> None:
+        """
+        Uses plotly to display provided clusters on a world map centred at a
+        given coordinate or the first item in coordinates.
+        :param coordinates: Coordinates to display.
+        :param cluster_assignments: Cluster assigned to each coordinate.
+        :param num_days: Number of days/clusters.
+        :param centroids: Central points of clusters, useful for step by step
+        plotting of centroid best clustering (such as kmeans).
+        :param centre: Point to centre the map on.
+        """
+        if centre is None:
+            centre = coordinates[0]
+
+        clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
+
+        figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 0][0],
+                                         lon=coordinates[clusters[0], 1][0],
+                                         mode='markers',
+                                         marker=dict(
+                                              size=10,
+                                              color=colour_set[0]
+                                         )))
+
+        for i in range(1, num_days):
+            figure.add_scattermap(lat=coordinates[clusters[i], 0][0],
+                                  lon=coordinates[clusters[i], 1][0],
+                                  mode='markers',
+                                  marker=dict(
+                                      size=10,
+                                      color=colour_set[i]
+                                  ))
+
+        figure.update_layout(autosize=True,
+                             map=dict(
+                                 bearing=0,
+                                 center=dict(
+                                     lat=centre[0],
+                                     lon=centre[1]
+                                 ),
+                                 pitch=0,
+                                 zoom=11,
+                                 style='carto-voyager'
+                             ))
+
+        if centroids is None:
+            figure.show()
+            return
+
+        for i in range(num_days):
+            figure.add_scattermap(lat=[centroids[i, 0]],
+                                  lon=[centroids[i, 1]],
+                                  mode='markers',
+                                  marker=dict(
+                                      size=20,
+                                      color=colour_set[i],
+                                      opacity=0.5
+                                  ))
+        figure.show()
