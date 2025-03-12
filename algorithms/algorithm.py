@@ -1,7 +1,14 @@
+"""
+Provides algorithm base class, which each algorithm will inherit from.
+"""
 import numpy as np
 from numpy import ndarray  # For type hints
 
-class Algorithm():
+class Algorithm:
+    """
+    Algorithm base class. Provides methods for route evaluation and permutation
+    based route generation.
+    """
     @staticmethod
     def evaluate_route(route: ndarray,
                        num_days: int,

@@ -1,14 +1,21 @@
-from enum import Enum
+"""
+Provides Clustering base class and most clustering classes.
+"""
+from algorithms.algorithm import Algorithm
+from algorithms.routing import Routing
+from core.plotting import Plotting
 
+from enum import Enum
 import numpy as np
 from numpy import ndarray  # For type hints
 
-from algorithms.algorithm import Algorithm
-from algorithms.routing import Routing
-from core import plotting
-
 
 class Clustering(Algorithm):
+    """
+    Clustering algorithm base class, provides routing methods enum as well as
+    methods for assigning nodes to centroids and finding routes rome a given
+    cluster assignment.
+    """
     class RoutingMethods(Enum):
         """
         These are travelling salesmen solvers for use with clustering.
@@ -27,21 +34,32 @@ class Clustering(Algorithm):
         """
         Assigns each coordinate a cluster by computing distance from each
         coordinate to each centroid and choosing the smallest distance.
-
         :param coordinates: Coordinates of each location.
-        :param centroids: Coordinates of each cluster's centroid.
-        :return: A 1D array of shape (n). Represents the chosen clusters.
+        :param centroids: Coordinates of each cluster's centroid. 2d array of
+        shape (num_days, 2)
+        :return: Each location's cluster assignment. A 1D array of shape
+        (num_locations).
         """
         distances = np.linalg.norm(
             coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
         clusters = np.argmin(distances, axis=1)
         return clusters
 
-    def find_route_from_cluster_assignments(self,
-                                            cluster_assignments: ndarray,
+    @staticmethod
+    def find_route_from_cluster_assignments(cluster_assignments: ndarray,
                                             num_days: int,
                                             routing_method: RoutingMethods,
                                             graph: ndarray) -> ndarray:
+        """
+        Finds a route from the given cluster assignment using the given routing
+        method on each cluster and stitching the routes together.
+        :param cluster_assignments: Each location's cluster assignment. A 1D
+        array of shape (num_locations).
+        :param num_days: Number of days in the route.
+        :param routing_method: The routing method to use on each cluster.
+        :param graph: The graph input as an adjacency matrix.
+        :return: 1D ndarray representing the found route.
+        """
         clusters = list[ndarray]()
         for i in range(num_days):
             indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
@@ -56,9 +74,9 @@ class Clustering(Algorithm):
 
         routing = Routing()
         match routing_method:
-            case self.RoutingMethods.BRUTE_FORCE:
+            case Clustering.RoutingMethods.BRUTE_FORCE:
                 routing_function = lambda _n, _g: routing.brute_force(_n, 1, _g)
-            case self.RoutingMethods.GREEDY:
+            case Clustering.RoutingMethods.GREEDY:
                 routing_function = routing.greedy
             case _:
                 print("Invalid routing method, defaulting to greedy")
@@ -73,8 +91,15 @@ class Clustering(Algorithm):
 
 
 class KMeans(Clustering):
+    """
+    Class for K-Means clustering.
+    """
     def __init__(self,
                  show_stages: bool = False):
+        """
+        Initialises k-means class with given parameter.
+        :param show_stages: Whether to plot each k-means stage.
+        """
         self.show_stages = show_stages
 
     @staticmethod
@@ -82,9 +107,9 @@ class KMeans(Clustering):
                        k: int) -> ndarray:
         """
         Computes the mean coordinate of each cluster.
-        :param _coordinates: Coordinates of each cluster, a 2D array with shape
+        :param coordinates: Coordinates of each cluster, a 2D array with shape
         (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
-        :param _k: The number of clusters/means to compute.
+        :param k: The number of clusters/means to compute.
         :return: Returns a list of means, 1D array.
         """
         computed_means = np.empty((k, 2))
@@ -99,13 +124,12 @@ class KMeans(Clustering):
                       k: int,
                       n: int):
         """
-        Sorts n coordinates into k clusters.
-
+        Sorts n coordinates into k clusters via a K-Means approach.
         :param coordinates: Coordinates of each location.
         :param k: Number of clusters.
         :param n: Number of locations.
-        :param show_stages: Whether to plot clusters after each stage.
-        :return: A 1D array of shape (n). Represents the chosen clusters.
+        :return: Each location's cluster assignment. A 1D array of shape
+        (num_locations).
         """
         # Todo: Change so centre can be specified instead of assuming index 0
         coordinates = np.append(coordinates[1:], np.zeros((n-1, 1)), axis=1)
@@ -119,7 +143,7 @@ class KMeans(Clustering):
                 self._assign_nodes_to_centroid(coordinates, means))
 
             if self.show_stages:
-                plotting.display_clusters(coordinates, cluster_assignments, k,
+                Plotting.display_clusters(coordinates, cluster_assignments, k,
                                           means)
 
             if np.array_equal(cluster_assignments, previous_clusters):
