@@ -1,8 +1,6 @@
 """
 Program launching point
 """
-import h5py
-
 from core.algorithm_shorthands import Shorthands
 from core.data_handling import DataHandling
 

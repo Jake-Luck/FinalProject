@@ -22,12 +22,14 @@ class Plotting:
     """
     @staticmethod
     def display_coordinates(coordinates: ndarray,
-                            centre: ndarray | None = None) -> None:
+                            centre: ndarray | None = None,
+                            title: str | None = None) -> None:
         """
         Uses plotly to display provided coordinates on a world map centred at a
         given coordinate or the first item in coordinates.
         :param coordinates: Coordinates to display.
         :param centre: Point to centre the map on.
+        :param title: Title of the plot.
         """
         if centre is None:
             centre = coordinates[0]
@@ -40,6 +42,9 @@ class Plotting:
                                              size=10,
                                              color=colour_set[0]
                                          )))
+
+        if title is not None:
+            figure.update_layout(title=title)
 
         figure.update_layout(autosize=True,
                              map=dict(
@@ -58,13 +63,15 @@ class Plotting:
     @staticmethod
     def display_route(route: ndarray,
                       coordinates: ndarray,
-                      centre: ndarray | None = None) -> None:
+                      centre: ndarray | None = None,
+                      title: str | None = None) -> None:
         """
         Uses plotly to display provided route on a world map centred at a
         given coordinate or the first item in coordinates.
         :param route: Route to display.
         :param coordinates: Coordinates to display.
         :param centre: Point to centre the map on.
+        :param title: Title of the plot.
         """
         if centre is None:
             centre = coordinates[0]
@@ -98,6 +105,9 @@ class Plotting:
                     color=colour_set[i]
                 )))
 
+        if title is not None:
+            figure.update_layout(title=title)
+
         figure.update_layout(
             autosize=True,
             map=dict(
@@ -118,7 +128,8 @@ class Plotting:
                          cluster_assignments: ndarray,
                          num_days: int,
                          centroids: ndarray | None = None,
-                         centre: ndarray | None = None) -> None:
+                         centre: ndarray | None = None,
+                         title: str | None = None) -> None:
         """
         Uses plotly to display provided clusters on a world map centred at a
         given coordinate or the first item in coordinates.
@@ -128,6 +139,7 @@ class Plotting:
         :param centroids: Central points of clusters, useful for step by step
         plotting of centroid best clustering (such as kmeans).
         :param centre: Point to centre the map on.
+        :param title: Title of the plot.
         """
         if centre is None:
             centre = coordinates[0]
@@ -152,6 +164,9 @@ class Plotting:
                                       size=10,
                                       color=colour_set[i]
                                   ))
+
+        if title is not None:
+            figure.update_layout(title=title)
 
         figure.update_layout(autosize=True,
                              map=dict(

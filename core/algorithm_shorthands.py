@@ -9,13 +9,9 @@ from algorithms.clustering import KMeans, Clustering
 from algorithms.genetic import GeneticClustering, GeneticCentroidClustering
 from algorithms.routing import Routing
 
-import h5py
-import numpy as np
 from numpy import ndarray  # For type hints
-import random
 
 
-# noinspection PyPep8
 class Shorthands:
     """
     Provides shorthand methods for running different algorithm with
@@ -63,8 +59,11 @@ class Shorthands:
 
         route = Routing.brute_force(num_locations, num_days, graph)
 
+        evaluation = Routing.evaluate_route(route, num_days, graph)
+        title = f"Bruteforce: {evaluation}"
+
         if plot:
-            Plotting.display_route(route, coordinates)
+            Plotting.display_route(route, coordinates, title=title)
         return route
 
     @staticmethod
@@ -115,8 +114,11 @@ class Shorthands:
         route = genetic_algorithm.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph)
 
+        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph)
+        title = f"Genetic Clustering + Greedy: {evaluation}"
+
         if plot:
-            Plotting.display_route(route, coordinates)
+            Plotting.display_route(route, coordinates, title=title)
         return route
 
     @staticmethod
@@ -165,8 +167,11 @@ class Shorthands:
         route = genetic_algorithm.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph)
 
+        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph)
+        title = f"Genetic Centroid Clustering + Greedy: {evaluation}"
+
         if plot:
-            Plotting.display_route(route, coordinates)
+            Plotting.display_route(route, coordinates, title=title)
         return route
 
     @staticmethod
@@ -198,6 +203,9 @@ class Shorthands:
         route = kmeans.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph)
 
+        evaluation = kmeans.evaluate_route(route, num_days, graph)
+        title = f"K-Means + Greedy: {evaluation}"
+
         if plot:
-            Plotting.display_route(route, coordinates)
+            Plotting.display_route(route, coordinates, title=title)
         return route
