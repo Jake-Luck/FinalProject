@@ -199,6 +199,23 @@ class DataHandling:
         return durations
 
     @staticmethod
+    def get_random_datum() -> tuple:
+        """
+        Gets a random graph and its coordinates.
+        :return: A tuple (graph, coordinates).
+        """
+        with h5py.File('data/training_data.h5', 'r') as f:
+            graphs = f[DataGroups.graphs.value]
+            chosen_index = random.randrange(len(graphs))
+            graph_data = graphs[str(chosen_index)]
+            chosen_graph = np.array(graph_data, copy=True, dtype=float)
+            chosen_coordinates = np.array(
+                graph_data.attrs[DataAttributes.coordinates.value],
+                copy=True, dtype=float)
+
+        return chosen_graph, chosen_coordinates
+
+    @staticmethod
     def reset_database() -> None:
         """
         In case of emergency (I mess something up and corrupt the file),

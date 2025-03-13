@@ -2,7 +2,7 @@
 Provides Shorthands class to easily run different algorithms with
 random/default inputs.
 """
-from core.data_handling import DataAttributes, DataGroups
+from core.data_handling import DataHandling
 from core.plotting import Plotting
 
 from algorithms.clustering import KMeans, Clustering
@@ -40,15 +40,7 @@ class Shorthands:
             return graph[:num_locations], coordinates[:num_locations]
 
         # Chooses a random graph from saved data.
-        with h5py.File('data/training_data.h5', 'r') as f:
-            graphs = f[DataGroups.graphs.value]
-            chosen_index = random.randrange(len(graphs))
-            graph_data = graphs[chosen_index]
-            chosen_graph = np.array(graph_data, copy=True, dtype=float)
-            chosen_coordinates = np.array(
-                graph_data.attrs[DataAttributes.coordinates],
-                copy=True, dtype=float)
-        return chosen_graph[:num_locations], chosen_coordinates[:num_locations]
+        return DataHandling.get_random_datum()
 
     @staticmethod
     def brute_force(num_locations: int,
@@ -86,7 +78,7 @@ class Shorthands:
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
-                    Clustering.RoutingMethods.BRUTE_FORCE,
+                    Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
             seed: int | None = None) -> ndarray:
@@ -138,7 +130,7 @@ class Shorthands:
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
-                    Clustering.RoutingMethods.BRUTE_FORCE,
+                    Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
             seed: int | None = None) -> ndarray:
@@ -183,7 +175,7 @@ class Shorthands:
                 graph: ndarray | None = None,
                 coordinates: ndarray | None = None,
                 routing_algorithm: Clustering.RoutingMethods =
-                        Clustering.RoutingMethods.BRUTE_FORCE,
+                        Clustering.RoutingMethods.GREEDY,
                 plot: bool = True) -> ndarray:
         """
         Shorthand for performing k-means clustering and performing routing
