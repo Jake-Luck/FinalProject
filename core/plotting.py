@@ -35,6 +35,7 @@ class Plotting:
         figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
                                          lon=coordinates[:, 0],
                                          mode='markers',
+                                         name="Locations",
                                          marker=dict(
                                              size=10,
                                              color=colour_set[0]
@@ -80,6 +81,7 @@ class Plotting:
             mode="markers+lines",
             lat=coordinates_per_day[0][:, 1],
             lon=coordinates_per_day[0][:, 0],
+            name="Day 1",
             marker=dict(
                 size=10,
                 color=colour_set[0]
@@ -90,6 +92,7 @@ class Plotting:
                 mode="markers+lines",
                 lat=coordinates_per_day[i][:, 1],
                 lon=coordinates_per_day[i][:, 0],
+                name=f"Day {i+1}",
                 marker=dict(
                     size=10,
                     color=colour_set[i]
@@ -134,6 +137,7 @@ class Plotting:
         figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 1][0],
                                          lon=coordinates[clusters[0], 0][0],
                                          mode='markers',
+                                         name="Day 1",
                                          marker=dict(
                                               size=10,
                                               color=colour_set[0]
@@ -143,6 +147,7 @@ class Plotting:
             figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
                                   lon=coordinates[clusters[i], 0][0],
                                   mode='markers',
+                                  name=f"Day {i+1}",
                                   marker=dict(
                                       size=10,
                                       color=colour_set[i]
@@ -168,6 +173,7 @@ class Plotting:
             figure.add_scattermap(lat=[centroids[i, 1]],
                                   lon=[centroids[i, 0]],
                                   mode='markers',
+                                  name=f"Centroid {i+1}",
                                   marker=dict(
                                       size=20,
                                       color=colour_set[i],
