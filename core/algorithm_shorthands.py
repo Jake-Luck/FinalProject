@@ -41,7 +41,7 @@ class Shorthands:
 
         # Chooses a random graph from saved data.
         with h5py.File('data/training_data.h5', 'r') as f:
-            graphs = f[DataGroups.graphs]
+            graphs = f[DataGroups.graphs.value]
             chosen_index = random.randrange(len(graphs))
             graph_data = graphs[chosen_index]
             chosen_graph = np.array(graph_data, copy=True, dtype=float)
