@@ -32,8 +32,8 @@ class Plotting:
         if centre is None:
             centre = coordinates[0]
 
-        figure = go.Figure(go.Scattermap(lat=coordinates[:, 0],
-                                         lon=coordinates[:, 1],
+        figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
+                                         lon=coordinates[:, 0],
                                          mode='markers',
                                          marker=dict(
                                              size=10,
@@ -44,8 +44,8 @@ class Plotting:
                              map=dict(
                                  bearing=0,
                                  center=dict(
-                                     lat=centre[0],
-                                     lon=centre[1]
+                                     lat=centre[1],
+                                     lon=centre[0]
                                  ),
                                  pitch=0,
                                  zoom=11,
@@ -73,14 +73,13 @@ class Plotting:
         # Add zeroes where necessary
         route_per_day[0] = np.concatenate(([0], route_per_day[0]))
         route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
-        print(route_per_day)
 
         coordinates_per_day = [coordinates[day] for day in route_per_day]
 
         figure = go.Figure(go.Scattermap(
             mode="markers+lines",
-            lat=coordinates_per_day[0][:, 0],
-            lon=coordinates_per_day[0][:, 1],
+            lat=coordinates_per_day[0][:, 1],
+            lon=coordinates_per_day[0][:, 0],
             marker=dict(
                 size=10,
                 color=colour_set[0]
@@ -89,8 +88,8 @@ class Plotting:
         for i in range(1, len(coordinates_per_day)):
             figure.add_trace(go.Scattermap(
                 mode="markers+lines",
-                lat=coordinates_per_day[i][:, 0],
-                lon=coordinates_per_day[i][:, 1],
+                lat=coordinates_per_day[i][:, 1],
+                lon=coordinates_per_day[i][:, 0],
                 marker=dict(
                     size=10,
                     color=colour_set[i]
@@ -101,8 +100,8 @@ class Plotting:
             map=dict(
                 bearing=0,
                 center=dict(
-                    lat=centre[0],
-                    lon=centre[1]
+                    lat=centre[1],
+                    lon=centre[0]
                 ),
                 pitch=0,
                 zoom=11,
@@ -132,8 +131,8 @@ class Plotting:
 
         clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
 
-        figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 0][0],
-                                         lon=coordinates[clusters[0], 1][0],
+        figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 1][0],
+                                         lon=coordinates[clusters[0], 0][0],
                                          mode='markers',
                                          marker=dict(
                                               size=10,
@@ -141,8 +140,8 @@ class Plotting:
                                          )))
 
         for i in range(1, num_days):
-            figure.add_scattermap(lat=coordinates[clusters[i], 0][0],
-                                  lon=coordinates[clusters[i], 1][0],
+            figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
+                                  lon=coordinates[clusters[i], 0][0],
                                   mode='markers',
                                   marker=dict(
                                       size=10,
@@ -153,8 +152,8 @@ class Plotting:
                              map=dict(
                                  bearing=0,
                                  center=dict(
-                                     lat=centre[0],
-                                     lon=centre[1]
+                                     lat=centre[1],
+                                     lon=centre[0]
                                  ),
                                  pitch=0,
                                  zoom=11,
@@ -166,8 +165,8 @@ class Plotting:
             return
 
         for i in range(num_days):
-            figure.add_scattermap(lat=[centroids[i, 0]],
-                                  lon=[centroids[i, 1]],
+            figure.add_scattermap(lat=[centroids[i, 1]],
+                                  lon=[centroids[i, 0]],
                                   mode='markers',
                                   marker=dict(
                                       size=20,
