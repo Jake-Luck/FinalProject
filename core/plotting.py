@@ -78,6 +78,8 @@ class Plotting:
 
         route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
+        if len(route_per_day) == 0 or len(route_per_day[0]) == 0:
+            route_per_day = [route.tolist()]
         # Add zeroes where necessary
         route_per_day[0] = np.concatenate(([0], route_per_day[0]))
         route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
