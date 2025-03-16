@@ -122,7 +122,8 @@ class GeneticClustering(Genetic, Clustering):
                              population: ndarray,
                              num_days: int,
                              routing_method: Clustering.RoutingMethods,
-                             graph: ndarray) -> ndarray:
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
         """
         Evaluates the fitness of a given population. This fitness is calculated
         by evaluating the route that's found from passing each individual's
@@ -131,19 +132,21 @@ class GeneticClustering(Genetic, Clustering):
         :param num_days: The number of days in the route.
         :param routing_method: The routing method to use on each cluster.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :return: 1D ndarray representing each individual's fitness.
         """
         evaluations = np.zeros(self.population_size)
         for individual in range(self.population_size):
             route = self.find_route_from_cluster_assignments(
-                population[individual], num_days, routing_method, graph
-            )
+                population[individual], num_days, routing_method, graph,
+                durations)
             evaluations[individual] = self.evaluate_route(route, num_days,
-                                                          graph)
+                                                          graph, durations)
         return evaluations
 
     def find_clusters(self,
                       graph: ndarray,
+                      durations: ndarray,
                       num_locations: int,
                       num_days: int,
                       route_length: int,
@@ -154,6 +157,7 @@ class GeneticClustering(Genetic, Clustering):
         genetic algorithm approach. Genome contains the assignment of each
         location to a cluster.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param route_length: The length of the route.
@@ -185,7 +189,8 @@ class GeneticClustering(Genetic, Clustering):
 
         for generation_number in range(self.num_generations):
             evaluations = self._evaluate_population(population, num_days,
-                                                    routing_method, graph)
+                                                    routing_method, graph,
+                                                    durations)
 
             index1, index2 = np.argpartition(evaluations, 2)[:2]
             parent1 = population[index1]
@@ -288,7 +293,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
                              population: ndarray,
                              num_days: int,
                              routing_method: Clustering.RoutingMethods,
-                             graph: ndarray) -> ndarray:
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
         """
         Evaluates the fitness of a given population. This fitness is calculated
         by evaluating the route that's found from passing each individual's
@@ -298,6 +304,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
         :param num_days: The number of days in the route.
         :param routing_method: The routing method to use on each cluster.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :return: 1D ndarray representing each individual's fitness.
         """
         evaluations = np.zeros(self.population_size)
@@ -306,15 +313,16 @@ class GeneticCentroidClustering(Genetic, Clustering):
                                                       population[individual])
 
             route = self.find_route_from_cluster_assignments(
-                clusters, num_days, routing_method, graph)
+                clusters, num_days, routing_method, graph, durations)
 
             evaluations[individual] = self.evaluate_route(
-                route, num_days, graph)
+                route, num_days, graph, durations)
         return evaluations
 
     def find_clusters(self,
                       coordinates: ndarray,
                       graph: ndarray,
+                      durations: ndarray,
                       num_days: int,
                       routing_method: Clustering.RoutingMethods) -> ndarray:
         """
@@ -323,6 +331,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
         each class.
         :param coordinates: Coordinates of each location.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param num_days: The number of days in the route.
         :param routing_method: The routing method to use on each cluster.
         :return: Each location's cluster assignment. A 1D array of shape
@@ -356,7 +365,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
         for generation_number in range(self.num_generations):
             self._evaluate_population(cluster_coordinates, population,
-                                      num_days, routing_method, graph)
+                                      num_days, routing_method, graph,
+                                      durations)
 
             index1, index2 = np.argpartition(evaluations, 2)[:2]
             parent1 = population[index1]

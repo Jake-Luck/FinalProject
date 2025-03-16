@@ -13,13 +13,15 @@ class Algorithm:
     @staticmethod
     def evaluate_route(route: ndarray,
                        num_days: int,
-                       graph: ndarray) -> float:
+                       graph: ndarray,
+                       durations: ndarray) -> float:
         """
         Evaluates a given route using the time taken and deviation between day
         lengths.
         :param route: Route to be evaluated.
         :param num_days: Number of days in the route.
         :param graph: Graph as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :return: Route evaluation
         """
         evaluation = 0.0
@@ -32,6 +34,7 @@ class Algorithm:
                 return float('inf')
 
             evaluation += graph[previous_index][index]
+            evaluation += durations[index]
             evaluation_per_day[current_day] += graph[previous_index][index]
 
             if index == 0:

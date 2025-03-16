@@ -30,6 +30,7 @@ class DataAttributes(Enum):
     Provides values to access attributes within h5 data file.
     """
     coordinates = 'coordinates'
+    durations = 'durations'
 
 
 class DataHandling:
@@ -63,8 +64,7 @@ class DataHandling:
                 print("Restarting...")
 
     def create_graph(self,
-                     coordinates: ndarray,
-                     durations: ndarray) -> ndarray | int:
+                     coordinates: ndarray) -> ndarray | int:
         """
         Takes a set of coordinates and converts them into a complete digraph,
         with each edge being the time taken to travel by car.
@@ -72,8 +72,6 @@ class DataHandling:
         Time taken is gathered using openrouteservice API.
 
         :param coordinates: ndarray of coordinates, shape=(num_locations, 2).
-        :param durations: The amount of time to be taken at each location,
-        shape=num_locations.
         :return: Graph as an ndarray, shape=(num_locations, num_locations).
         If API call fails an int will be returned.
         """
@@ -81,13 +79,11 @@ class DataHandling:
         if isinstance(graph, int):
             return graph
 
-        number_of_locations = len(graph)
-        for i in range(number_of_locations):
-            for j in range(number_of_locations):
-                if i == j:
-                    graph[j, i] = np.finfo(np.float32).max
-                # Converts graph to minutes before adding durations
-                graph[j, i] = math.ceil((graph[j][i] / 60) + durations[i])
+        # Convert graph to minutes
+        graph = np.ceil(graph / 60)
+
+        # Sets cost of travel to self to maximum possible value
+        np.fill_diagonal(graph, np.finfo(np.float32).max)
 
         return graph
 
@@ -114,12 +110,12 @@ class DataHandling:
             coordinates = self.generate_coordinates(centre)
         if durations is None:
             durations = self.generate_durations()
-        graph = self.create_graph(coordinates, durations)
+        graph = self.create_graph(coordinates)
 
         if isinstance(graph, int):
             return graph
 
-        return [graph, coordinates]
+        return [graph, coordinates, durations]
 
     def openrouteservice_api_call(self,
                                   coordinate_array: ndarray) -> ndarray | int:
@@ -229,7 +225,7 @@ class DataHandling:
             f.create_group(DataGroups.algorithm_performance.value)
 
     @staticmethod
-    def save_test_datum(datum: tuple,
+    def save_test_datum(datum: list[ndarray],
                         group: DataGroups):
         """
         Saves a training datum to the hdf5 file.
@@ -245,3 +241,5 @@ class DataHandling:
                                                        dtype=np.float64))
 
             graph.attrs[DataAttributes.coordinates.value] = datum[1]
+            graph.attrs[DataAttributes.durations.value] = datum[2]
+

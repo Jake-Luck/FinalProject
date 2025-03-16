@@ -2,6 +2,8 @@
 Provides Shorthands class to easily run different algorithms with
 random/default inputs.
 """
+import numpy as np
+
 from core.data_handling import DataHandling
 from core.plotting import Plotting
 
@@ -22,18 +24,25 @@ class Shorthands:
     @staticmethod
     def _setup_inputs(num_locations: int,
                       graph: ndarray | None = None,
+                      durations: ndarray | None = None,
                       coordinates: ndarray | None = None) -> tuple:
         """
         Sets up our inputs so that if either our graph or coordinates aren't
         provided, random ones will be chosen.
         :param graph: The graph input to use if given. If not, a randomly
         chosen graph & coordinates will be used.
+        :param durations: Duration spent at each location. If not given, random
+        durations will be generated.
         :param coordinates: The coordinates input to use if given. If not, a
         randomly chosen graph & coordinates will be used.
         """
         # If graph provided, but no coordinates, cannot plot
+        if durations is None:
+            durations = np.random.randint(1, 96, num_locations) * 15
+            durations[0] = 0
+
         if graph is not None and coordinates is not None:
-            return graph[:num_locations], coordinates[:num_locations]
+            return graph[:num_locations], coordinates[:num_locations], durations
 
         # Chooses a random graph from saved data.
         return DataHandling.get_random_datum()
@@ -42,6 +51,7 @@ class Shorthands:
     def brute_force(num_locations: int,
                     num_days: int,
                     graph: ndarray | None = None,
+                    durations: ndarray | None = None,
                     coordinates: ndarray | None = None,
                     plot: bool = True) -> ndarray:
         """
@@ -50,16 +60,17 @@ class Shorthands:
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param coordinates: Coordinates of each location in the graph.
         :param plot: Whether to plot the final route.
         :return: Returns a 1D ndarray representing the found route.
         """
-        graph, coordinates = Shorthands._setup_inputs(num_locations, graph,
-                                                      coordinates)
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
 
-        route = Routing.brute_force(num_locations, num_days, graph)
+        route = Routing.brute_force(num_locations, num_days, graph, durations)
 
-        evaluation = Routing.evaluate_route(route, num_days, graph)
+        evaluation = Routing.evaluate_route(route, num_days, graph, durations)
         title = f"Bruteforce: {evaluation}"
 
         if plot:
@@ -71,6 +82,7 @@ class Shorthands:
             num_locations: int,
             num_days: int,
             graph: ndarray | None = None,
+            durations: ndarray | None = None,
             coordinates: ndarray | None = None,
             num_generations: int = 1000,
             population_size: int = 100,
@@ -88,6 +100,7 @@ class Shorthands:
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param coordinates: Coordinates of each location in the graph.
         :param num_generations: Number of generations to run.
         :param population_size: Number of individuals in each population.
@@ -100,21 +113,22 @@ class Shorthands:
         :param seed: Specified seed for random number generators.
         :return: Returns a 1D ndarray representing the found route.
         """
-        graph, coordinates = Shorthands._setup_inputs(num_locations, graph,
-                                                      coordinates)
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
         route_length = num_locations + num_days - 1
 
         genetic_algorithm = GeneticClustering(
             num_generations, population_size, crossover_probability,
             mutation_probability, generations_per_update, plot, seed)
         cluster_assignments = genetic_algorithm.find_clusters(
-            graph, num_locations, num_days, route_length, routing_algorithm,
-            coordinates)
+            graph, durations, num_locations, num_days, route_length,
+            routing_algorithm, coordinates)
 
         route = genetic_algorithm.find_route_from_cluster_assignments(
-            cluster_assignments, num_days, routing_algorithm, graph)
+            cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph)
+        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph,
+                                                      durations)
         title = f"Genetic Clustering + Greedy: {evaluation}"
 
         if plot:
@@ -126,6 +140,7 @@ class Shorthands:
             num_locations: int,
             num_days: int,
             graph: ndarray | None = None,
+            durations: ndarray | None = None,
             coordinates: ndarray | None = None,
             num_generations: int = 1000,
             population_size: int = 100,
@@ -143,6 +158,7 @@ class Shorthands:
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param coordinates: Coordinates of each location in the graph.
         :param num_generations: Number of generations to run.
         :param population_size: Number of individuals in each population.
@@ -155,19 +171,20 @@ class Shorthands:
         :param seed: Specified seed for random number generators.
         :return: Returns a 1D ndarray representing the found route.
         """
-        graph, coordinates = Shorthands._setup_inputs(num_locations, graph,
-                                                      coordinates)
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
 
         genetic_algorithm = GeneticCentroidClustering(
             num_generations, population_size, crossover_probability,
             mutation_probability, generations_per_update, plot, seed)
         cluster_assignments = genetic_algorithm.find_clusters(
-            coordinates, graph, num_days, routing_algorithm)
+            coordinates, graph, durations, num_days, routing_algorithm)
 
         route = genetic_algorithm.find_route_from_cluster_assignments(
-            cluster_assignments, num_days, routing_algorithm, graph)
+            cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph)
+        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph,
+                                                      durations)
         title = f"Genetic Centroid Clustering + Greedy: {evaluation}"
 
         if plot:
@@ -178,10 +195,12 @@ class Shorthands:
     def k_means(num_locations: int,
                 num_days: int,
                 graph: ndarray | None = None,
+                durations: ndarray | None = None,
                 coordinates: ndarray | None = None,
                 routing_algorithm: Clustering.RoutingMethods =
                         Clustering.RoutingMethods.GREEDY,
-                plot: bool = True) -> ndarray:
+                plot: bool = True,
+                show_stages: bool = False) -> ndarray:
         """
         Shorthand for performing k-means clustering and performing routing
         using those clusters. Unless **both** graph and coordinates are
@@ -189,21 +208,22 @@ class Shorthands:
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :param coordinates: Coordinates of each location in the graph.
         :param routing_algorithm: The routing algorithm to use with clustering.
         :param plot: Whether to plot each k-means step and the final route.
         :return: Returns a 1D ndarray representing the found route.
         """
-        graph, coordinates = Shorthands._setup_inputs(num_locations, graph,
-                                                      coordinates)
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
 
-        kmeans = KMeans(show_stages=True)
+        kmeans = KMeans(show_stages=show_stages)
         cluster_assignments = kmeans.find_clusters(coordinates, num_days,
                                                    num_locations)
         route = kmeans.find_route_from_cluster_assignments(
-            cluster_assignments, num_days, routing_algorithm, graph)
+            cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = kmeans.evaluate_route(route, num_days, graph)
+        evaluation = kmeans.evaluate_route(route, num_days, graph, durations)
         title = f"K-Means + Greedy: {evaluation}"
 
         if plot:

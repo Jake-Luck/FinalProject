@@ -48,7 +48,8 @@ class Clustering(Algorithm):
     def find_route_from_cluster_assignments(cluster_assignments: ndarray,
                                             num_days: int,
                                             routing_method: RoutingMethods,
-                                            graph: ndarray) -> ndarray:
+                                            graph: ndarray,
+                                            durations: ndarray) -> ndarray:
         """
         Finds a route from the given cluster assignment using the given routing
         method on each cluster and stitching the routes together.
@@ -57,6 +58,7 @@ class Clustering(Algorithm):
         :param num_days: Number of days in the route.
         :param routing_method: The routing method to use on each cluster.
         :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
         :return: 1D ndarray representing the found route.
         """
         clusters = list[ndarray]()
@@ -68,25 +70,27 @@ class Clustering(Algorithm):
         # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
         # Which can they be used to access graphs
         graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
+        durations_each_day = [durations[indexes] for indexes in clusters]
 
         route = np.empty(0, dtype=int)
 
         routing = Routing()
         match routing_method:
             case Clustering.RoutingMethods.BRUTE_FORCE:
-                routing_function = lambda _n, _g: routing.brute_force(
-                    _n, 1, _g)
+                routing_function = routing.brute_force
             case Clustering.RoutingMethods.GREEDY:
                 routing_function = routing.greedy
             case _:
                 print("Invalid routing method, defaulting to greedy")
                 routing_function = routing.greedy
 
-        for sub_graph, cluster_index in zip(graphs, clusters):
+        for sub_graph, cluster, sub_durations in zip(graphs, clusters,
+                                                     durations_each_day):
             n = sub_graph.shape[0]
-            sub_route = routing_function(n, sub_graph)
+            sub_route = routing_function(n, 1, sub_graph,
+                                         sub_durations)
 
-            route = np.concatenate((route, cluster_index[sub_route]))
+            route = np.concatenate((route, cluster[sub_route]))
         return route
 
 
