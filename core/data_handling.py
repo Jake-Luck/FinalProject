@@ -195,11 +195,14 @@ class DataHandling:
         return durations
 
     @staticmethod
-    def get_random_datum() -> tuple:
+    def get_random_datum(seed: int | None = None) -> tuple:
         """
         Gets a random graph and its coordinates.
+        :seed: Random number generator seed.
         :return: A tuple (graph, coordinates).
         """
+        if seed is not None:
+            random.seed(seed)
         with h5py.File('data/training_data.h5', 'r') as f:
             graphs = f[DataGroups.graphs.value]
             chosen_index = random.randrange(len(graphs))

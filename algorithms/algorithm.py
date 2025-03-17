@@ -14,7 +14,7 @@ class Algorithm:
     def evaluate_route(route: ndarray,
                        num_days: int,
                        graph: ndarray,
-                       durations: ndarray) -> float:
+                       durations: ndarray) -> tuple[float, float, ndarray]:
         """
         Evaluates a given route using the time taken and deviation between day
         lengths.
@@ -31,7 +31,8 @@ class Algorithm:
         # Sum durations in route
         for index in route:
             if previous_index == index:
-                return float('inf')
+                evaluation_per_day[:] = float('inf')
+                return float('inf'), float('inf'), evaluation_per_day
 
             evaluation += graph[previous_index][index]
             evaluation += durations[index]
@@ -42,9 +43,10 @@ class Algorithm:
             previous_index = index
 
         # Multiply durations by 1 + standard deviation of time spent each day
-        evaluation *= 1 + np.std(evaluation_per_day)
+        standard_deviation = float(np.std(evaluation_per_day))
+        evaluation *= 1 + standard_deviation
 
-        return evaluation
+        return evaluation, standard_deviation, evaluation_per_day
 
     @staticmethod
     # TODO: Move base_set construction outside of method. In case generate

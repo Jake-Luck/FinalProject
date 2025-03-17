@@ -140,8 +140,8 @@ class GeneticClustering(Genetic, Clustering):
             route = self.find_route_from_cluster_assignments(
                 population[individual], num_days, routing_method, graph,
                 durations)
-            evaluations[individual] = self.evaluate_route(route, num_days,
-                                                          graph, durations)
+            evaluations[individual], _, _ = self.evaluate_route(
+                route, num_days, graph, durations)
         return evaluations
 
     def find_clusters(self,
@@ -198,8 +198,10 @@ class GeneticClustering(Genetic, Clustering):
 
             if self.generations_per_update is not None \
                     and generation_number % self.generations_per_update == 0:
-                print(f"Generation {generation_number} completed, best "
-                      f"evaluation: {evaluations[index1]}")
+                progress = 100 * generation_number/self.num_generations
+                print(f"Cluster evolution {int(progress)}% complete: "
+                      f"{generation_number}/{self.num_generations} completed. "
+                      f"Best evaluation: {evaluations[index1]}")
 
                 if self.plotting:
                     Plotting.display_clusters(coordinates, parent1, num_days)
@@ -224,7 +226,8 @@ class GeneticClustering(Genetic, Clustering):
                     if mutate:
                         population[i][j] = random.randrange(num_days)
 
-        print(f"Evolution completed, best evaluation: {evaluations[index1]}")
+        print(f"Cluster evolution complete. "
+              f"Best evaluation: {evaluations[index1]}")
         return parent1
 
 
@@ -315,9 +318,23 @@ class GeneticCentroidClustering(Genetic, Clustering):
             route = self.find_route_from_cluster_assignments(
                 clusters, num_days, routing_method, graph, durations)
 
-            evaluations[individual] = self.evaluate_route(
+            evaluations[individual], _, _ = self.evaluate_route(
                 route, num_days, graph, durations)
         return evaluations
+
+    def _generate_random_centroids(self,
+                                   num_days: int,
+                                   centre: ndarray):
+        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
+                                                   centre[0] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
+        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
+                                                   centre[1] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
+
+        return np.dstack((centroid_x_coordinates, centroid_y_coordinates))
 
     def find_clusters(self,
                       coordinates: ndarray,
@@ -345,17 +362,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
         evaluations[:] = float('inf')
 
         # Randomly Assign Centroids
-        centre = coordinates[0]
-        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
-                                                   centre[0] + 0.1,
-                                                   size=(self.population_size,
-                                                         num_days))
-        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
-                                                   centre[1] + 0.1,
-                                                   size=(self.population_size,
-                                                         num_days))
-
-        population = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
+        centre = coordinates.mean(axis=0)
+        population = self._generate_random_centroids(num_days, centre)
         cluster_coordinates = np.array(coordinates[1:], copy=True)
 
         # Assign these before loop just in case num_generations is 0 and these
@@ -364,9 +372,9 @@ class GeneticCentroidClustering(Genetic, Clustering):
         index1 = 0
 
         for generation_number in range(self.num_generations):
-            self._evaluate_population(cluster_coordinates, population,
-                                      num_days, routing_method, graph,
-                                      durations)
+            evaluations = self._evaluate_population(
+                cluster_coordinates, population, num_days, routing_method,
+                graph, durations)
 
             index1, index2 = np.argpartition(evaluations, 2)[:2]
             parent1 = population[index1]
@@ -374,15 +382,27 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
             if (self.generations_per_update is not None
                     and generation_number % self.generations_per_update == 0):
-                print(f"Generation {generation_number} completed, best "
-                      f"evaluation: {evaluations[index1]}")
+                progress = 100 * generation_number/self.num_generations
+                print(f"Centroid evolution {int(progress)}% complete: "
+                      f"{generation_number}/{self.num_generations} completed. "
+                      f"Best evaluation: {evaluations[index1]}")
 
                 if self.plotting:
                     cluster_assignments = self._assign_nodes_to_centroid(
                         cluster_coordinates, parent1)
+
+                    centre = coordinates.mean(axis=0)
                     Plotting.display_clusters(
                         cluster_coordinates, cluster_assignments, num_days,
-                        parent1)
+                        parent1, centre)
+
+            if float('inf') in (evaluations[index1], evaluations[index2]):
+                population = self._generate_random_centroids(num_days, centre)
+                if evaluations[index1] != float('inf'):
+                    population[0] = parent1
+                if evaluations[index2] != float('inf'):
+                    population[0] = parent2
+                continue
 
             # Crossover
             population[0] = parent1
@@ -393,8 +413,9 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
                 # Generate random individual (increases genetic diversity)
                 if not use_crossover:
-                    np.random.uniform(centre[1] - 0.1, centre[1] + 0.1,
-                                      (num_days, 2))
+                    individual = np.random.uniform(centre[1] - 0.1,
+                                                   centre[1] + 0.1,
+                                                   (num_days, 2))
                     continue
 
                 population[individual] = self._crossover(parent1, parent2)
@@ -407,7 +428,8 @@ class GeneticCentroidClustering(Genetic, Clustering):
                         #  below format:
                         population[individual, cluster] += mutation
 
-        print(f"Evolution completed, best evaluation: {evaluations[index1]}")
+        print(f"Centroid evolution complete. "
+              f"Best evaluation: {evaluations[index1]}")
         cluster_assignments = self._assign_nodes_to_centroid(
             cluster_coordinates, parent1)
 

@@ -147,8 +147,9 @@ class KMeans(Clustering):
                 self._assign_nodes_to_centroid(coordinates, means))
 
             if self.show_stages:
+                centre = coordinates.mean(axis=0)
                 Plotting.display_clusters(coordinates, cluster_assignments, k,
-                                          means)
+                                          means, centre)
 
             if np.array_equal(cluster_assignments, previous_clusters):
                 break

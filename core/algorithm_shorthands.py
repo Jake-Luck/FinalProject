@@ -20,7 +20,6 @@ class Shorthands:
     random/default inputs. Useful for demonstrating and quickly running
     algorithms.
     """
-
     @staticmethod
     def _setup_inputs(num_locations: int,
                       graph: ndarray | None = None,
@@ -70,11 +69,14 @@ class Shorthands:
 
         route = Routing.brute_force(num_locations, num_days, graph, durations)
 
-        evaluation = Routing.evaluate_route(route, num_days, graph, durations)
-        title = f"Bruteforce: {evaluation}"
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
+        title = f"Bruteforce: {evaluation}, σ={std_deviation}"
 
+        centre = coordinates.mean(axis=0)
         if plot:
-            Plotting.display_route(route, coordinates, title=title)
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
         return route
 
     @staticmethod
@@ -84,8 +86,8 @@ class Shorthands:
             graph: ndarray | None = None,
             durations: ndarray | None = None,
             coordinates: ndarray | None = None,
-            num_generations: int = 1000,
-            population_size: int = 100,
+            num_generations: int = 100,
+            population_size: int = 10,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
@@ -119,7 +121,7 @@ class Shorthands:
 
         genetic_algorithm = GeneticClustering(
             num_generations, population_size, crossover_probability,
-            mutation_probability, generations_per_update, plot, seed)
+            mutation_probability, generations_per_update, False, seed)
         cluster_assignments = genetic_algorithm.find_clusters(
             graph, durations, num_locations, num_days, route_length,
             routing_algorithm, coordinates)
@@ -127,12 +129,24 @@ class Shorthands:
         route = genetic_algorithm.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph,
-                                                      durations)
-        title = f"Genetic Clustering + Greedy: {evaluation}"
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
 
+        routing_string = ""
+        match routing_algorithm:
+            case Clustering.RoutingMethods.GREEDY:
+                routing_string = " + Greedy"
+            case Clustering.RoutingMethods.BRUTE_FORCE:
+                routing_string = " + Brute Force"
+            case _:
+                routing_string = " + Unknown Routing"
+        title = (f"Genetic Clustering{routing_string}: {evaluation}, "
+                 f"σ={std_deviation}")
+
+        centre = coordinates.mean(axis=0)
         if plot:
-            Plotting.display_route(route, coordinates, title=title)
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
         return route
 
     @staticmethod
@@ -142,8 +156,8 @@ class Shorthands:
             graph: ndarray | None = None,
             durations: ndarray | None = None,
             coordinates: ndarray | None = None,
-            num_generations: int = 1000,
-            population_size: int = 100,
+            num_generations: int = 100,
+            population_size: int = 10,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
@@ -176,19 +190,64 @@ class Shorthands:
 
         genetic_algorithm = GeneticCentroidClustering(
             num_generations, population_size, crossover_probability,
-            mutation_probability, generations_per_update, plot, seed)
+            mutation_probability, generations_per_update, False, seed)
         cluster_assignments = genetic_algorithm.find_clusters(
             coordinates, graph, durations, num_days, routing_algorithm)
 
         route = genetic_algorithm.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = genetic_algorithm.evaluate_route(route, num_days, graph,
-                                                      durations)
-        title = f"Genetic Centroid Clustering + Greedy: {evaluation}"
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
 
+        routing_string = ""
+        match routing_algorithm:
+            case Clustering.RoutingMethods.GREEDY:
+                routing_string = " + Greedy"
+            case Clustering.RoutingMethods.BRUTE_FORCE:
+                routing_string = " + Brute Force"
+            case _:
+                routing_string = " + Unknown Routing"
+        title = (f"Genetic Centroid Clustering{routing_string}: {evaluation}"
+                 f", σ={std_deviation}")
+
+        centre = coordinates.mean(axis=0)
         if plot:
-            Plotting.display_route(route, coordinates, title=title)
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
+        return route
+
+    @staticmethod
+    def greedy(num_locations: int,
+               num_days: int,
+               graph: ndarray | None = None,
+               durations: ndarray | None = None,
+               coordinates: ndarray | None = None,
+               plot: bool = True) -> ndarray:
+        """
+        Shorthand for performing greedy routing. Unless **both** graph and
+        coordinates are provided, random replacements will be chosen instead.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :param coordinates: Coordinates of each location in the graph.
+        :param plot: Whether to plot the final route.
+        :return: Returns a 1D ndarray representing the found route.
+        """
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
+
+        route = Routing.greedy(num_locations, num_days, graph, durations)
+
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
+        title = f"Greedy: {evaluation}, σ={std_deviation}"
+
+        centre = coordinates.mean(axis=0)
+        if plot:
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
         return route
 
     @staticmethod
@@ -223,9 +282,21 @@ class Shorthands:
         route = kmeans.find_route_from_cluster_assignments(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
-        evaluation = kmeans.evaluate_route(route, num_days, graph, durations)
-        title = f"K-Means + Greedy: {evaluation}"
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
 
+        routing_string = ""
+        match routing_algorithm:
+            case Clustering.RoutingMethods.GREEDY:
+                routing_string = " + Greedy"
+            case Clustering.RoutingMethods.BRUTE_FORCE:
+                routing_string = " + Brute Force"
+            case _:
+                routing_string = " + Unknown Routing"
+        title = f"K-Means{routing_string}: {evaluation}, σ={std_deviation}"
+
+        centre = coordinates.mean(axis=0)
         if plot:
-            Plotting.display_route(route, coordinates, title=title)
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
         return route

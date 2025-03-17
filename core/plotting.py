@@ -64,7 +64,9 @@ class Plotting:
     def display_route(route: ndarray,
                       coordinates: ndarray,
                       centre: ndarray | None = None,
-                      title: str | None = None) -> None:
+                      title: str | None = None,
+                      evaluation_per_day: ndarray | None = None,
+                      durations: ndarray | None = None) -> None:
         """
         Uses plotly to display provided route on a world map centred at a
         given coordinate or the first item in coordinates.
@@ -85,23 +87,30 @@ class Plotting:
         route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
 
         coordinates_per_day = [coordinates[day] for day in route_per_day]
-
+        if evaluation_per_day is None:
+            day_name = f"Day1"
+        else:
+            day_name = f"Day1: {evaluation_per_day[0]}"
         figure = go.Figure(go.Scattermap(
             mode="markers+lines",
             lat=coordinates_per_day[0][:, 1],
             lon=coordinates_per_day[0][:, 0],
-            name="Day 1",
+            name=day_name,
             marker=dict(
                 size=10,
                 color=colour_set[0]
             )))
 
         for i in range(1, len(coordinates_per_day)):
+            if evaluation_per_day is None:
+                day_name = f"Day{i+1}"
+            else:
+                day_name = f"Day{i+1}: {evaluation_per_day[i]}"
             figure.add_trace(go.Scattermap(
                 mode="markers+lines",
                 lat=coordinates_per_day[i][:, 1],
                 lon=coordinates_per_day[i][:, 0],
-                name=f"Day {i+1}",
+                name=day_name,
                 marker=dict(
                     size=10,
                     color=colour_set[i]

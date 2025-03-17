@@ -23,10 +23,6 @@ class Routing(Algorithm):
         :param graph: The adjacency matrix for the graph.
         :return: 1D ndarray representing the best route.
         """
-        if num_locations < 4:
-            # 3 locations only has 1 result, so just use greedy
-            return Routing.greedy(num_locations, graph)
-
         # Gets the westernmost point (guaranteed to be on outside).
         starting_index = np.argmin(coordinates[:, 0])
         hull = []
@@ -75,7 +71,7 @@ class Routing(Algorithm):
             raise ValueError(f"num_days={num_days}, must be at least 1.")
         if num_locations < 4:
             # 3 locations only has 1 result, so just use greedy
-            return Routing.greedy(num_locations, graph)
+            return Routing.greedy(num_locations, num_days, graph, durations)
 
         route_length = num_locations + num_days - 1
 
@@ -87,8 +83,8 @@ class Routing(Algorithm):
         best_route = Algorithm.generate_route(0, n_routes,
                                               num_locations, num_days,
                                               route_length)
-        best_evaluation = Algorithm.evaluate_route(best_route, num_days, graph,
-                                                   durations)
+        best_evaluation, _, _= Algorithm.evaluate_route(best_route, num_days,
+                                                        graph, durations)
 
         iterations_per_update = n_routes / 10
         progress = 0
@@ -96,7 +92,7 @@ class Routing(Algorithm):
         for i in range(1, n_routes):  # yikes
             route = Algorithm.generate_route(i, n_routes, num_locations,
                                              num_days, route_length)
-            evaluation = Algorithm.evaluate_route(route, num_days, graph,
+            evaluation, _, _ = Algorithm.evaluate_route(route, num_days, graph,
                                                   durations)
 
             if evaluation < best_evaluation:
@@ -105,7 +101,7 @@ class Routing(Algorithm):
 
             if (i+1) % iterations_per_update == 0:
                 progress += 10
-                print(f"Brute force {progress}% complete: {i}/{n_routes}.")
+                print(f"Brute force {progress}% complete: {i+1}/{n_routes}. Best evaluation: {best_evaluation}")
 
         return best_route
 
@@ -126,22 +122,23 @@ class Routing(Algorithm):
         route_length = num_locations
         route = np.empty(route_length, dtype=int)
         index = 0
+        working_graph = np.array(graph, copy=True)
         for i in range(route_length):
-            graph[:, index] = np.iinfo(np.int32).max
-            index = graph[index].argmin()
+            working_graph[:, index] = np.iinfo(np.int32).max
+            index = working_graph[index].argmin()
             route[i] = index
 
-        for i in range(2, num_days):
+        for i in range(2, num_days+1):
             best_route = np.insert(route, 1, 0)
-            best_evaluation = Routing.evaluate_route(best_route, i, graph,
-                                                     durations)
+            best_evaluation, _, _ = Routing.evaluate_route(best_route, i, graph,
+                                                           durations)
             for j in range(2, num_locations):
                 new_route = np.insert(route, j, 0)
-                evaluation = Routing.evaluate_route(new_route, i, graph,
-                                                    durations)
+                evaluation, _, _ = Routing.evaluate_route(new_route, i, graph,
+                                                          durations)
                 if evaluation < best_evaluation:
                     best_route = new_route
                     best_evaluation = evaluation
 
-                route = best_route
+            route = best_route
         return route
