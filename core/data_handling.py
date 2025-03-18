@@ -50,18 +50,17 @@ class DataHandling:
         Permanently loops, accessing the OpenRouteService API as often as
         possible to collect data and save it to the project database.
         """
-        while True:
+        i = 0
+        while i < 2500:
             datum = self.generate_test_datum()
             if not isinstance(datum, int):
                 self.save_test_datum(datum, DataGroups.graphs)
-            if datum == 1:
+
+            i += 1
+            if i % 60 == 0:
                 print("Waiting 1 minute for api.")
                 time.sleep(60)  # Wait 1 minute before trying again
                 print("Continuing...")
-            if datum == 2:
-                print("Waiting 24hrs for api.")
-                time.sleep(86400)
-                print("Restarting...")
 
     def create_graph(self,
                      coordinates: ndarray) -> ndarray | int:
