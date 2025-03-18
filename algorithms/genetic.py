@@ -42,7 +42,7 @@ class Genetic(Algorithm):
 
         if random_seed is not None:
             random.seed(random_seed)
-            np.random.seed(random_seed)
+            np.random.seed = random_seed
 
         if (not isinstance(generations_per_update, int)
                 or generations_per_update < 1):

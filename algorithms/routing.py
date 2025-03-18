@@ -86,8 +86,8 @@ class Routing(Algorithm):
         best_evaluation, _, _= Algorithm.evaluate_route(best_route, num_days,
                                                         graph, durations)
 
-        iterations_per_update = n_routes / 10
-        progress = 0
+        # iterations_per_update = n_routes / 10
+        # progress = 0
 
         for i in range(1, n_routes):  # yikes
             route = Algorithm.generate_route(i, n_routes, num_locations,
@@ -99,9 +99,9 @@ class Routing(Algorithm):
                 best_route = np.array(route, copy=True)
                 best_evaluation = evaluation
 
-            if (i+1) % iterations_per_update == 0:
-                progress += 10
-                print(f"Brute force {progress}% complete: {i+1}/{n_routes}. Best evaluation: {best_evaluation}")
+            # if (i+1) % iterations_per_update == 0:
+            #     progress += 10
+            #     print(f"Brute force {progress}% complete: {i+1}/{n_routes}. Best evaluation: {best_evaluation}")
 
         return best_route
 

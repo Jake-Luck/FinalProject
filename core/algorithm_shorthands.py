@@ -94,7 +94,7 @@ class Shorthands:
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = None) -> ndarray:
+            seed: int | None = 3) -> ndarray:
         """
         Shorthand for performing genetic clustering and performing routing
         using those clusters. Unless **both** graph and coordinates are
@@ -164,7 +164,7 @@ class Shorthands:
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = None) -> ndarray:
+            seed: int | None = 4) -> ndarray:
         """
         Shorthand for performing genetic centroid clustering and performing
         routing using those clusters. Unless **both** graph and coordinates are
