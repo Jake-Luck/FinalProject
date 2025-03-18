@@ -87,6 +87,7 @@ class Plotting:
         route_per_day = [np.concatenate((arr, [0])) for arr in route_per_day]
 
         coordinates_per_day = [coordinates[day] for day in route_per_day]
+        durations_per_day = [durations[day] for day in route_per_day]
         if evaluation_per_day is None:
             day_name = f"Day1"
         else:
@@ -99,7 +100,8 @@ class Plotting:
             marker=dict(
                 size=10,
                 color=colour_set[0]
-            )))
+            ),
+            text=durations_per_day[0]))
 
         for i in range(1, len(coordinates_per_day)):
             if evaluation_per_day is None:
@@ -114,7 +116,8 @@ class Plotting:
                 marker=dict(
                     size=10,
                     color=colour_set[i]
-                )))
+                ),
+                text=durations_per_day[i]))
 
         if title is not None:
             figure.update_layout(title=title)
