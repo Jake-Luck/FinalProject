@@ -166,7 +166,7 @@ class GeneticClustering(Genetic, Clustering):
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
-        if coordinates is None:
+        if coordinates is None and self.plotting is True:
             print("No coordinates provided, setting plotting to False")
             self.plotting = False
 
@@ -354,10 +354,6 @@ class GeneticCentroidClustering(Genetic, Clustering):
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
-        if coordinates is None:
-            print("No coordinates provided, setting plotting to False")
-            self.plotting = False
-
         evaluations = np.empty(self.population_size)
         evaluations[:] = float('inf')
 

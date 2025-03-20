@@ -39,8 +39,10 @@ class Clustering(Algorithm):
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
+        # Gets a matrix of distances from each coordinate to each centroid
         distances = np.linalg.norm(
             coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
+
         clusters = np.argmin(distances, axis=1)
         return clusters
 

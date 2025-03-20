@@ -101,7 +101,8 @@ class Routing(Algorithm):
 
             # if (i+1) % iterations_per_update == 0:
             #     progress += 10
-            #     print(f"Brute force {progress}% complete: {i+1}/{n_routes}. Best evaluation: {best_evaluation}")
+            #     print(f"Brute force {progress}% complete: {i+1}/{n_routes}.
+            #     Best evaluation: {best_evaluation}")
 
         return best_route
 
