@@ -13,8 +13,7 @@ class Routing(Algorithm):
     """
     @staticmethod
     def _gift_wrapping(num_locations: int,
-                      coordinates: ndarray,
-                      graph: ndarray) -> ndarray:
+                       coordinates: ndarray) -> ndarray:
         """
         Finds a convex hull around the coordinates, then attempts to add
         the interior points in an order that minimises route length.
@@ -83,8 +82,8 @@ class Routing(Algorithm):
         best_route = Algorithm.generate_route(0, n_routes,
                                               num_locations, num_days,
                                               route_length)
-        best_evaluation, _, _= Algorithm.evaluate_route(best_route, num_days,
-                                                        graph, durations)
+        best_evaluation, _, _ = Algorithm.evaluate_route(best_route, num_days,
+                                                         graph, durations)
 
         # iterations_per_update = n_routes / 10
         # progress = 0
@@ -93,7 +92,7 @@ class Routing(Algorithm):
             route = Algorithm.generate_route(i, n_routes, num_locations,
                                              num_days, route_length)
             evaluation, _, _ = Algorithm.evaluate_route(route, num_days, graph,
-                                                  durations)
+                                                        durations)
 
             if evaluation < best_evaluation:
                 best_route = np.array(route, copy=True)

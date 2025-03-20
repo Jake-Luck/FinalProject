@@ -126,13 +126,12 @@ class Shorthands:
             graph, durations, num_locations, num_days, route_length,
             routing_algorithm, coordinates)
 
-        route = genetic_algorithm.find_route_from_cluster_assignments(
+        route = genetic_algorithm.find_route_from_clusters(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
 
-        routing_string = ""
         match routing_algorithm:
             case Clustering.RoutingMethods.GREEDY:
                 routing_string = " + Greedy"
@@ -194,13 +193,12 @@ class Shorthands:
         cluster_assignments = genetic_algorithm.find_clusters(
             coordinates, graph, durations, num_days, routing_algorithm)
 
-        route = genetic_algorithm.find_route_from_cluster_assignments(
+        route = genetic_algorithm.find_route_from_clusters(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
 
-        routing_string = ""
         match routing_algorithm:
             case Clustering.RoutingMethods.GREEDY:
                 routing_string = " + Greedy"
@@ -271,6 +269,7 @@ class Shorthands:
         :param coordinates: Coordinates of each location in the graph.
         :param routing_algorithm: The routing algorithm to use with clustering.
         :param plot: Whether to plot each k-means step and the final route.
+        :param show_stages: Whether to show each kmeans stages.
         :return: Returns a 1D ndarray representing the found route.
         """
         graph, coordinates, durations = Shorthands._setup_inputs(
@@ -279,13 +278,12 @@ class Shorthands:
         kmeans = KMeans(show_stages=show_stages)
         cluster_assignments = kmeans.find_clusters(coordinates, num_days,
                                                    num_locations)
-        route = kmeans.find_route_from_cluster_assignments(
+        route = kmeans.find_route_from_clusters(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
 
-        routing_string = ""
         match routing_algorithm:
             case Clustering.RoutingMethods.GREEDY:
                 routing_string = " + Greedy"

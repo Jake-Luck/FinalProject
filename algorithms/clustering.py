@@ -47,11 +47,11 @@ class Clustering(Algorithm):
         return clusters
 
     @staticmethod
-    def find_route_from_cluster_assignments(cluster_assignments: ndarray,
-                                            num_days: int,
-                                            routing_method: RoutingMethods,
-                                            graph: ndarray,
-                                            durations: ndarray) -> ndarray:
+    def find_route_from_clusters(cluster_assignments: ndarray,
+                                 num_days: int,
+                                 routing_method: RoutingMethods,
+                                 graph: ndarray,
+                                 durations: ndarray) -> ndarray:
         """
         Finds a route from the given cluster assignment using the given routing
         method on each cluster and stitching the routes together.

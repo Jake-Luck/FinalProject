@@ -2,7 +2,6 @@
 Provides Plotting class to display coordinates, clusters and routes. Uses plotly
 to get a world map which plots are drawn onto
 """
-
 import numpy as np
 from numpy import ndarray
 import plotly.graph_objects as go
@@ -43,22 +42,7 @@ class Plotting:
                                              color=colour_set[0]
                                          )))
 
-        if title is not None:
-            figure.update_layout(title=title)
-
-        figure.update_layout(autosize=True,
-                             map=dict(
-                                 bearing=0,
-                                 center=dict(
-                                     lat=centre[1],
-                                     lon=centre[0]
-                                 ),
-                                 pitch=0,
-                                 zoom=11,
-                                 style='carto-voyager'
-                             ))
-
-        figure.show()
+        Plotting._update_layout_and_show_figure(title, centre, figure)
 
     @staticmethod
     def display_route(route: ndarray,
@@ -74,6 +58,8 @@ class Plotting:
         :param coordinates: Coordinates to display.
         :param centre: Point to centre the map on.
         :param title: Title of the plot.
+        :param evaluation_per_day: Evaluation per day. 1D array.
+        :param durations: Evaluation per day. 1D array.
         """
         if centre is None:
             centre = coordinates[0]
@@ -118,24 +104,7 @@ class Plotting:
                     color=colour_set[i]
                 ),
                 text=durations_per_day[i]))
-
-        if title is not None:
-            figure.update_layout(title=title)
-
-        figure.update_layout(
-            autosize=True,
-            map=dict(
-                bearing=0,
-                center=dict(
-                    lat=centre[1],
-                    lon=centre[0]
-                ),
-                pitch=0,
-                zoom=11,
-                style='carto-voyager'
-             ))
-
-        figure.show()
+        Plotting._update_layout_and_show_figure(title, centre, figure)
 
     @staticmethod
     def display_clusters(coordinates: ndarray,
@@ -165,20 +134,44 @@ class Plotting:
                                          mode='markers',
                                          name="Day 1",
                                          marker=dict(
-                                              size=10,
-                                              color=colour_set[0]
+                                             size=10,
+                                             color=colour_set[0]
                                          )))
 
         for i in range(1, num_days):
             figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
                                   lon=coordinates[clusters[i], 0][0],
                                   mode='markers',
-                                  name=f"Day {i+1}",
+                                  name=f"Day {i + 1}",
                                   marker=dict(
                                       size=10,
                                       color=colour_set[i]
                                   ))
 
+        if centroids is not None:
+            for i in range(num_days):
+                figure.add_scattermap(lat=[centroids[i, 1]],
+                                      lon=[centroids[i, 0]],
+                                      mode='markers',
+                                      name=f"Centroid {i+1}",
+                                      marker=dict(
+                                          size=20,
+                                          color=colour_set[i],
+                                          opacity=0.5
+                                      ))
+
+        Plotting._update_layout_and_show_figure(title, centre, figure)
+
+    @staticmethod
+    def _update_layout_and_show_figure(title: str | None,
+                                       centre: ndarray,
+                                       figure: go.Figure):
+        """
+        Updates figure layout and displays it.
+        :param title: Title of the plot.
+        :param centre: Point to centre the map on.
+        :param figure: The figure to update and display.
+        """
         if title is not None:
             figure.update_layout(title=title)
 
@@ -194,18 +187,4 @@ class Plotting:
                                  style='carto-voyager'
                              ))
 
-        if centroids is None:
-            figure.show()
-            return
-
-        for i in range(num_days):
-            figure.add_scattermap(lat=[centroids[i, 1]],
-                                  lon=[centroids[i, 0]],
-                                  mode='markers',
-                                  name=f"Centroid {i+1}",
-                                  marker=dict(
-                                      size=20,
-                                      color=colour_set[i],
-                                      opacity=0.5
-                                  ))
         figure.show()

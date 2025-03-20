@@ -16,8 +16,7 @@ from numpy import ndarray  # For type hints
 import openrouteservice
 import random
 import requests
-import time
-from time import perf_counter
+from time import perf_counter, sleep
 
 NUMBER_OF_NODES = 25  # Max allowed by ORS api
 
@@ -51,7 +50,132 @@ class DataHandling:
         self.client = openrouteservice.Client(key=self.api_key)
 
     @staticmethod
-    def collect_results():
+    def loop_through_locations_and_days(graph,
+                                        durations,
+                                        coordinates,
+                                        kmeans,
+                                        genetic_clustering,
+                                        genetic_centroid_clustering) -> list:
+        """
+        Loops through every possible input for num_locations and num_days
+        with the given input.
+        :param graph: The adjacency matrix for the graph.
+        :param durations: Duration spent at each location.
+        :param coordinates: Coordinates of each cluster, a 2D array with shape
+        (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
+        :param kmeans: Instance of kmeans class.
+        :param genetic_clustering: Instance of genetic clustering class.
+        :param genetic_centroid_clustering: Instance of genetic centroid
+        clustering class.
+        :return: Returns a list of results, to be saved as csv.
+        """
+        new_rows = []
+        for n in range(4, graph.shape[0]+1):
+            for d in range(1, n):
+                _graph = graph[:n, :n]
+                _durations = durations[:n]
+                _coordinates = coordinates[:n]
+                # brute force
+                if n + d < 11:
+                    start = perf_counter()
+                    route = Routing.brute_force(n, d, _graph,
+                                                _durations)
+                    end = perf_counter()
+                    time = end - start
+                    evaluation, _, _ = Routing.evaluate_route(
+                        route, d, _graph, _durations)
+                    new_rows.append(
+                        ["Brute Force", n, d, evaluation, time,
+                         "W * (1+σ)"])
+                # greedy routing & greedy insertion
+                start = perf_counter()
+                route = Routing.greedy(n, d, _graph, _durations)
+                end = perf_counter()
+                time = end - start
+                evaluation, _, _ = Routing.evaluate_route(route, d,
+                                                          _graph,
+                                                          _durations)
+                new_rows.append(
+                    ["Greedy Routing & Greedy Insertion", n, d,
+                     evaluation, time, "W * (1+σ)"])
+
+                if d <= 1:  # No need to cluster if days is 1
+                    continue
+
+                start = perf_counter()
+                clusters = kmeans.find_clusters(_coordinates, d, n)
+                route = kmeans.find_route_from_clusters(
+                    clusters, d, kmeans.RoutingMethods.GREEDY,
+                    _graph, _durations)
+                end = perf_counter()
+                time = end - start
+                evaluation, _, _ = Routing.evaluate_route(
+                    route, d, _graph, _durations)
+                new_rows.append(
+                    ["K-Means & Greedy", n, d, evaluation, time,
+                     "W * (1+\sigma)"])
+                # kmeans & brute force
+                start = perf_counter()
+                clusters = kmeans.find_clusters(_coordinates, d, n)
+                counts = np.bincount(clusters)
+                biggest_cluster = np.max(counts)
+                if biggest_cluster < 8:
+                    route = kmeans.find_route_from_clusters(
+                        clusters, d,
+                        kmeans.RoutingMethods.BRUTE_FORCE, _graph,
+                        _durations)
+                    end = perf_counter()
+                    time = end - start
+                    evaluation, _, _ = Routing.evaluate_route(
+                        route, d, _graph, _durations)
+                else:
+                    end = perf_counter()
+                    time = end - start
+                    evaluation = float('inf')
+                new_rows.append(
+                    ["K-Means & Brute Force", n, d, evaluation,
+                     time, "W * (1+\sigma)"])
+                # Genetic Clustering + Greedy
+                start = perf_counter()
+                clusters = genetic_clustering.find_clusters(
+                    _graph, _durations, n, d, n + d - 1,
+                    genetic_clustering.RoutingMethods.GREEDY)
+                route = genetic_clustering.find_route_from_clusters(
+                    clusters, d,  genetic_clustering.RoutingMethods.GREEDY,
+                    _graph, _durations)
+                end = perf_counter()
+                time = end - start
+                evaluation, _, _ = Routing.evaluate_route(route, d,
+                                                          _graph,
+                                                          _durations)
+                new_rows.append(
+                    ["Genetic Clustering & Greedy Routing", n, d,
+                     evaluation, time, "W * (1+\sigma)"])
+                # Genetic Centroid Clustering + Greedy
+                start = perf_counter()
+                clusters = genetic_centroid_clustering.find_clusters(
+                    _coordinates, _graph, _durations, d,
+                    genetic_centroid_clustering.RoutingMethods.GREEDY)
+                route = genetic_centroid_clustering.find_route_from_clusters(
+                    clusters, d,
+                    genetic_clustering.RoutingMethods.GREEDY,
+                    _graph, _durations)
+                end = perf_counter()
+                time = end - start
+                evaluation, _, _ = Routing.evaluate_route(route, d,
+                                                          _graph,
+                                                          _durations)
+                new_rows.append(
+                    ["Genetic Centorid Clustering & Greedy Routing",
+                     n, d, evaluation, time, "W * (1+\sigma)"])
+        return new_rows
+
+    @staticmethod
+    def collect_results() -> None:
+        """
+        Loops through saved graphs to test different algorithms on the same
+        input. Saves results to csv file.
+        """
         with h5py.File('data/training_data.h5', 'a') as f:
             graphs = f['graphs']
             kmeans = KMeans()
@@ -65,113 +189,12 @@ class DataHandling:
                 coordinates = np.array(datum.attrs['coordinates'])
                 durations = np.random.randint(1, 96, 25) * 15
                 durations[0] = 0
-                new_rows = []
-                for n in range(4, 26):
-                    for d in range(1, n):
-                        _graph = graph[:n, :n]
-                        _durations = durations[:n]
-                        _coordinates = coordinates[:n]
-                        # brute force
-                        if n + d < 11:
-                            start = perf_counter()
-                            route = Routing.brute_force(n, d, _graph,
-                                                        _durations)
-                            end = perf_counter()
-                            time = end - start
-                            evaluation, _, _ = Routing.evaluate_route(route, d,
-                                                                      _graph,
-                                                                      _durations)
-                            new_rows.append(
-                                ["Brute Force", n, d, evaluation, time,
-                                 "W * (1+σ)"])
-                        # greedy routing & greedy insertion
-                        start = perf_counter()
-                        route = Routing.greedy(n, d, _graph, _durations)
-                        end = perf_counter()
-                        time = end - start
-                        evaluation, _, _ = Routing.evaluate_route(route, d,
-                                                                  _graph,
-                                                                  _durations)
-                        new_rows.append(
-                            ["Greedy Routing & Greedy Insertion", n, d,
-                             evaluation, time, "W * (1+σ)"])
-                        if d > 1:
-                            # kmeans & greedy
-                            start = perf_counter()
-                            clusters = kmeans.find_clusters(_coordinates, d, n)
-                            route = kmeans.find_route_from_cluster_assignments(
-                                clusters, d, kmeans.RoutingMethods.GREEDY,
-                                _graph, _durations)
-                            end = perf_counter()
-                            time = end - start
-                            evaluation, _, _ = Routing.evaluate_route(route, d,
-                                                                      _graph,
-                                                                      _durations)
-                            new_rows.append(
-                                ["K-Means & Greedy", n, d, evaluation, time,
-                                 "W * (1+σ)"])
-                            # kmeans & brute force
-                            start = perf_counter()
-                            clusters = kmeans.find_clusters(_coordinates, d, n)
-                            counts = np.bincount(clusters)
-                            biggest_cluster = np.max(counts)
-                            if biggest_cluster < 8:
-                                route = kmeans.find_route_from_cluster_assignments(
-                                    clusters, d,
-                                    kmeans.RoutingMethods.BRUTE_FORCE, _graph,
-                                    _durations)
-                                end = perf_counter()
-                                time = end - start
-                                evaluation, _, _ = Routing.evaluate_route(route,
-                                                                          d,
-                                                                          _graph,
-                                                                          _durations)
-                            else:
-                                end = perf_counter()
-                                time = end - start
-                                evaluation = float('inf')
-                            new_rows.append(
-                                ["K-Means & Brute Force", n, d, evaluation,
-                                 time, "W * (1+σ)"])
-                            # Genetic Clustering + Greedy
-                            start = perf_counter()
-                            clusters = genetic_clustering.find_clusters(_graph,
-                                                                        _durations,
-                                                                        n, d,
-                                                                        n + d - 1,
-                                                                        genetic_clustering.RoutingMethods.GREEDY)
-                            route = genetic_clustering.find_route_from_cluster_assignments(
-                                clusters, d,
-                                genetic_clustering.RoutingMethods.GREEDY,
-                                _graph, _durations)
-                            end = perf_counter()
-                            time = end - start
-                            evaluation, _, _ = Routing.evaluate_route(route, d,
-                                                                      _graph,
-                                                                      _durations)
-                            new_rows.append(
-                                ["Genetic Clustering & Greedy Routing", n, d,
-                                 evaluation, time, "W * (1+σ)"])
-                            # Genetic Centroid Clustering + Greedy
-                            start = perf_counter()
-                            clusters = genetic_centroid_clustering.find_clusters(
-                                _coordinates, _graph, _durations, d,
-                                genetic_centroid_clustering.RoutingMethods.GREEDY)
-                            route = genetic_centroid_clustering.find_route_from_cluster_assignments(
-                                clusters, d,
-                                genetic_clustering.RoutingMethods.GREEDY,
-                                _graph, _durations)
-                            end = perf_counter()
-                            time = end - start
-                            evaluation, _, _ = Routing.evaluate_route(route, d,
-                                                                      _graph,
-                                                                      _durations)
-                            new_rows.append(
-                                ["Genetic Centorid Clustering & Greedy Routing",
-                                 n, d, evaluation, time, "W * (1+σ)"])
+                new_rows = DataHandling.loop_through_locations_and_days(
+                    graph, durations, coordinates, kmeans, genetic_clustering,
+                    genetic_centroid_clustering)
 
-                with open('data/results.csv', 'a') as csvfile:
-                    csvwriter = csv.writer(csvfile)
+                with open('data/results.csv', 'a', encoding='utf-32') as csvf:
+                    csvwriter = csv.writer(csvf)
                     csvwriter.writerows(new_rows)
                 print(f"Graph {i} saved to csv.")
 
@@ -181,15 +204,17 @@ class DataHandling:
         possible to collect data and save it to the project database.
         """
         i = 0
-        while i < 2500:
+        while i < 1779:
             datum = self.generate_test_datum()
             if not isinstance(datum, int):
                 self.save_test_datum(datum, DataGroups.graphs)
-
+            elif datum == 2:
+                print("Reached daily API limit, exiting.")
+                return
             i += 1
             if i % 60 == 0:
                 print("Waiting 1 minute for api.")
-                time.sleep(60)  # Wait 1 minute before trying again
+                sleep(60)  # Wait 1 minute before trying again
                 print("Continuing...")
 
     def create_graph(self,

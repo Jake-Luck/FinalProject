@@ -137,7 +137,7 @@ class GeneticClustering(Genetic, Clustering):
         """
         evaluations = np.zeros(self.population_size)
         for individual in range(self.population_size):
-            route = self.find_route_from_cluster_assignments(
+            route = self.find_route_from_clusters(
                 population[individual], num_days, routing_method, graph,
                 durations)
             evaluations[individual], _, _ = self.evaluate_route(
@@ -315,7 +315,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
             clusters = self._assign_nodes_to_centroid(coordinates,
                                                       population[individual])
 
-            route = self.find_route_from_cluster_assignments(
+            route = self.find_route_from_clusters(
                 clusters, num_days, routing_method, graph, durations)
 
             evaluations[individual], _, _ = self.evaluate_route(
@@ -409,9 +409,9 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
                 # Generate random individual (increases genetic diversity)
                 if not use_crossover:
-                    individual = np.random.uniform(centre[1] - 0.1,
-                                                   centre[1] + 0.1,
-                                                   (num_days, 2))
+                    population[individual] = np.random.uniform(centre[1] - 0.1,
+                                                               centre[1] + 0.1,
+                                                               (num_days, 2))
                     continue
 
                 population[individual] = self._crossover(parent1, parent2)
