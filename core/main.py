@@ -1,7 +1,7 @@
 """
 Program launching point
 """
-from algorithms.clustering import KMeans
+
 from core.algorithm_shorthands import Shorthands
 from core.data_handling import DataHandling
 
@@ -16,7 +16,13 @@ def main():
     data_handler = DataHandling()
     data_collection_thread = threading.Thread(
         target=data_handler.collect_test_data)
-    # data_collection_thread.start()
+    data_collection_thread.start()
+
+    data_handler.collect_results()
+
+    data_collection_thread.join()
+
+    return
 
     num_locations = 25
     num_days = 5
@@ -50,7 +56,7 @@ def main():
         durations=durations, mutation_probability=0.1,
         generations_per_update=1)
 
-    # data_collection_thread.join()
+    data_collection_thread.join()
 
 
 if __name__ == '__main__':
