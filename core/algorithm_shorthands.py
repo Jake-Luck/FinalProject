@@ -216,6 +216,41 @@ class Shorthands:
         return route
 
     @staticmethod
+    def gift_wrapping(num_locations: int,
+                      num_days: int,
+                      graph: ndarray | None = None,
+                      durations: ndarray | None = None,
+                      coordinates: ndarray | None = None,
+                      plot: bool = True) -> ndarray:
+        """
+        Shorthand for performing gift wrapping routing. Unless **both** graph
+        and coordinates are provided, random replacements will be chosen
+        instead.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :param coordinates: Coordinates of each location in the graph.
+        :param plot: Whether to plot the final route.
+        :return: Returns a 1D ndarray representing the found route.
+        """
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
+
+        route = Routing.gift_wrapping(
+            num_locations, num_days, coordinates, graph, durations)
+
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
+        title = f"Gift Wrapping: {evaluation}, σ={std_deviation}"
+
+        centre = coordinates.mean(axis=0)
+        if plot:
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
+        return route
+
+    @staticmethod
     def greedy(num_locations: int,
                num_days: int,
                graph: ndarray | None = None,

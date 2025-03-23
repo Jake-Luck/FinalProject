@@ -21,34 +21,25 @@ def main():
     num_locations = 25
     num_days = 5
     seed = 4
-    np.random.seed(seed)
-    graph, coordinates = DataHandling.get_random_datum(seed)
+    graph, coordinates = DataHandling.get_random_datum()
     durations = np.random.randint(1, 96, num_locations) * 15
     durations[0] = 0
     graph = graph[:num_locations, :num_locations]
     coordinates = coordinates[:num_locations]
 
-    Shorthands.brute_force(
-        num_locations=9, num_days=3, graph=graph[:9, :9],
-        coordinates=coordinates[:9], durations=durations)
-    Shorthands.greedy(
-        num_locations, num_days, graph=graph, coordinates=coordinates,
-        durations=durations)
-    Shorthands.k_means(
-        num_locations, num_days, graph=graph, coordinates=coordinates,
-        durations=durations)
-    Shorthands.k_means(
-        num_locations, num_days, graph=graph, coordinates=coordinates,
-        durations=durations,
-        routing_algorithm=KMeans.RoutingMethods.BRUTE_FORCE)
+    Shorthands.gift_wrapping(num_locations, num_days, graph, durations,
+                             coordinates)
+    Shorthands.brute_force(9, 3, graph[:9, :9], durations[:9], coordinates[:9])
+    Shorthands.greedy(num_locations, num_days, graph, durations, coordinates)
+    Shorthands.k_means(num_locations, num_days, graph, durations, coordinates)
+    Shorthands.k_means(num_locations, num_days, graph, durations, coordinates,
+                       KMeans.RoutingMethods.BRUTE_FORCE)
     Shorthands.genetic_clustering(
-        num_locations, num_days, graph=graph, coordinates=coordinates,
-        durations=durations, mutation_probability=0.1,
-        generations_per_update=1)
+        num_locations, num_days, graph, durations, coordinates,
+        mutation_probability=0.1, generations_per_update=1)
     Shorthands.genetic_centroid_clustering(
-        num_locations, num_days, graph=graph, coordinates=coordinates,
-        durations=durations, mutation_probability=0.1,
-        generations_per_update=1)
+        num_locations, num_days, graph, durations, coordinates,
+        mutation_probability=0.1, generations_per_update=1)
 
     data_collection_thread.join()
 

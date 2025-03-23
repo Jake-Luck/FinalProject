@@ -30,7 +30,7 @@ class Algorithm:
 
         # Sum durations in route
         for index in route:
-            if previous_index == index:
+            if previous_index == index or current_day >= num_days:
                 evaluation_per_day[:] = float('inf')
                 return float('inf'), float('inf'), evaluation_per_day
 

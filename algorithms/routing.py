@@ -13,13 +13,18 @@ class Routing(Algorithm):
     """
     @staticmethod
     def gift_wrapping(num_locations: int,
-                       coordinates: ndarray) -> ndarray:
+                      num_days: int,
+                      coordinates: ndarray,
+                      graph: ndarray,
+                      durations: ndarray) -> ndarray:
         """
         Finds a convex hull around the coordinates, then attempts to add
         the interior points in an order that minimises route length.
         :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
         :param coordinates: Coordinates of each location.
         :param graph: The adjacency matrix for the graph.
+        :param durations: Duration spent at each location.
         :return: 1D ndarray representing the best route.
         """
         # Gets the westernmost point (guaranteed to be on outside).
@@ -50,7 +55,18 @@ class Routing(Algorithm):
 
             current_index = next_index
 
-        return np.array(hull)
+        all_points = np.arange(num_locations)
+        interior_points = np.setdiff1d(all_points, hull)
+
+        route = Routing.greedy_insertion(np.array(hull), interior_points,
+                                         graph, durations)
+
+        if num_days > 1:
+            new_locations = np.zeros(num_days - 1)
+            route = Routing.greedy_insertion(route, new_locations, graph,
+                                             durations)
+        return route
+
 
     @staticmethod
     def brute_force(num_locations: int,
