@@ -12,7 +12,7 @@ class Routing(Algorithm):
     Provides various routing algorithms as static methods.
     """
     @staticmethod
-    def _gift_wrapping(num_locations: int,
+    def gift_wrapping(num_locations: int,
                        coordinates: ndarray) -> ndarray:
         """
         Finds a convex hull around the coordinates, then attempts to add
@@ -70,7 +70,8 @@ class Routing(Algorithm):
             raise ValueError(f"num_days={num_days}, must be at least 1.")
         if num_locations < 4:
             # 3 locations only has 1 result, so just use greedy
-            return Routing.greedy(num_locations, num_days, graph, durations)
+            return Routing.greedy_routing(num_locations, num_days,
+                                          graph, durations)
 
         route_length = num_locations + num_days - 1
 
@@ -106,10 +107,10 @@ class Routing(Algorithm):
         return best_route
 
     @staticmethod
-    def greedy(num_locations: int,
-               num_days: int,
-               graph: ndarray,
-               durations: ndarray):
+    def greedy_routing(num_locations: int,
+                       num_days: int,
+                       graph: ndarray,
+                       durations: ndarray):
         """
         A very simple solver for use with clustering, will not find a valid
         route on its own. This is a conventional TSP solver.
@@ -128,17 +129,47 @@ class Routing(Algorithm):
             index = working_graph[index].argmin()
             route[i] = index
 
-        for i in range(2, num_days+1):
-            best_route = np.insert(route, 1, 0)
-            best_evaluation, _, _ = Routing.evaluate_route(best_route, i, graph,
-                                                           durations)
-            for j in range(2, num_locations):
-                new_route = np.insert(route, j, 0)
-                evaluation, _, _ = Routing.evaluate_route(new_route, i, graph,
-                                                          durations)
+        if num_days > 1:
+            new_locations = np.zeros(num_days-1)
+            route = Routing.greedy_insertion(route, new_locations, graph,
+                                             durations)
+
+        return route
+
+    @staticmethod
+    def greedy_insertion(route: ndarray,
+                         new_locations: ndarray,
+                         graph: ndarray,
+                         durations: ndarray) -> ndarray:
+        """
+        Iteratively inserts new locations into the route by finding the best
+        insertion point at each iteration.
+        :param route: 1D ndarray representing the current route.
+        :param new_locations: 1D ndarray containing locations to insert.
+        :param graph: The adjacency matrix for the graph.
+        :param durations: Duration spent at each location in minutes.
+        :return: 1D ndarray representing the updated route with new locations.
+        """
+        num_days = np.count_nonzero(route == 0)
+        num_days += np.count_nonzero(new_locations == 0)
+        working_route = np.array(route, copy=True)
+
+        # For each new location, find the best insertion point in the route
+
+        for location in new_locations:
+            best_route = np.insert(working_route, 0, location)
+            best_evaluation, _, _ = Routing.evaluate_route(best_route, num_days,
+                                                           graph, durations)
+
+            for i in range(1, len(working_route) + 1):
+                new_route = np.insert(working_route, i, location)
+                evaluation, _, _ = Routing.evaluate_route(new_route, num_days,
+                                                         graph, durations)
+
                 if evaluation < best_evaluation:
                     best_route = new_route
                     best_evaluation = evaluation
 
-            route = best_route
-        return route
+            working_route = best_route
+
+        return working_route

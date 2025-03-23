@@ -81,10 +81,10 @@ class Clustering(Algorithm):
             case Clustering.RoutingMethods.BRUTE_FORCE:
                 routing_function = routing.brute_force
             case Clustering.RoutingMethods.GREEDY:
-                routing_function = routing.greedy
+                routing_function = routing.greedy_routing
             case _:
                 print("Invalid routing method, defaulting to greedy")
-                routing_function = routing.greedy
+                routing_function = routing.greedy_routing
 
         for sub_graph, cluster, sub_durations in zip(graphs, clusters,
                                                      durations_each_day):
