@@ -89,7 +89,7 @@ class DataHandling:
                          "W * (1+σ)"])
                 # greedy routing & greedy insertion
                 start = perf_counter()
-                route = Routing.greedy(n, d, _graph, _durations)
+                route = Routing.greedy_routing(n, d, _graph, _durations)
                 end = perf_counter()
                 time = end - start
                 evaluation, _, _ = Routing.evaluate_route(route, d,
@@ -113,7 +113,7 @@ class DataHandling:
                     route, d, _graph, _durations)
                 new_rows.append(
                     ["K-Means & Greedy", n, d, evaluation, time,
-                     "W * (1+\sigma)"])
+                     "W * (1+\\sigma)"])
                 # kmeans & brute force
                 start = perf_counter()
                 clusters = kmeans.find_clusters(_coordinates, d, n)
@@ -134,7 +134,7 @@ class DataHandling:
                     evaluation = float('inf')
                 new_rows.append(
                     ["K-Means & Brute Force", n, d, evaluation,
-                     time, "W * (1+\sigma)"])
+                     time, "W * (1+\\sigma)"])
                 # Genetic Clustering + Greedy
                 start = perf_counter()
                 clusters = genetic_clustering.find_clusters(
@@ -150,7 +150,7 @@ class DataHandling:
                                                           _durations)
                 new_rows.append(
                     ["Genetic Clustering & Greedy Routing", n, d,
-                     evaluation, time, "W * (1+\sigma)"])
+                     evaluation, time, "W * (1+\\sigma)"])
                 # Genetic Centroid Clustering + Greedy
                 start = perf_counter()
                 clusters = genetic_centroid_clustering.find_clusters(
@@ -167,7 +167,7 @@ class DataHandling:
                                                           _durations)
                 new_rows.append(
                     ["Genetic Centorid Clustering & Greedy Routing",
-                     n, d, evaluation, time, "W * (1+\sigma)"])
+                     n, d, evaluation, time, "W * (1+\\sigma)"])
         return new_rows
 
     @staticmethod
@@ -204,7 +204,7 @@ class DataHandling:
         possible to collect data and save it to the project database.
         """
         i = 0
-        while i < 1779:
+        while i < 2500:
             datum = self.generate_test_datum()
             if not isinstance(datum, int):
                 self.save_test_datum(datum, DataGroups.graphs)

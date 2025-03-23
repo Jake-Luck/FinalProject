@@ -236,7 +236,8 @@ class Shorthands:
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
 
-        route = Routing.greedy(num_locations, num_days, graph, durations)
+        route = Routing.greedy_routing(
+            num_locations, num_days, graph, durations)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
