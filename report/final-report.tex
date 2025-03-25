@@ -46,44 +46,76 @@
 
     \section{Introduction}\label{sec:introduction}
     \subsection{Motivation}\label{subsec:motivation}
+    \todo{Write about reasoning for this project, can copy a little bit over from presentation slides. Explain problem informally. Link into aims and objectives.}
     \subsection{Aims and Objectives}\label{subsec:aims-and-objectives}
+    \todo{Explin goals of the project, link in to methodology.}
+    \subsection{Methodology}\label{subsec:methodology}
+    \todo{Explain how the project will be carried out.}
+    \subsection{Summary}\label{subsec:summary}
+    \todo{Explain what is in the rest of the report. "In this report I shall...", cover each section, etc.}
 
     \pagebreak
     
     \section{Problem Formulation}\label{sec:problem-formulation}
-    %\input{problem-formulation}
-    \todo{Inserty problem formulation here}
+    \input{problem-formulation}
 
     \pagebreak
 
     \section{Literature Review}\label{sec:literature-review}
-    \todo{Write literature review}
+    \todo{Plan (and write) literature review}
 
     \pagebreak
 
     \section{Algorithms Investigated}\label{sec:algorithms-investigated}
-    \todo{Paragraph describing different types of algorithm used (Routing, Cluster and Routing, Evolutionary, etc.)}
-    \subsection{Brute Force}\label{subsec:brute-force}
+    \todo{Paragraph describing different types of algorithm used (Routing then cluster, Cluster then Routing, Genetic, etc.)}
+
+
+    \subsection{Routing}\label{subsec:routing}
+    \todo{Explain purpose of routing/goal of algorithms.}
+    \subsubsection{Brute Force}\label{subsubsec:brute-force-routing}
     \todo{Write brute force explanation}
+    \subsubsection{Greedy Routing/Insertion}\label{subsubsec:greedy-routing}
+    \todo{Explain greedy routing algorithm}
+    \todo{Explain greedy insertion algorithm}
+    \subsubsection{Gift Wrapping}\label{subsubsec:gift-wrapping}
+    \todo{Explain gift wrapping algorithm}
+    \todo{Something like: "Once gift wrapping has found a convex hull, a greedy insertion algorithm is used to find the optimal route within the convex hull."}
 
     \subsection{Clustering}\label{subsec:clustering}
-    \todo{Write clustering explanation}
-    Once divided into clusters, each cluster can be solved using our brute force method (with \(d = 1\)) or with
-    traditional TSP algorithms.
-    TSP algorithms implemented in this project include:
-    \subsection{Greedy}\label{subsec:greedy}
-    \todo{Write greedy explanation}
+    \todo{Explain purpose of clustering, how it is used in route planning and the goal of our algorithms.}
+    \subsubsection{K-Means}\label{subsubsec:k-means}
+    \todo{Explain k-means algorithm}
+
+    \subsection{Trip Generation}\label{subsec:trip-generation}
+    \todo{Explain trip generation, how it is used in route planning and the goal of our algorithms.}
+    \subsubsection{Brute Force}\label{subsubsec:brute-force-trip-generation}
+    \todo{Explain how brute force algorithm can be modified for trip generation.}
+
+    \subsection{Genetic Algorithms}\label{subsec:genetic-algorithm}
+    \todo{Explain basics of genetic algorithms, include how by considering different genomes, the algorithm can be used for routing, clustering or trip generation.}
+    \subsubsection{General Clustering}
+    \todo{Explain genetic clustering}
+    \subsubsection{Centroid-based Clustering}
+    \todo{Explain genetic centroid-based clustering and how it differs from general clustering.}
+    \subsubsection{Routing}
+    \todo{Explain genetic routing}
+    \subsubsection{Trip Generation}
+    \todo{Explain genetic trip generation}
 
     \pagebreak
 
     \section{Evaluation and Comparison}\label{sec:evaluation-and-comparison}
     \todo{Write paragraph about experiment process. Comparison based on computation time and route evaluation.
     Describe how route is evaluated. Describe data being tested on.}
+    \todo{Present comparison of different combinations of algorithms on different inputs.}
 
     \pagebreak
 
     \section{Conclusion}\label{sec:conclusion}
-    \todo{Write conclusion}
+    \todo{Write conclusion, discuss results, comparison of algorithms, etc.}
+    \todo{Project reflection subsection?}
+    \subsection{Further work}\label{subsec:further-work}
+    \todo{Discuss further work, what could be done to improve the project, what I would do differently.}
 
     \pagebreak
 
