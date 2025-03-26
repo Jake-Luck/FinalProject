@@ -34,9 +34,9 @@ class Algorithm:
                 evaluation_per_day[:] = float('inf')
                 return float('inf'), float('inf'), evaluation_per_day
 
-            evaluation += graph[previous_index][index]
+            evaluation += graph[previous_index, index]
             evaluation += durations[index]
-            evaluation_per_day[current_day] += graph[previous_index][index]
+            evaluation_per_day[current_day] += graph[previous_index, index]
 
             if index == 0:
                 current_day += 1
