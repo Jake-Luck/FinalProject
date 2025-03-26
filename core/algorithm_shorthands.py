@@ -8,7 +8,8 @@ from core.data_handling import DataHandling
 from core.plotting import Plotting
 
 from algorithms.clustering import KMeans, Clustering
-from algorithms.genetic import GeneticClustering, GeneticCentroidClustering
+from algorithms.genetic import (
+    GeneticClustering, GeneticCentroidClustering, GeneticRouting)
 from algorithms.routing import Routing
 
 from numpy import ndarray  # For type hints
@@ -86,15 +87,15 @@ class Shorthands:
             graph: ndarray | None = None,
             durations: ndarray | None = None,
             coordinates: ndarray | None = None,
-            num_generations: int = 100,
-            population_size: int = 10,
+            num_generations: int = 1000,
+            population_size: int = 100,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = 3) -> ndarray:
+            seed: int | None = None) -> ndarray:
         """
         Shorthand for performing genetic clustering and performing routing
         using those clusters. Unless **both** graph and coordinates are
@@ -117,14 +118,13 @@ class Shorthands:
         """
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
-        route_length = num_locations + num_days - 1
 
         genetic_algorithm = GeneticClustering(
             num_generations, population_size, crossover_probability,
             mutation_probability, generations_per_update, False, seed)
         cluster_assignments = genetic_algorithm.find_clusters(
-            graph, durations, num_locations, num_days, route_length,
-            routing_algorithm, coordinates)
+            graph, durations, num_locations, num_days, routing_algorithm,
+            coordinates)
 
         route = genetic_algorithm.find_route_from_clusters(
             cluster_assignments, num_days, routing_algorithm, graph, durations)
@@ -155,15 +155,15 @@ class Shorthands:
             graph: ndarray | None = None,
             durations: ndarray | None = None,
             coordinates: ndarray | None = None,
-            num_generations: int = 100,
-            population_size: int = 10,
+            num_generations: int = 1000,
+            population_size: int = 100,
             crossover_probability: float = 0.9,
             mutation_probability: float = 0.1,
             routing_algorithm: Clustering.RoutingMethods =
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = 4) -> ndarray:
+            seed: int | None = None) -> ndarray:
         """
         Shorthand for performing genetic centroid clustering and performing
         routing using those clusters. Unless **both** graph and coordinates are
@@ -208,6 +208,40 @@ class Shorthands:
                 routing_string = " + Unknown Routing"
         title = (f"Genetic Centroid Clustering{routing_string}: {evaluation}"
                  f", σ={std_deviation}")
+
+        centre = coordinates.mean(axis=0)
+        if plot:
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
+        return route
+
+    @staticmethod
+    def genetic_routing(
+            num_locations: int,
+            num_days: int,
+            graph: ndarray | None = None,
+            durations: ndarray | None = None,
+            coordinates: ndarray | None = None,
+            num_generations: int = 1000,
+            population_size: int = 100,
+            crossover_probability: float = 0.9,
+            mutation_probability: float = 0.1,
+            generations_per_update: int | None = 200,
+            plot: bool = True,
+            seed: int | None = None) -> ndarray:
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
+
+        genetic_algorithm = GeneticRouting(
+            num_generations, population_size, crossover_probability,
+            mutation_probability, generations_per_update, False, seed)
+        route = genetic_algorithm.find_route(
+            graph, durations, num_locations, num_days, coordinates)
+
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
+
+        title = f"Genetic Routing: {evaluation}, σ={std_deviation}"
 
         centre = coordinates.mean(axis=0)
         if plot:

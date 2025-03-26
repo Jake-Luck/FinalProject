@@ -64,7 +64,6 @@ class Genetic(Algorithm):
         pass
 
 
-# Pretty bad
 class GeneticClustering(Genetic, Clustering):
     """
     Class for genetic clustering. Genome contains the assignment of each
@@ -105,6 +104,23 @@ class GeneticClustering(Genetic, Clustering):
         :param parent2: Second parent's genome.
         :return: Offspring of each parent.
         """
+        def rename_individuals_clusters(individual: ndarray) -> ndarray:
+            """
+            Renames cluster assignments to be in order of appearance. This
+            ensures consistency between parent1 and parent2
+            :param individual: The individual to rename.
+            :return: The individual with renamed clusters.
+            """
+            unique_vals, first_indices = np.unique(individual,
+                                                   return_index=True)
+            sorted_unique_vals = unique_vals[np.argsort(first_indices)]
+            mapping = {val: i for i, val in enumerate(sorted_unique_vals)}
+
+            renamed_individual = np.vectorize(mapping.get)(individual)
+            return renamed_individual
+        parent1 = rename_individuals_clusters(parent1)
+        parent2 = rename_individuals_clusters(parent2)
+
         # Keeps value if parents the same, otherwise sets to -1
         offspring = np.where(parent1 == parent2, parent1, -1)
 
@@ -149,7 +165,6 @@ class GeneticClustering(Genetic, Clustering):
                       durations: ndarray,
                       num_locations: int,
                       num_days: int,
-                      route_length: int,
                       routing_method: Clustering.RoutingMethods,
                       coordinates: ndarray | None = None) -> ndarray:
         """
@@ -160,7 +175,6 @@ class GeneticClustering(Genetic, Clustering):
         :param durations: Duration spent at each location.
         :param num_locations: The number of locations in the route.
         :param num_days: The number of days in the route.
-        :param route_length: The length of the route.
         :param routing_method: The routing method to use on each cluster.
         :param coordinates: Coordinates of each location.
         :return: Each location's cluster assignment. A 1D array of shape
@@ -173,19 +187,14 @@ class GeneticClustering(Genetic, Clustering):
         evaluations = np.empty(self.population_size)
         evaluations[:] = float('inf')
 
-        n_routes = 1
-        for i in range(2, route_length):
-            n_routes *= i
-
         # Assign random clusters to each location
-        population = np.random.randint(num_days,
-                                       size=(self.population_size,
-                                             num_locations - 1))
+        population = np.random.randint(
+            num_days, size=(self.population_size, num_locations - 1))
 
         # Assign these before loop just in case num_generations is 0 and these
         # are used before initialisation
         index1 = 0
-        parent1 = None
+        parent1 = population[index1]
 
         for generation_number in range(self.num_generations):
             evaluations = self._evaluate_population(population, num_days,
@@ -223,8 +232,9 @@ class GeneticClustering(Genetic, Clustering):
 
                 for j in range(num_locations - 1):
                     mutate = random.random() < self.mutation_probability
-                    if mutate:
-                        population[i][j] = random.randrange(num_days)
+                    if not mutate:
+                        continue
+                    population[i, j] = random.randrange(num_days)
 
         print(f"Cluster evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
@@ -325,6 +335,12 @@ class GeneticCentroidClustering(Genetic, Clustering):
     def _generate_random_centroids(self,
                                    num_days: int,
                                    centre: ndarray):
+        """
+        Generates random centroids for each individual in the population.
+        :param num_days: The number of days in the route.
+        :param centre: The centre of the coordinates.
+        :return: A population of random centroids.
+        """
         centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
                                                    centre[0] + 0.1,
                                                    size=(self.population_size,
@@ -418,11 +434,10 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
                 for cluster in range(num_days):
                     mutate = random.random() < self.mutation_probability
-                    if mutate:
-                        mutation = np.random.uniform(-0.01, 0.01, 2)
-                        # todo: change array indexing throughout project to
-                        #  below format:
-                        population[individual, cluster] += mutation
+                    if not mutate:
+                        continue
+                    mutation = np.random.uniform(-0.01, 0.01, 2)
+                    population[individual, cluster] += mutation
 
         print(f"Centroid evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
@@ -430,3 +445,191 @@ class GeneticCentroidClustering(Genetic, Clustering):
             cluster_coordinates, parent1)
 
         return cluster_assignments
+
+
+class GeneticRouting(Genetic):
+    """
+    Class for genetic routing. Genome contains the order of locations in the
+    route.
+    """
+    def __init__(self,
+                 num_generations: int,
+                 population_size: int,
+                 crossover_probability: float,
+                 mutation_probability: float,
+                 generations_per_update: int | None = 1,
+                 plotting: bool = True,
+                 random_seed: int | None = None):
+        """
+        Initialises genetic routing with given parameters.
+        :param num_generations: Number of generations to run.
+        :param population_size: Number of individuals in each population.
+        :param crossover_probability: Probability of crossover (0-1).
+        :param mutation_probability: Probability of mutation (0-1).
+        :param generations_per_update: Number of generations between each
+        progress update. If None or less than 0, no updates given.
+        :param plotting: Whether to display plots on each update.
+        :param random_seed: Specified seed for random number generators.
+        """
+        super().__init__(num_generations, population_size,
+                         crossover_probability, mutation_probability,
+                         generations_per_update, plotting, random_seed)
+
+    def _crossover(self,
+                   parent1: ndarray,
+                   parent2: ndarray) -> ndarray:
+        """
+        Performs crossover between two given individuals.
+        :param parent1: First parent's genome.
+        :param parent2: Second parent's genome.
+        :return: Offspring of each parent.
+        """
+        num_days = np.count_nonzero(parent1 == 0)
+
+        offspring = np.empty_like(parent1)
+        offspring[:] = -1
+
+        crossover_point = random.randint(0, len(parent1)-1)
+
+        # Adds parent1 to offspring up to crossover point
+        offspring[:crossover_point] = parent1[:crossover_point]
+
+        num_days -= np.count_nonzero(offspring == 0)
+
+        # Adds remaining cities in order that they appear in parent2
+        offspring_index = crossover_point
+        for i in range(0, parent2.shape[0]-1):
+            if parent2[i] == 0 and num_days > 0 or parent2[i] not in offspring:
+                offspring[offspring_index] = parent2[i]
+                offspring_index += 1
+                if parent2[i] == 0:
+                    num_days -= 1
+
+        # Return to start at end of route
+        offspring[offspring.shape[0]-1] = 0
+        return offspring
+
+    def _evaluate_population(self,
+                             population: ndarray,
+                             num_days: int,
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
+        """
+        Evaluates the fitness of a given population.
+        :param population: Population to evaluate.
+        :param num_days: The number of days in the route.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :return: 1D ndarray representing each individual's fitness.
+        """
+        evaluations = np.zeros(self.population_size)
+        for individual in range(self.population_size):
+            evaluations[individual], _, _ = self.evaluate_route(
+                population[individual], num_days, graph, durations)
+        return evaluations
+
+    def _generate_random_routes(self,
+                                num_locations: int,
+                                num_days: int,
+                                n_routes) -> ndarray:
+        """
+        Generates a random route for each individual in the population.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param n_routes: Total number of possible routes
+        :return: A population of random routes.
+        """
+        population = np.empty((self.population_size, num_locations), dtype=int)
+        for i in range(self.population_size):
+            route_number = random.randint(0, n_routes)
+            population[i] = self.generate_route(route_number, n_routes,
+                                                num_locations, num_days,
+                                                num_locations)
+        return population
+
+    def find_route(self,
+                   graph: ndarray,
+                   durations: ndarray,
+                   num_locations: int,
+                   num_days: int,
+                   coordinates: ndarray | None = None) -> ndarray:
+        """
+        Generates a route that visits all locations using a genetic algorithm
+        approach. Genome contains the order of locations in the route.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param coordinates: Coordinates of each location. Used for plotting.
+        :return: A route that visits all locations.
+        """
+
+        if coordinates is None and self.plotting is True:
+            print("No coordinates provided, setting plotting to False")
+            self.plotting = False
+
+        evaluations = np.empty(self.population_size)
+        evaluations[:] = float('inf')
+
+        route_length = num_locations + num_days - 1
+
+        n_routes = 1
+        for i in range(2, route_length):
+            n_routes *= i
+        # Assign random routes to each location
+        population = self._generate_random_routes(num_locations, num_days,
+                                                  n_routes)
+
+        # Assign these before loop just in case num_generations is 0 and these
+        # are used before initialisation
+        index1 = 0
+        parent1 = population[index1]
+
+        for generation_number in range(self.num_generations):
+            evaluations = self._evaluate_population(population, num_days, graph,
+                                                    durations)
+
+            index1, index2 = np.argpartition(evaluations, 2)[:2]
+            parent1 = population[index1]
+            parent2 = population[index2]
+
+            if self.generations_per_update is not None \
+                    and generation_number % self.generations_per_update == 0:
+                progress = 100 * generation_number/self.num_generations
+                print(f"Route evolution {int(progress)}% complete: "
+                      f"{generation_number}/{self.num_generations} completed. "
+                      f"Best evaluation: {evaluations[index1]}")
+
+                if self.plotting:
+                    Plotting.display_route(coordinates, parent1)
+
+            # Crossover
+            population[0] = parent1
+            population[1] = parent2
+
+            for i in range(2, self.population_size):
+                use_crossover = random.random() < self.crossover_probability
+
+                # Generate random individual (increases genetic diversity)
+                if not use_crossover:
+                    route_number = random.randint(0, n_routes)
+                    population[i] = self.generate_route(route_number, n_routes,
+                                                        num_locations, num_days,
+                                                        num_locations)
+                    continue
+
+                population[i] = self._crossover(parent1, parent2)
+
+                mutate = random.random() < self.mutation_probability
+                if not mutate:
+                    continue
+                # swap two elements
+                mutation_index1, mutation_index2 = random.sample(
+                    range(num_locations), 2)
+                temp = population[i, mutation_index1]
+                population[i, mutation_index1] = population[i, mutation_index2]
+                population[i, mutation_index2] = temp
+
+        print(f"Route evolution complete. "
+              f"Best evaluation: {evaluations[index1]}")
+        return parent1

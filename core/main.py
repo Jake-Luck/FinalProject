@@ -35,12 +35,11 @@ def main():
     Shorthands.k_means(num_locations, num_days, graph, durations, coordinates,
                        KMeans.RoutingMethods.BRUTE_FORCE)
     Shorthands.genetic_clustering(
-        num_locations, num_days, graph, durations, coordinates,
-        mutation_probability=0.1, generations_per_update=1)
+        num_locations, num_days, graph, durations, coordinates)
     Shorthands.genetic_centroid_clustering(
-        num_locations, num_days, graph, durations, coordinates,
-        mutation_probability=0.1, generations_per_update=1)
-
+        num_locations, num_days, graph, durations, coordinates)
+    Shorthands.genetic_routing(
+        num_locations, num_days, graph, durations, coordinates)
     data_collection_thread.join()
 
 
