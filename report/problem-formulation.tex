@@ -9,7 +9,7 @@ that:
     each visit to $s$.
 \end{enumerate}
 
-\subsection{Inputs and Outputs}\label{subsec:inputs-and-outputs}
+\subsection{Inputs, Outputs and Design Variables}\label{subsec:inputs-and-outputs}
 Inputs:
 \begin{itemize}
     \item $d$: The number of times $s$ should be visited in a route.
@@ -49,13 +49,14 @@ Inputs:
 Outputs:
     \begin{itemize}
     \item $R$: A valid route satisfying all constraints, represented as an ordered sequence of locations.\\
-    $R = [r_1, r_2, \dots, r_n]$, $r_i \in V$.
+    $R = [r_1, r_2, \dots, r_n], r_i \in V$.
 \end{itemize}
 
-\subsection{Optimisation}\label{subsec:optimisation}
+\subsection{Objective Function}\label{subsec:objective-function}
 As previously mentioned in the \hyperref[subsec:problem-description]{Problem Description}, our goal is to find a
 route that minimises the cumulative weight and the variance in route weight between each visit to $s$.
 To accomplish this the following cost function is applied to each route:
+\todo{Update equation for cost, talk to leandro about how to handle changing this.}
 \begin{equation}
     Cost(R) = W \times (1 + \sigma)\label{eq:cost}
 \end{equation}
@@ -67,4 +68,6 @@ sum of weights between each visit to $s$:
 \end{equation}
 Where $R$ is divided into sections between each visit to $s$ and $X$ is a list of the sum of weights within these
 sections.
-$\mu$ is the mean cumulative weight of each $x_i$.\\\\
+$\mu$ is the mean cumulative weight of each $x_i$.
+\subsection{Constraints}\label{subsec:constraints}
+\todo{Describe constraints}
