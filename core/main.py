@@ -14,14 +14,15 @@ def main():
     Launching point of the program, always starts a thread for collecting data.
     """
     data_handler = DataHandling()
-    data_collection_thread = threading.Thread(
-        target=data_handler.collect_test_data)
-    data_collection_thread.start()
+    #data_collection_thread = threading.Thread(
+    #    target=data_handler.collect_test_data)
+    #data_collection_thread.start()
 
-    num_locations = 25
-    num_days = 5
-    seed = 4
-    graph, coordinates = DataHandling.get_random_datum()
+    num_locations = 6
+    num_days = 2
+    seed = 0
+    np.random.seed(seed)
+    graph, coordinates = DataHandling.get_random_datum(seed)
     durations = np.random.randint(1, 96, num_locations) * 15
     durations[0] = 0
     graph = graph[:num_locations, :num_locations]
@@ -29,7 +30,9 @@ def main():
 
     Shorthands.gift_wrapping(num_locations, num_days, graph, durations,
                              coordinates)
-    Shorthands.brute_force(9, 3, graph[:9, :9], durations[:9], coordinates[:9])
+    Shorthands.brute_force(
+        num_locations, num_days, graph[:num_locations, :num_locations],
+        durations[:num_locations], coordinates[:num_locations])
     Shorthands.greedy(num_locations, num_days, graph, durations, coordinates)
     Shorthands.k_means(num_locations, num_days, graph, durations, coordinates)
     Shorthands.k_means(num_locations, num_days, graph, durations, coordinates,
@@ -40,6 +43,7 @@ def main():
         num_locations, num_days, graph, durations, coordinates)
     Shorthands.genetic_routing(
         num_locations, num_days, graph, durations, coordinates)
+    return
     data_collection_thread.join()
 
 
