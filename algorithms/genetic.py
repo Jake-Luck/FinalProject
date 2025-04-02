@@ -484,7 +484,6 @@ class GeneticRouting(Genetic):
         :param parent2: Second parent's genome.
         :return: Offspring of each parent.
         """
-        num_days = np.count_nonzero(parent1 == 0)
 
         offspring = np.empty_like(parent1)
         offspring[:] = -1
@@ -494,16 +493,17 @@ class GeneticRouting(Genetic):
         # Adds parent1 to offspring up to crossover point
         offspring[:crossover_point] = parent1[:crossover_point]
 
-        num_days -= np.count_nonzero(offspring == 0)
+        days_left = (np.count_nonzero(parent1 == 0) -
+                     np.count_nonzero(offspring == 0)) - 1
 
         # Adds remaining cities in order that they appear in parent2
         offspring_index = crossover_point
         for i in range(0, parent2.shape[0]-1):
-            if parent2[i] == 0 and num_days > 0 or parent2[i] not in offspring:
+            if parent2[i] == 0 and days_left > 0 or parent2[i] not in offspring:
                 offspring[offspring_index] = parent2[i]
                 offspring_index += 1
                 if parent2[i] == 0:
-                    num_days -= 1
+                    days_left -= 1
 
         # Return to start at end of route
         offspring[offspring.shape[0]-1] = 0
@@ -531,7 +531,8 @@ class GeneticRouting(Genetic):
     def _generate_random_routes(self,
                                 num_locations: int,
                                 num_days: int,
-                                n_routes) -> ndarray:
+                                n_routes: int,
+                                route_length: int) -> ndarray:
         """
         Generates a random route for each individual in the population.
         :param num_locations: The number of locations in the route.
@@ -539,12 +540,13 @@ class GeneticRouting(Genetic):
         :param n_routes: Total number of possible routes
         :return: A population of random routes.
         """
-        population = np.empty((self.population_size, num_locations), dtype=int)
+        population = np.empty(shape=(self.population_size, route_length),
+                              dtype=int)
         for i in range(self.population_size):
             route_number = random.randint(0, n_routes)
             population[i] = self.generate_route(route_number, n_routes,
                                                 num_locations, num_days,
-                                                num_locations)
+                                                route_length)
         return population
 
     def find_route(self,
@@ -578,7 +580,7 @@ class GeneticRouting(Genetic):
             n_routes *= i
         # Assign random routes to each location
         population = self._generate_random_routes(num_locations, num_days,
-                                                  n_routes)
+                                                  n_routes, route_length)
 
         # Assign these before loop just in case num_generations is 0 and these
         # are used before initialisation
@@ -615,7 +617,7 @@ class GeneticRouting(Genetic):
                     route_number = random.randint(0, n_routes)
                     population[i] = self.generate_route(route_number, n_routes,
                                                         num_locations, num_days,
-                                                        num_locations)
+                                                        route_length)
                     continue
 
                 population[i] = self._crossover(parent1, parent2)
