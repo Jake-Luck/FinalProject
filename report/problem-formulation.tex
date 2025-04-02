@@ -62,12 +62,16 @@ To accomplish this the following cost function is applied to each route:
 \end{equation}
 Where $W$ is the sum of the weights of all edges traversed in the route and $\sigma$ is the standard deviation of the
 sum of weights between each visit to $s$:
-\todo{Add equation for $W$}
+\begin{equation}
+    W = \sum_{i=0}^{n-1} w(r_i, r_{i+1}), r_i \in R\label{eq:weight}
+\end{equation}
+Where $w(r_i, r_{i+1})$ is the weight of the edge between $r_i$ and $r_{i+1}$.
 \begin{equation}
     \sigma = \sqrt{\frac{\sum_{i=0}^{d}(x_i-\mu)}{d}}, x_i \in X\label{eq:standard-deviation}
 \end{equation}
 Where $R$ is divided into sections between each visit to $s$ and $X$ is a list of the sum of weights within these
-sections.
+sections.\\
 $\mu$ is the mean cumulative weight of each $x_i$.
+
 \subsection{Constraints}\label{subsec:constraints}
 \todo{Describe constraints}
