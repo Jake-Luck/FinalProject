@@ -37,6 +37,7 @@ class Algorithm:
             evaluation += graph[previous_index, index]
             evaluation += durations[index]
             evaluation_per_day[current_day] += graph[previous_index, index]
+            evaluation_per_day[current_day] += durations[index]
 
             if index == 0:
                 current_day += 1
@@ -44,17 +45,17 @@ class Algorithm:
 
 
         # Multiply durations by 1 + standard deviation of time spent each day
-        standard_deviation = float(np.std(evaluation_per_day))
-        evaluation *= 1 + standard_deviation
+        #standard_deviation = float(np.std(evaluation_per_day))
+        #evaluation *= 1 + standard_deviation
         
-        return evaluation, standard_deviation, evaluation_per_day
+        #return evaluation, standard_deviation, evaluation_per_day
 
         # W/d + σ^2
         evaluation /= num_days
-        variance = float(np.var(evaluation_per_day))
-        evaluation += variance
+        standard_deviation = float(np.std(evaluation_per_day))
+        evaluation += standard_deviation
 
-        return evaluation, variance, evaluation_per_day
+        return evaluation, standard_deviation, evaluation_per_day
 
     @staticmethod
     # TODO: Move base_set construction outside of method. In case generate
