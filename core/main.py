@@ -14,9 +14,13 @@ def main():
     Launching point of the program, always starts a thread for collecting data.
     """
     data_handler = DataHandling()
-    #data_collection_thread = threading.Thread(
-    #    target=data_handler.collect_test_data)
-    #data_collection_thread.start()
+    data_collection_thread = threading.Thread(
+        target=data_handler.collect_test_data)
+    data_collection_thread.start()
+
+    data_collection_thread.join()
+
+    return
 
     num_locations = 6
     num_days = 2
