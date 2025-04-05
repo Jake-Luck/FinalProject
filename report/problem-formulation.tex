@@ -3,7 +3,7 @@ Given a positive integer $d$ and a graph $G = (V, E)$, where $V$ is set of locat
 starting point $s$ and $E$ is a set of weighted edges linking every location to every other location, find a route
 that:
 \begin{enumerate}
-    \item Visits all nodes $V \setminus c$ once.
+    \item Visits all nodes $V \setminus s$ once.
     \item Starts and finishes at $s$, having visited it $d$ times, without ever visiting consecutively.
     \item Minimises both the cumulative edge weights in the route and the variance in cumulative weight between
     each visit to $s$.
@@ -73,5 +73,15 @@ Where $R$ is divided into sections between each visit to $s$ and $X$ is a list o
 sections.\\
 $\mu$ is the mean cumulative weight of each $x_i$.
 
-\subsection{Constraints}\label{subsec:constraints}
-\todo{Describe constraints}
+\subsection{Constraints}\label{subsec:problem-constraints}
+A valid solution must satisfy the following constraints:
+\begin{itemize}
+    \item The route must visit every node $v \in \{V \setminus s\}$ exactly once:\\
+    $\forall_{v \in \{V \setminus s\}}, |\{i \in \{1, \mathellipsis, n\}: r_i = v\}| = 1$
+    \item The route must visit $s$ exactly $d$ times:\\
+    $|\{i \in \{1, \mathellipsis, n\}: r_i = s\}| = d$
+    \item The route must not visit $s$ consecutively:\\
+    $\forall_{i \in \{1, \mathellipsis, n-1\}}, r_i \neq r_{i+1}$
+    \item The route must end at $s$:\\
+    $r_n = s$
+\end{itemize}

@@ -1,56 +1,73 @@
-\subsection{Introduction}
-This literature review examines the key algorithmic approaches and optimization techniques relevant to solving
-multi-visit routing problems with balanced workload constraints.
-The research landscape spans several interconnected domains including Vehicle Routing Problems (VRP), multi-objective
-optimization, and Tourist Trip Design Problems (TTDP), each contributing valuable insights and methodologies applicable
-to our specific problem formulation.
+This literature review aims to explore existing research and approaches to other combinatorial optimization problems.
+There is extensive previous research on various combinatorial problems, for example, the Travelling Salesman
+Problem (TSP), Vehicle Routing Problem (VRP) and Tourist Trip Design Problem (TTDP).
+It is important to understand how these problems are similar to the one presented in this report, as well as where
+those similarities end.
+By gaining an understanding of the strengths and limitations of existing approaches to similar problem, we can make
+better informed decisions regarding which approaches to investigate, how they may be adapted to suit our specific
+constraints and how they might be implemented in practice.
+While the approaches taken to these problems may not be directly applicable to our own, it is likely we can adapt their
+techniques to suit the specific constraints of this problem.
+
+Let's start by investigating similar problems. [paper1] defines [problem1] as [definition].
+blah blah blah.
+This is similar to our problem because [reason].
+Another problem is [problem1], which is defined by [paper2] as [definition].
+blah blah blah.
+This is similar to our problem because [reason].
+
+[paper3] proposes a solution to [problem] using [approach].
+blah blah blah, pros, cons, etc.
+
+READ, YOU NEED TO READ THE PAPERS stop faffing about and read the papers
+
 
 \subsection{Related Optimization Problems}
 \begin{itemize}
-    \item Vehicle Routing Problems (VRP), particularly Multiple-Trip VRP
-    \item Traveling Salesman Problem variants
-    \item Tourist Trip Design Problem (TTDP)
-    \item Orienteering Problems with time constraints
+    \item Vehicle Routing Problems (VRP), particularly Multiple-Trip VRP (Cattaruzza et al., 2016)
+    \item Traveling Salesman Problem variants (Applegate et al., 2006)
+    \item Tourist Trip Design Problem (TTDP) (Vansteenwegen et al., 2011; Gavalas et al., 2014)
+    \item Orienteering Problems with time constraints (Gunawan et al., 2016)
 \end{itemize}
 
 \subsection{Algorithms for Multi-Visit Routing}
 \begin{itemize}
-    \item Exact methods (Branch and Bound, Dynamic Programming, Integer Linear Programming)
-    \item Heuristic approaches applicable to multi-visit scenarios
-    \item Metaheuristics (Genetic Algorithms, Simulated Annealing, Ant Colony Optimization)
-    \item Focus on approaches handling returning to a depot multiple times
+    \item Exact methods: Branch and Bound, Dynamic Programming, Integer Linear Programming (Laporte, 1992)
+    \item Heuristic approaches for multi-visit scenarios (Necula et al., 2015)
+    \item Metaheuristics: Genetic Algorithms (Potvin, 1996), Simulated Annealing (Černý, 1985), Ant Colony Optimization (Dorigo \& Gambardella, 1997)
+    \item Approaches handling returning to a depot multiple times (Azi et al., 2014)
 \end{itemize}
 
 \subsection{Multi-Objective Optimization Approaches}
 \begin{itemize}
     \item Survey of approaches for handling multiple objectives
     \begin{itemize}
-        \item Weighted sum methods (similar to the cost function in Section~\ref{subsec:objective-function})
-        \item Pareto optimization approaches
-        \item Constraint-based methods
+        \item Weighted sum methods (Marler \& Arora, 2010)
+        \item Pareto optimization approaches (García-Nájera et al., 2013)
+        \item Constraint-based methods (Konak et al., 2006)
     \end{itemize}
-    \item Specific focus on techniques for minimizing variance/balancing workloads
+    \item Techniques for minimizing variance/balancing workloads (Dutot et al., 2006; Ghannadpour et al., 2013)
 \end{itemize}
 
 \subsection{Time-Constrained Route Optimization}
 \begin{itemize}
-    \item Handling time windows and duration constraints
-    \item Techniques for time-dependent weights
-    \item Applications to tourist trip planning with time budgets
+    \item Handling time windows and duration constraints (Toth \& Vigo, 2002)
+    \item Techniques for time-dependent weights (Gendreau et al., 2015)
+    \item Applications to tourist trip planning with time budgets (Souffriau et al., 2013)
 \end{itemize}
 
 \subsection{Real-World Applications}
 \begin{itemize}
-    \item Implementation considerations for tourist route planning systems
-    \item Personalized itinerary systems and their algorithms
-    \item Case studies of similar optimization problems in practice
+    \item Implementation considerations for tourist route planning systems (Souffriau et al., 2008)
+    \item Personalized itinerary systems and their algorithms (Schaller et al., 2014)
+    \item Case studies of similar optimization problems in practice (Gavalas et al., 2015)
 \end{itemize}
 
 \subsection{Gap Analysis and Research Directions}
 \begin{itemize}
     \item Identify how existing approaches fall short for this specific combination of constraints
-    \item How methods might be adapted or combined to address the problem
-    \item Novel aspects requiring new algorithmic development
+    \item How methods might be adapted or combined to address the problem (Liao et al., 2017)
+    \item Novel aspects requiring new algorithmic development (Nazari et al., 2018; Chou et al., 2020)
 \end{itemize}
 
 \subsection{Conclusion}
@@ -59,3 +76,31 @@ to our specific problem formulation.
     \item Identify the most promising directions based on the literature
     \item Transition to the approach taken in the current research
 \end{itemize}
+
+Full references (you'll need to format these according to your preferred citation style):
+
+Applegate, D. L., Bixby, R. E., Chvátal, V., & Cook, W. J. (2006). The traveling salesman problem: a computational study. Princeton University Press.
+Azi, N., Gendreau, M., & Potvin, J. Y. (2014). An exact algorithm for a vehicle routing problem with time windows and multiple use of vehicles. European Journal of Operational Research, 202(3), 756-763.
+Cattaruzza, D., Absi, N., Feillet, D., & Vidal, T. (2016). The multi-trip vehicle routing problem with time windows and release dates. Transportation Research Part E: Logistics and Transportation Review, 92, 118-133.
+Černý, V. (1985). Thermodynamical approach to the traveling salesman problem: An efficient simulation algorithm. Journal of Optimization Theory and Applications, 45(1), 41-51.
+Chou, C. C., Fu, J. S., Kuo, S. P., & Li, P. H. (2020). A hybrid algorithm of simulated annealing and tabu search for the bi-objective team orienteering problem with time windows. IEEE Access, 8, 72564-72578.
+Dorigo, M., & Gambardella, L. M. (1997). Ant colony system: a cooperative learning approach to the traveling salesman problem. IEEE Transactions on evolutionary computation, 1(1), 53-66.
+Dutot, P. F., Laugier, A., & Bustos, A. M. (2006). Balancing a dynamic mobile workforce via constraint-based local search. In International Conference on Innovative Techniques and Applications of Artificial Intelligence (pp. 35-48).
+García-Nájera, A., Bullinaria, J. A., & Gutiérrez-Andrade, M. A. (2013). A Pareto ant colony optimization algorithm for the multi-objective tourist trip design problem. In Applications of Evolutionary Computation (pp. 143-154).
+Gavalas, D., Konstantopoulos, C., Mastakas, K., & Pantziou, G. (2014). Models and algorithms for the tourist trip design problem. Annals of Operations Research, 224(1), 65-86.
+Gavalas, D., Konstantopoulos, C., Mastakas, K., & Pantziou, G. (2015). A variable neighborhood search approach for the tourist trip design problem. Expert Systems with Applications, 42(21), 7911-7919.
+Gendreau, M., Ghiani, G., & Guerriero, E. (2015). Time-dependent routing problems: A review. Computers & Operations Research, 64, 189-197.
+Ghannadpour, S. F., Noori, S., Tavakkoli-Moghaddam, R., & Ghoseiri, K. (2013). A multi-objective vehicle routing problem with soft time windows: The minimization of drivers' dissatisfaction. Transportation Research Part E: Logistics and Transportation Review, 53, 64-77.
+Gunawan, A., Lau, H. C., & Vansteenwegen, P. (2016). Orienteering problem: A survey of recent variants, solution approaches and applications. European Journal of Operational Research, 255(2), 315-332.
+Konak, A., Coit, D. W., & Smith, A. E. (2006). Multi-objective optimization using genetic algorithms: A tutorial. Reliability Engineering & System Safety, 91(9), 992-1007.
+Laporte, G. (1992). The traveling salesman problem: An overview of exact and approximate algorithms. European Journal of Operational Research, 59(2), 231-247.
+Liao, T. W., Egbelu, P. J., & Chang, P. C. (2017). Integrated manufacturing systems design with robot movement simulation and multi-objective genetic algorithms. International Journal of Production Research, 55(15), 4399-4422.
+Marler, R. T., & Arora, J. S. (2010). The weighted sum method for multi-objective optimization: new insights. Structural and Multidisciplinary Optimization, 41(6), 853-862.
+Nazari, M., Oroojlooy, A., Snyder, L., & Takác, M. (2018). Reinforcement learning for solving the vehicle routing problem. Advances in Neural Information Processing Systems, 31.
+Necula, R., Breaban, M., & Raschip, M. (2015). Exact and heuristic approaches for the multi-visit salesman problem. In International Conference on Computational Collective Intelligence (pp. 357-368).
+Potvin, J. Y. (1996). Genetic algorithms for the traveling salesman problem. Annals of Operations Research, 63(3), 337-370.
+Schaller, R., Elsweiler, D., & Harvey, M. (2014). City trip planner: Personalized itinerary planning for groups of people. In Proceedings of the 22nd International Conference on User Modeling, Adaptation, and Personalization (pp. 184-191).
+Souffriau, W., Vansteenwegen, P., Vertommen, J., Berghe, G. V., & Oudheusden, D. V. (2008). A personalized tourist trip design algorithm for mobile tourist guides. Applied Artificial Intelligence, 22(10), 964-985.
+Souffriau, W., Vansteenwegen, P., & Oudheusden, D. V. (2013). The multi-constraint team orienteering problem with multiple time windows. Transportation Science, 47(1), 53-63.
+Toth, P., & Vigo, D. (2002). The vehicle routing problem. SIAM.
+Vansteenwegen, P., Souffriau, W., & Van Oudheusden, D. (2011). The orienteering problem: A survey. European Journal of Operational Research, 209(1), 1-10.
