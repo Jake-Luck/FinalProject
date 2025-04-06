@@ -183,7 +183,7 @@ class Plotting:
                                      lon=centre[0]
                                  ),
                                  pitch=0,
-                                 zoom=11,
+                                 zoom=10,
                                  style='carto-voyager'
                              ))
 
