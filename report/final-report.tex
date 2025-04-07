@@ -12,9 +12,13 @@
 \usepackage{blindtext}
 \usepackage{titlesec}
 \usepackage{todonotes}
+\usepackage[hidelinks]{hyperref}
+
 \usepackage{graphicx}
 \graphicspath{{images/}}
-\usepackage[hidelinks]{hyperref}
+
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
 
  % Set inline as default for todos
 \usepackage{regexpatch}
@@ -98,6 +102,5 @@
     \pagebreak
 
     \section{Bibliography}\label{sec:bibliography}
-    \todo{Fill in bibliography}
-
+    \printbibliography
 \end{document}
