@@ -10,6 +10,7 @@ that:
 \end{enumerate}
 
 \subsection{Inputs, Outputs and Design Variables}\label{subsec:inputs-and-outputs}
+\todo{Update so durations aren't in the graph, instead something like D, mapping a duration to each location.}
 Inputs:
 \begin{itemize}
     \item $d$: The number of times $s$ should be visited in a route.
@@ -19,13 +20,9 @@ Inputs:
         \item[\textbullet] $V$: A set of nodes representing locations the tourist would like to visit.
         $v \in V, v = (x, y, t)$, a triple comprising:
         \begin{itemize}
-            \item[\textbullet]$x$: Longitude, indicating the location's geographic east-west position on the
-            earth\footnote{\label{latitude-longitude-note}While the coordinates of our locations are
-            included in $V$, they are not directly tied to the weight of our edges $E$, which are based on
-            time and not distance.}.\\
+            \item[\textbullet]$x$: Longitude, indicating the location's geographic east-west position on the earth
             $x \in \mathbb{Q}, -180 \leq x \leq 180$.
-            \item[\textbullet]$y$: Latitude, indicating the location's geographic north-south position on
-            the earth\footnote{See footnote \ref{latitude-longitude-note}}.\\
+            \item[\textbullet]$y$: Latitude, indicating the location's geographic north-south position on the earth
             $y \in \mathbb{Q}, -90 \leq y \leq 90$.
             \item[\textbullet]$t$: Duration, in minutes, indicating how much time to spend at this location.\\
             $t \in \mathbb{Z}, t > 0$.
