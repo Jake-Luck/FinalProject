@@ -55,16 +55,16 @@ route that minimises the cumulative weight and the variance in route weight betw
 To accomplish this the following cost function is applied to each route:
 \todo{Update equation for cost, talk to leandro about how to handle changing this.}
 \begin{equation}
-    Cost(R) = W \times (1 + \sigma)\label{eq:cost}
+    Cost(R) = W/d \times (1 + \sigma^2)\label{eq:cost}
 \end{equation}
-Where $W$ is the sum of the weights of all edges traversed in the route and $\sigma$ is the standard deviation of the
+Where $W$ is the sum of the weights of all edges traversed in the route and $\sigma^2$ is the variance of the
 sum of weights between each visit to $s$:
 \begin{equation}
     W = \sum_{i=0}^{n-1} w(r_i, r_{i+1}), r_i \in R\label{eq:weight}
 \end{equation}
 Where $w(r_i, r_{i+1})$ is the weight of the edge between $r_i$ and $r_{i+1}$.
 \begin{equation}
-    \sigma = \sqrt{\frac{\sum_{i=0}^{d}(x_i-\mu)}{d}}, x_i \in X\label{eq:standard-deviation}
+    \sigma^2 = \frac{\sum_{i=0}^{d}(x_i-\mu)}{d}, x_i \in X\label{eq:standard-deviation}
 \end{equation}
 Where $R$ is divided into sections between each visit to $s$ and $X$ is a list of the sum of weights within these
 sections.\\
