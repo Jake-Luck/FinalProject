@@ -103,12 +103,14 @@ class KMeans(Clustering):
     Class for K-Means clustering.
     """
     def __init__(self,
-                 show_stages: bool = False):
+                 show_stages: bool = False,
+                 maximum_iterations: int = 100):
         """
         Initialises k-means class with given parameter.
         :param show_stages: Whether to plot each k-means stage.
         """
         self.show_stages = show_stages
+        self.maximum_iterations = maximum_iterations
 
     @staticmethod
     def _compute_means(coordinates: ndarray,
@@ -153,12 +155,12 @@ class KMeans(Clustering):
                                           replace=False)
         means = coordinates[chosen_indices]
 
-        MAXIMUM_ITERATIONS = 100
-        for _ in range(MAXIMUM_ITERATIONS):
+        for _ in range(self.maximum_iterations):
             cluster_assignments = self._assign_nodes_to_centroid(coordinates,
                                                                  means)
             coordinates[:, 2] = cluster_assignments
 
+            # Delete this for screenshots
             if self.show_stages:
                 centre = coordinates.mean(axis=0)
                 Plotting.display_clusters(coordinates, cluster_assignments,
