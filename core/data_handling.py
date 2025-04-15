@@ -209,7 +209,7 @@ class DataHandling:
                 "geojson": {"type": "Point", "coordinates": centre.tolist()}
             },
             "filters": {"category_group_ids": [130, 220, 260, 420, 560]},
-            "limit": 25
+            "limit": 24
         }
         headers = {
             'Accept': 'application/json, application/geo+json, '
