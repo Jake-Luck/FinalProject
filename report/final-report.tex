@@ -16,7 +16,10 @@
 \usepackage{titlesec}
 \usepackage{todonotes}
 \usepackage{setspace}
-\usepackage{subcaption}
+
+\usepackage{caption}
+\DeclareCaptionLabelFormat{cont}{#1~#2\alph{ContinuedFloat}}
+\captionsetup[ContinuedFloat]{labelformat=cont}
 
 \usepackage{graphicx}
 \graphicspath{{images/}}
