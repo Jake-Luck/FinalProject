@@ -39,10 +39,12 @@ class Clustering(Algorithm):
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
-        # Gets a matrix of distances from each coordinate to each centroid
+        # Gets a matrix of distances from each location to each centroid
         distances = np.linalg.norm(
             coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
 
+        # For each location (index in distance matrix) gets the index for the
+        # centroid with the smallest distance
         clusters = np.argmin(distances, axis=1)
         return clusters
 
@@ -137,11 +139,15 @@ class KMeans(Clustering):
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
-        # Todo: Change so centre can be specified instead of assuming index 0
+        # Todo: Change so starting point can be specified instead of assuming index 0
         coordinates = np.append(coordinates[1:], np.zeros((n-1, 1)), axis=1)
 
-        # Todo: Change so initial means are random and non-deterministic
-        means = np.array(coordinates[:k], copy=True)
+        centre = coordinates.mean(axis=0)
+        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
+                                                   centre[0] + 0.1, size=k)
+        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
+                                                   centre[1] + 0.1, size=k)
+        means = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
 
         cluster_assignments = previous_clusters = np.zeros(n)
         MAXIMUM_ITERATIONS = 100
