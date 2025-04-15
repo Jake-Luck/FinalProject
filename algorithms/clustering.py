@@ -112,44 +112,47 @@ class KMeans(Clustering):
 
     @staticmethod
     def _compute_means(coordinates: ndarray,
-                       k: int) -> ndarray:
+                       num_days: int) -> ndarray:
         """
         Computes the mean coordinate of each cluster.
         :param coordinates: Coordinates of each cluster, a 2D array with shape
         (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
-        :param k: The number of clusters/means to compute.
+        :param num_days: The number of clusters/means to compute.
         :return: Returns a list of means, 1D array.
         """
-        computed_means = np.empty((k, 2))
+        computed_means = np.empty((num_days, 2))
 
-        for i in range(k):
-            _cluster_assignments = coordinates[coordinates[:, 2] == i, :2]
-            computed_means[i] = _cluster_assignments.mean(axis=0)
+        for i in range(num_days):
+            cluster = coordinates[coordinates[:, 2] == i, :2]
+            computed_means[i] = cluster.mean(axis=0)
         return computed_means
 
     def find_clusters(self,
                       coordinates: ndarray,
-                      k: int,
-                      n: int):
+                      num_days: int,
+                      num_locations: int):
         """
         Sorts n coordinates into k clusters via a K-Means approach.
         :param coordinates: Coordinates of each location.
-        :param k: Number of clusters.
-        :param n: Number of locations.
+        :param num_days: Number of clusters.
+        :param num_locations: Number of locations.
         :return: Each location's cluster assignment. A 1D array of shape
         (num_locations).
         """
-        # Todo: Change so starting point can be specified instead of assuming index 0
-        coordinates = np.append(coordinates[1:], np.zeros((n-1, 1)), axis=1)
+        # Initialises cluster assignments to 0
+        cluster_assignments = previous_clusters = np.zeros(num_locations)
 
-        centre = coordinates.mean(axis=0)
-        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
-                                                   centre[0] + 0.1, size=k)
-        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
-                                                   centre[1] + 0.1, size=k)
-        means = np.dstack((centroid_x_coordinates, centroid_y_coordinates))
+        # Adds third axis to coordinates. Used to denote cluster assignment.
+        # Excludes starting point, which does not need clustering.
+        coordinates = np.append(coordinates[1:],
+                                np.zeros((num_locations - 1, 1)),
+                                axis=1)
 
-        cluster_assignments = previous_clusters = np.zeros(n)
+        # Initialises means to random unique coordinates
+        chosen_indices = np.random.choice(coordinates.shape[0], num_days,
+                                          replace=False)
+        means = coordinates[chosen_indices]
+
         MAXIMUM_ITERATIONS = 100
         for _ in range(MAXIMUM_ITERATIONS):
             cluster_assignments = self._assign_nodes_to_centroid(coordinates,
@@ -158,13 +161,13 @@ class KMeans(Clustering):
 
             if self.show_stages:
                 centre = coordinates.mean(axis=0)
-                Plotting.display_clusters(coordinates, cluster_assignments, k,
-                                          means, centre)
+                Plotting.display_clusters(coordinates, cluster_assignments,
+                                          num_days, means, centre)
 
             if np.array_equal(cluster_assignments, previous_clusters):
                 break
             previous_clusters = np.array(cluster_assignments, copy=True)
 
-            means = self._compute_means(coordinates, k)
+            means = self._compute_means(coordinates, num_days)
 
         return cluster_assignments
