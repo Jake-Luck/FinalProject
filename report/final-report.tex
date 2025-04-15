@@ -1,5 +1,6 @@
 % Preamble
 \documentclass[a4paper,12pt]{article}
+\counterwithin{figure}{section}
 
 % Prevents line breaks mid-word
 \tolerance=1
@@ -10,10 +11,12 @@
 % Packages
 \usepackage{amsfonts}
 \usepackage{blindtext}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
 \usepackage{todonotes}
 \usepackage{setspace}
-\usepackage[hidelinks]{hyperref}
+\usepackage{subcaption}
 
 \usepackage{graphicx}
 \graphicspath{{images/}}
@@ -59,6 +62,7 @@
     \todo{Explin goals of the project, link in to methodology.}
     \subsection{Methodology}\label{subsec:methodology}
     \todo{Briefly explain how the project will be carried out. A more thorough description can be provided later on, i.e., when describing algorithms.}
+    \todo{Mention code being available from github. Include a code segment and explain how figure captions denote filepath within the repository.}
     \subsection{Summary}\label{subsec:summary}
     \todo{Explain what is in the rest of the report. "In this report I shall...", cover each section, etc.}
 
@@ -81,15 +85,12 @@
 
     \pagebreak
 
-    \section{Implementation}\label{sec:implementation}
-
-    \subsection{Constraints}\label{subsec:implementation-constraints}
-
-    \pagebreak
-
     \section{Evaluation and Comparison}\label{sec:evaluation-and-comparison}
-    \todo{Write paragraph about experiment process. Comparison based on computation time and route evaluation.
-    Describe how route is evaluated. Describe data being tested on.}
+    \subsection{Methodology}\label{subsec:evaluation-methodology}
+    \subsubsection{Constraints}\label{subsubsec:constraints}
+    \subsection{Results \& Analysis}\label{subsec:results-and-analysis}
+    \todo{Gather data for London and Birmingham with POI}
+    \todo{Write paragraph about experiment process. Comparison based on computation time and route evaluation. Describe how route is evaluated. Describe data being tested on.}
     \todo{Present comparison of different combinations of algorithms on different inputs.}
     \todo{Reflect about the questionns you are trying to answer with your evaluation. You can have onne subsection for each question that you are trying to answer. It's also important to justify your choices when it comes to the methodology used for evaluation.}
 
@@ -101,6 +102,8 @@
     \todo{Reflect on the project, what went well, what didn't go well, what I would do differently. This should lead into future work.}
     \subsection{Future work}\label{subsec:future-work}
     \todo{Discuss further work, what I will be doing to improve the project}
+    \todo{Discuss spectral clustering}
+    \todo{Discuss Neural Networks}
 
     \pagebreak
 
