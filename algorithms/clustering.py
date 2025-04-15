@@ -143,10 +143,12 @@ class KMeans(Clustering):
         # Todo: Change so initial means are random and non-deterministic
         means = np.array(coordinates[:k], copy=True)
 
-        previous_clusters = np.zeros(n)
-        while True:
-            coordinates[:, 2] = cluster_assignments = (
-                self._assign_nodes_to_centroid(coordinates, means))
+        cluster_assignments = previous_clusters = np.zeros(n)
+        MAXIMUM_ITERATIONS = 100
+        for _ in range(MAXIMUM_ITERATIONS):
+            cluster_assignments = self._assign_nodes_to_centroid(coordinates,
+                                                                 means)
+            coordinates[:, 2] = cluster_assignments
 
             if self.show_stages:
                 centre = coordinates.mean(axis=0)
