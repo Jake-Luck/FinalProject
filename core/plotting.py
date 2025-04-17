@@ -173,7 +173,7 @@ class Plotting:
         :param figure: The figure to update and display.
         """
         if title is not None:
-            figure.update_layout(title=title)
+            figure.update_layout(title=title, title_x=0.5, title_y=0.91)
 
         figure.update_layout(autosize=True,
                              map=dict(
