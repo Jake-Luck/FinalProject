@@ -65,18 +65,12 @@ class Clustering(Algorithm):
         :param durations: Duration spent at each location.
         :return: 1D ndarray representing the found route.
         """
+        # uses a list of each locations cluster assignment to form a list of   ⠀
+        # the index for each clustser's locations.
         clusters = list[ndarray]()
         for i in range(num_days):
             indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
             clusters.append(np.concatenate(([0], indexes_in_cluster)))
-
-        # numpy magic
-        # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
-        # Which can they be used to access graphs
-        graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
-        durations_each_day = [durations[indexes] for indexes in clusters]
-
-        route = np.empty(0, dtype=int)
 
         routing = Routing()
         match routing_method:
@@ -88,10 +82,18 @@ class Clustering(Algorithm):
                 print("Invalid routing method, defaulting to greedy")
                 routing_function = routing.greedy_routing
 
+        # numpy magic
+        # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
+        # Which can they be used to easily form subgraphs for each cluster.    ⠀
+        graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
+        durations_each_day = [durations[indexes] for indexes in clusters]
+
+        route = np.empty(0, dtype=int)
         for sub_graph, cluster, sub_durations in zip(graphs, clusters,
                                                      durations_each_day):
-            n = sub_graph.shape[0]
-            sub_route = routing_function(n, 1, sub_graph,
+            num_locations = sub_graph.shape[0]
+            num_days = 1
+            sub_route = routing_function(num_locations, num_days, sub_graph,
                                          sub_durations)
 
             route = np.concatenate((route, cluster[sub_route]))

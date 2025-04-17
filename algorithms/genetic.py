@@ -34,6 +34,11 @@ class Genetic(Algorithm):
         :param plotting: Whether to display plots on each update.
         :param random_seed: Specified seed for random number generators.
         """
+        if num_generations < 1:
+            raise ValueError("num_generations must be at least 1.")
+        if population_size < 3:
+            raise ValueError("population_size must be at least 3.")
+
         self.num_generations = num_generations
         self.population_size = population_size
         self.crossover_probability = crossover_probability
@@ -92,8 +97,6 @@ class GeneticClustering(Genetic, Clustering):
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
 
-    # todo: The same cluster might be given a different number and be
-    #  considered a conflict when there shouldn't be one, needs fixing.
     def _crossover(self,
                    parent1: ndarray,
                    parent2: ndarray) -> ndarray:
@@ -121,17 +124,9 @@ class GeneticClustering(Genetic, Clustering):
         parent1 = rename_individuals_clusters(parent1)
         parent2 = rename_individuals_clusters(parent2)
 
-        # Keeps value if parents the same, otherwise sets to -1
-        offspring = np.where(parent1 == parent2, parent1, -1)
+        crossover_mask = np.random.randint(0, 2, size=len(parent1))
+        offspring = np.where(crossover_mask == 0, parent1, parent2)
 
-        # For each conflicting assignment, choose from parent randomly.
-        conflicts = np.argwhere(offspring == -1)
-        for conflict in conflicts:
-            chosen_parent = random.randrange(2)
-            if chosen_parent == 0:
-                offspring[conflict] = parent1[conflict]
-            else:
-                offspring[conflict] = parent2[conflict]
         return offspring
 
     def _evaluate_population(self,
@@ -201,6 +196,7 @@ class GeneticClustering(Genetic, Clustering):
                                                     routing_method, graph,
                                                     durations)
 
+            # get the indices of the lowest (and best) evaluations
             index1, index2 = np.argpartition(evaluations, 2)[:2]
             parent1 = population[index1]
             parent2 = population[index2]
@@ -215,20 +211,22 @@ class GeneticClustering(Genetic, Clustering):
                 if self.plotting:
                     Plotting.display_clusters(coordinates, parent1, num_days)
 
-            # Crossover
+            # Maintain best two individuals across generations.
             population[0] = parent1
             population[1] = parent2
 
+            # Generate rest of new generation
             for i in range(2, self.population_size):
                 use_crossover = random.random() < self.crossover_probability
 
-                # Generate random individual (increases genetic diversity)
                 if not use_crossover:
+                    # Generate random individual (increases genetic diversity) ⠀
                     population[i] = np.random.randint(num_days,
                                                       size=num_locations - 1)
                     continue
 
                 population[i] = self._crossover(parent1, parent2)
+
 
                 for j in range(num_locations - 1):
                     mutate = random.random() < self.mutation_probability
