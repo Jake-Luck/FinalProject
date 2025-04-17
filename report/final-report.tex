@@ -1,6 +1,5 @@
 % Preamble
 \documentclass[a4paper,12pt]{article}
-\counterwithin{figure}{section}
 
 % Prevents line breaks mid-word
 \tolerance=1
@@ -17,8 +16,11 @@
 \usepackage{todonotes}
 \usepackage{setspace}
 
+\usepackage[margin=1in]{geometry}
+
 \usepackage{caption}
 \DeclareCaptionLabelFormat{cont}{#1~#2\alph{ContinuedFloat}}
+\captionsetup{justification=centering, margin=0.5cm}
 \captionsetup[ContinuedFloat]{labelformat=cont}
 
 \usepackage{graphicx}
@@ -37,12 +39,13 @@
 \begin{document}
     \begin{titlepage}
         \centering
+        \vspace*{8ex}
         \includegraphics[width = 1\textwidth]{UoB_Logo}\\[10ex]
-        \Huge{A Comparison of Approaches to Combinatorial Optimisation for Multi-Day Route Planning}\\[14ex]
+        \Huge{A Comparison of Approaches to Combinatorial Optimisation for Multi-Day Route Planning}\\[3ex]
         \LARGE{Jacob Luck}\\
-        \large{2338114}\\[2ex]
+        \large{2338114}\\[18ex]
         \Large{B.Sc. Computer Science with a Year in Industry}\\
-        \Large{Project Supervisor - Leandro Minku}\\[2ex]
+        \Large{Project Supervisor - Leandro Minku}\\[6ex]
         \large{April 2025}\\
         \large{xxxx Words}
     \end{titlepage}
