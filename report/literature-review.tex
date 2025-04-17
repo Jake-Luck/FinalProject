@@ -13,20 +13,23 @@ The Travelling Salesman Problem (TSP) is perhaps one of the most studied optimis
 This extensive research on the problem has acted as an `engine of discovery for general-purpose techniques' offering
 large contributions across a wide range of mathematics. \todo{cite tsp: a computational study, pg 40--41}
 The TSP can be described simply as: Given a set of locations and the cost of travel between them, find the shortest
-route that visits each location and returns to the start\todo{cite tsp: a computational study, pg 1}.
+route that visits each location and returns to the start\todo{cite tsp: a computational study, pg 1}.\\
 
+There are clear similarities between the TSP and our own problem, both involve finding a route that visits every
+node, while attempting to minimise the time taken travelling said route.
+In fact, with an input of $d=1$ our problem becomes the TSP, with greater values of $d$ introducing additional
+complexity.
+With this in mind we are able to investigate existing approaches to the TSP and consider how they can be applied to
+our problem.
+The TSP is proven to be NP-hard\todo{cite introduction to algorithms, pg 1096--1097}, meaning that there are no
+known algorithms capable of solving the problem in polynomial time.
+Considering this, and the aforementioned similarities to our own problem, we can conclude that our problem is also
+NP-hard.
+\todo{Discuss how knowledge of NP-hardness can be used to decide which algorithms to investigate.}
 
-The [problem1] was first defined in [paper1] as [definition], since its introduction [problem1] has been widely
-studied, including many variants of the original problem.
-blah blah blah.
-This is similar to our problem because [reason].
-Another problem is [problem1], which is defined by [paper2] as [definition].
-blah blah blah.
-This is similar to our problem because [reason].
-[paper3] proposes a solution to [problem] using [approach].
-blah blah blah, pros, cons, etc.\\
+\todo{Discuss a couple of solutions/types of solution}
 
-READ, YOU NEED TO READ THE PAPERS stop faffing about and read the papers
+\todo{sentence about TSP variants, leads into paragraph about mTSP}
 
 
 \subsection{Classical Traveling Salesman Problem (TSP)}
