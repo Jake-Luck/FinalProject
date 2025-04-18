@@ -65,7 +65,7 @@ class Clustering(Algorithm):
         :param durations: Duration spent at each location.
         :return: 1D ndarray representing the found route.
         """
-        # uses a list of each locations cluster assignment to form a list of   ⠀
+        # uses a list of each locations cluster assignment to form a list of
         # the index for each clustser's locations.
         clusters = list[ndarray]()
         for i in range(num_days):
@@ -84,7 +84,7 @@ class Clustering(Algorithm):
 
         # numpy magic
         # np.ix_([1,2,3], [1,2,3]) returns [[[1],[2],[3]],[1,2,3]]
-        # Which can they be used to easily form subgraphs for each cluster.    ⠀
+        # Which can then be used to easily form subgraphs for each cluster.
         graphs = [graph[np.ix_(indexes, indexes)] for indexes in clusters]
         durations_each_day = [durations[indexes] for indexes in clusters]
 

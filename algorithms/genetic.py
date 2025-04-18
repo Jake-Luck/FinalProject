@@ -107,22 +107,25 @@ class GeneticClustering(Genetic, Clustering):
         :param parent2: Second parent's genome.
         :return: Offspring of each parent.
         """
-        def rename_individuals_clusters(individual: ndarray) -> ndarray:
+        def relabel_individuals_clusters(individual: ndarray) -> ndarray:
             """
             Renames cluster assignments to be in order of appearance. This
             ensures consistency between parent1 and parent2
             :param individual: The individual to rename.
             :return: The individual with renamed clusters.
             """
+            # Get unique values and the first index they're used
             unique_vals, first_indices = np.unique(individual,
                                                    return_index=True)
+
             sorted_unique_vals = unique_vals[np.argsort(first_indices)]
-            mapping = {val: i for i, val in enumerate(sorted_unique_vals)}
+            mapping = {unique: sorted for unique, sorted in
+                       zip(unique_vals, sorted_unique_vals)}
 
             renamed_individual = np.vectorize(mapping.get)(individual)
             return renamed_individual
-        parent1 = rename_individuals_clusters(parent1)
-        parent2 = rename_individuals_clusters(parent2)
+        parent1 = relabel_individuals_clusters(parent1)
+        parent2 = relabel_individuals_clusters(parent2)
 
         crossover_mask = np.random.randint(0, 2, size=len(parent1))
         offspring = np.where(crossover_mask == 0, parent1, parent2)
@@ -220,7 +223,7 @@ class GeneticClustering(Genetic, Clustering):
                 use_crossover = random.random() < self.crossover_probability
 
                 if not use_crossover:
-                    # Generate random individual (increases genetic diversity) ⠀
+                    # Generate random individual (increases genetic diversity)
                     population[i] = np.random.randint(num_days,
                                                       size=num_locations - 1)
                     continue
