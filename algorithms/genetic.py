@@ -97,50 +97,6 @@ class GeneticClustering(Genetic, Clustering):
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
 
-    def _crossover(self,
-                   parent1: ndarray,
-                   parent2: ndarray) -> ndarray:
-        """
-        Performs crossover between two given individuals. For each location,
-        chooses a cluster from either parent.
-        :param parent1: First parent's genome.
-        :param parent2: Second parent's genome.
-        :return: Offspring of each parent.
-        """
-        parent1 = self._relabel_individuals_clusters(parent1)
-        parent2 = relabel_individuals_clusters(parent2)
-
-        crossover_mask = np.random.randint(0, 2, size=len(parent1))
-        offspring = np.where(crossover_mask == 0, parent1, parent2)
-
-        return offspring
-
-    def _evaluate_population(self,
-                             population: ndarray,
-                             num_days: int,
-                             routing_method: Clustering.RoutingMethods,
-                             graph: ndarray,
-                             durations: ndarray) -> ndarray:
-        """
-        Evaluates the fitness of a given population. This fitness is calculated
-        by evaluating the route that's found from passing each individual's
-        clusters to the given routing method.
-        :param population: Population to evaluate.
-        :param num_days: The number of days in the route.
-        :param routing_method: The routing method to use on each cluster.
-        :param graph: The graph input as an adjacency matrix.
-        :param durations: Duration spent at each location.
-        :return: 1D ndarray representing each individual's fitness.
-        """
-        evaluations = np.zeros(self.population_size)
-        for individual in range(self.population_size):
-            route = self.find_route_from_clusters(
-                population[individual], num_days, routing_method, graph,
-                durations)
-            evaluations[individual], _, _ = self.evaluate_route(
-                route, num_days, graph, durations)
-        return evaluations
-
     def find_clusters(self,
                       graph: ndarray,
                       durations: ndarray,
@@ -223,6 +179,50 @@ class GeneticClustering(Genetic, Clustering):
               f"Best evaluation: {evaluations[index1]}")
         return parent1
 
+    def _crossover(self,
+                   parent1: ndarray,
+                   parent2: ndarray) -> ndarray:
+        """
+        Performs crossover between two given individuals. For each location,
+        chooses a cluster from either parent.
+        :param parent1: First parent's genome.
+        :param parent2: Second parent's genome.
+        :return: Offspring of each parent.
+        """
+        parent1 = self._relabel_individuals_clusters(parent1)
+        parent2 = relabel_individuals_clusters(parent2)
+
+        crossover_mask = np.random.randint(0, 2, size=len(parent1))
+        offspring = np.where(crossover_mask == 0, parent1, parent2)
+
+        return offspring
+
+    def _evaluate_population(self,
+                             population: ndarray,
+                             num_days: int,
+                             routing_method: Clustering.RoutingMethods,
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
+        """
+        Evaluates the fitness of a given population. This fitness is calculated
+        by evaluating the route that's found from passing each individual's
+        clusters to the given routing method.
+        :param population: Population to evaluate.
+        :param num_days: The number of days in the route.
+        :param routing_method: The routing method to use on each cluster.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :return: 1D ndarray representing each individual's fitness.
+        """
+        evaluations = np.zeros(self.population_size)
+        for individual in range(self.population_size):
+            route = self.find_route_from_clusters(
+                population[individual], num_days, routing_method, graph,
+                durations)
+            evaluations[individual], _, _ = self.evaluate_route(
+                route, num_days, graph, durations)
+        return evaluations
+
         @staticmethod
         def _relabel_individuals_clusters(individual: ndarray) -> ndarray:
             """
@@ -270,89 +270,6 @@ class GeneticCentroidClustering(Genetic, Clustering):
         super().__init__(num_generations, population_size,
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
-
-    def _crossover(self,
-                   parent1: ndarray,
-                   parent2: ndarray,) -> ndarray:
-        """
-        Performs crossover between two given individuals. For each location,
-        chooses a cluster from either parent.
-        :param parent1: First parent's genome.
-        :param parent2: Second parent's genome.
-        :return: Offspring of each parent.
-        """
-        offspring = np.empty_like(parent2)
-        reordered_parent2 = np.empty_like(parent2)
-
-        # Get distances between parent1 & parent2 centroids
-        distances = np.linalg.norm(parent1[:, np.newaxis] - parent2, axis=2)
-
-        num_days = parent1.shape[0]
-
-        # Reorder parent2 so clusters are similar to parent1
-        for i in range(num_days):
-            best_match = np.argmin(distances[i])
-            reordered_parent2[i] = parent2[best_match]
-
-            distances[:, best_match] = np.inf
-
-        # Create centroids in-between parents'
-        for i in range(num_days):
-            weight = random.random()
-            offspring[i] = weight * parent1[i] + (1-weight) * parent2[i]
-
-        return offspring
-
-    def _evaluate_population(self,
-                             coordinates: ndarray,
-                             population: ndarray,
-                             num_days: int,
-                             routing_method: Clustering.RoutingMethods,
-                             graph: ndarray,
-                             durations: ndarray) -> ndarray:
-        """
-        Evaluates the fitness of a given population. This fitness is calculated
-        by evaluating the route that's found from passing each individual's
-        clusters to the given routing method.
-        :param coordinates: Coordinates of each location.
-        :param population: Population to evaluate.
-        :param num_days: The number of days in the route.
-        :param routing_method: The routing method to use on each cluster.
-        :param graph: The graph input as an adjacency matrix.
-        :param durations: Duration spent at each location.
-        :return: 1D ndarray representing each individual's fitness.
-        """
-        evaluations = np.zeros(self.population_size)
-        for individual in range(self.population_size):
-            clusters = self._assign_nodes_to_centroid(coordinates,
-                                                      population[individual])
-
-            route = self.find_route_from_clusters(
-                clusters, num_days, routing_method, graph, durations)
-
-            evaluations[individual], _, _ = self.evaluate_route(
-                route, num_days, graph, durations)
-        return evaluations
-
-    def _generate_random_centroids(self,
-                                   num_days: int,
-                                   centre: ndarray):
-        """
-        Generates random centroids for each individual in the population.
-        :param num_days: The number of days in the route.
-        :param centre: The centre of the coordinates.
-        :return: A population of random centroids.
-        """
-        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
-                                                   centre[0] + 0.1,
-                                                   size=(self.population_size,
-                                                         num_days))
-        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
-                                                   centre[1] + 0.1,
-                                                   size=(self.population_size,
-                                                         num_days))
-
-        return np.dstack((centroid_x_coordinates, centroid_y_coordinates))
 
     def find_clusters(self,
                       coordinates: ndarray,
@@ -448,6 +365,89 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
         return cluster_assignments
 
+    def _crossover(self,
+                   parent1: ndarray,
+                   parent2: ndarray,) -> ndarray:
+        """
+        Performs crossover between two given individuals. For each location,
+        chooses a cluster from either parent.
+        :param parent1: First parent's genome.
+        :param parent2: Second parent's genome.
+        :return: Offspring of each parent.
+        """
+        offspring = np.empty_like(parent2)
+        reordered_parent2 = np.empty_like(parent2)
+
+        # Get distances between parent1 & parent2 centroids
+        distances = np.linalg.norm(parent1[:, np.newaxis] - parent2, axis=2)
+
+        num_days = parent1.shape[0]
+
+        # Reorder parent2 so clusters are similar to parent1
+        for i in range(num_days):
+            best_match = np.argmin(distances[i])
+            reordered_parent2[i] = parent2[best_match]
+
+            distances[:, best_match] = np.inf
+
+        # Create centroids in-between parents'
+        for i in range(num_days):
+            weight = random.random()
+            offspring[i] = weight * parent1[i] + (1-weight) * parent2[i]
+
+        return offspring
+
+    def _evaluate_population(self,
+                             coordinates: ndarray,
+                             population: ndarray,
+                             num_days: int,
+                             routing_method: Clustering.RoutingMethods,
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
+        """
+        Evaluates the fitness of a given population. This fitness is calculated
+        by evaluating the route that's found from passing each individual's
+        clusters to the given routing method.
+        :param coordinates: Coordinates of each location.
+        :param population: Population to evaluate.
+        :param num_days: The number of days in the route.
+        :param routing_method: The routing method to use on each cluster.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :return: 1D ndarray representing each individual's fitness.
+        """
+        evaluations = np.zeros(self.population_size)
+        for individual in range(self.population_size):
+            clusters = self._assign_nodes_to_centroid(coordinates,
+                                                      population[individual])
+
+            route = self.find_route_from_clusters(
+                clusters, num_days, routing_method, graph, durations)
+
+            evaluations[individual], _, _ = self.evaluate_route(
+                route, num_days, graph, durations)
+        return evaluations
+
+    def _generate_random_centroids(self,
+                                   num_days: int,
+                                   centre: ndarray):
+        """
+        Generates random centroids for each individual in the population.
+        :param num_days: The number of days in the route.
+        :param centre: The centre of the coordinates.
+        :return: A population of random centroids.
+        """
+        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
+                                                   centre[0] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
+        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
+                                                   centre[1] + 0.1,
+                                                   size=(self.population_size,
+                                                         num_days))
+
+        return np.dstack((centroid_x_coordinates, centroid_y_coordinates))
+
 
 class GeneticRouting(Genetic):
     """
@@ -476,80 +476,6 @@ class GeneticRouting(Genetic):
         super().__init__(num_generations, population_size,
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
-
-    def _crossover(self,
-                   parent1: ndarray,
-                   parent2: ndarray) -> ndarray:
-        """
-        Performs crossover between two given individuals.
-        :param parent1: First parent's genome.
-        :param parent2: Second parent's genome.
-        :return: Offspring of each parent.
-        """
-
-        offspring = np.empty_like(parent1)
-        offspring[:] = -1
-
-        crossover_point = random.randint(0, len(parent1)-1)
-
-        # Adds parent1 to offspring up to crossover point
-        offspring[:crossover_point] = parent1[:crossover_point]
-
-        days_left = (np.count_nonzero(parent1 == 0) -
-                     np.count_nonzero(offspring == 0)) - 1
-
-        # Adds remaining cities in order that they appear in parent2
-        offspring_index = crossover_point
-        for i in range(0, parent2.shape[0]-1):
-            if parent2[i] == 0 and days_left > 0 or parent2[i] not in offspring:
-                offspring[offspring_index] = parent2[i]
-                offspring_index += 1
-                if parent2[i] == 0:
-                    days_left -= 1
-
-        # Return to start at end of route
-        offspring[offspring.shape[0]-1] = 0
-        return offspring
-
-    def _evaluate_population(self,
-                             population: ndarray,
-                             num_days: int,
-                             graph: ndarray,
-                             durations: ndarray) -> ndarray:
-        """
-        Evaluates the fitness of a given population.
-        :param population: Population to evaluate.
-        :param num_days: The number of days in the route.
-        :param graph: The graph input as an adjacency matrix.
-        :param durations: Duration spent at each location.
-        :return: 1D ndarray representing each individual's fitness.
-        """
-        evaluations = np.zeros(self.population_size)
-        for individual in range(self.population_size):
-            evaluations[individual], _, _ = self.evaluate_route(
-                population[individual], num_days, graph, durations)
-        return evaluations
-
-    def _generate_random_routes(self,
-                                num_locations: int,
-                                num_days: int,
-                                n_routes: int,
-                                route_length: int) -> ndarray:
-        """
-        Generates a random route for each individual in the population.
-        :param num_locations: The number of locations in the route.
-        :param num_days: The number of days in the route.
-        :param n_routes: Total number of possible routes
-        :return: A population of random routes.
-        """
-        population = np.empty(shape=(self.population_size, route_length),
-                              dtype=int)
-        for i in range(self.population_size):
-            route_number = random.randint(0, n_routes)
-            population[i] = self.generate_route(route_number, n_routes,
-                                                num_locations, num_days,
-                                                route_length)
-        return population
 
     def find_route(self,
                    graph: ndarray,
@@ -637,3 +563,78 @@ class GeneticRouting(Genetic):
         print(f"Route evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
         return parent1
+
+    def _crossover(self,
+                   parent1: ndarray,
+                   parent2: ndarray) -> ndarray:
+        """
+        Performs crossover between two given individuals.
+        :param parent1: First parent's genome.
+        :param parent2: Second parent's genome.
+        :return: Offspring of each parent.
+        """
+
+        offspring = np.empty_like(parent1)
+        offspring[:] = -1
+
+        crossover_point = random.randint(0, len(parent1)-1)
+
+        # Adds parent1 to offspring up to crossover point
+        offspring[:crossover_point] = parent1[:crossover_point]
+
+        days_left = (np.count_nonzero(parent1 == 0) -
+                     np.count_nonzero(offspring == 0)) - 1
+
+        # Adds remaining cities in order that they appear in parent2
+        offspring_index = crossover_point
+        for i in range(0, parent2.shape[0]-1):
+            if parent2[i] == 0 and days_left > 0 or parent2[i] not in offspring:
+                offspring[offspring_index] = parent2[i]
+                offspring_index += 1
+                if parent2[i] == 0:
+                    days_left -= 1
+
+        # Return to start at end of route
+        offspring[offspring.shape[0]-1] = 0
+        return offspring
+
+    def _evaluate_population(self,
+                             population: ndarray,
+                             num_days: int,
+                             graph: ndarray,
+                             durations: ndarray) -> ndarray:
+        """
+        Evaluates the fitness of a given population.
+        :param population: Population to evaluate.
+        :param num_days: The number of days in the route.
+        :param graph: The graph input as an adjacency matrix.
+        :param durations: Duration spent at each location.
+        :return: 1D ndarray representing each individual's fitness.
+        """
+        evaluations = np.zeros(self.population_size)
+        for individual in range(self.population_size):
+            evaluations[individual], _, _ = self.evaluate_route(
+                population[individual], num_days, graph, durations)
+        return evaluations
+
+    def _generate_random_routes(self,
+                                num_locations: int,
+                                num_days: int,
+                                n_routes: int,
+                                route_length: int) -> ndarray:
+        """
+        Generates a random route for each individual in the population.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param n_routes: Total number of possible routes
+        :return: A population of random routes.
+        """
+        population = np.empty(shape=(self.population_size, route_length),
+                              dtype=int)
+        for i in range(self.population_size):
+            route_number = random.randint(0, n_routes)
+            population[i] = self.generate_route(route_number, n_routes,
+                                                num_locations, num_days,
+                                                route_length)
+        return population
+

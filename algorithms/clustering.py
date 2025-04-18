@@ -28,27 +28,6 @@ class Clustering(Algorithm):
         'Compares every possible route to find the best.'
 
     @staticmethod
-    def _assign_nodes_to_centroid(coordinates: ndarray,
-                                  centroids: ndarray) -> ndarray:
-        """
-        Assigns each coordinate a cluster by computing distance from each
-        coordinate to each centroid and choosing the smallest distance.
-        :param coordinates: Coordinates of each location.
-        :param centroids: Coordinates of each cluster's centroid. 2d array of
-        shape (num_days, 2)
-        :return: Each location's cluster assignment. A 1D array of shape
-        (num_locations).
-        """
-        # Gets a matrix of distances from each location to each centroid
-        distances = np.linalg.norm(
-            coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
-
-        # For each location (index in distance matrix) gets the index for the
-        # centroid with the smallest distance
-        clusters = np.argmin(distances, axis=1)
-        return clusters
-
-    @staticmethod
     def find_route_from_clusters(cluster_assignments: ndarray,
                                  num_days: int,
                                  routing_method: RoutingMethods,
@@ -98,6 +77,27 @@ class Clustering(Algorithm):
 
             route = np.concatenate((route, cluster[sub_route]))
         return route
+
+    @staticmethod
+    def _assign_nodes_to_centroid(coordinates: ndarray,
+                                  centroids: ndarray) -> ndarray:
+        """
+        Assigns each coordinate a cluster by computing distance from each
+        coordinate to each centroid and choosing the smallest distance.
+        :param coordinates: Coordinates of each location.
+        :param centroids: Coordinates of each cluster's centroid. 2d array of
+        shape (num_days, 2)
+        :return: Each location's cluster assignment. A 1D array of shape
+        (num_locations).
+        """
+        # Gets a matrix of distances from each location to each centroid
+        distances = np.linalg.norm(
+            coordinates[:, np.newaxis, :2] - centroids[:, :2], axis=2)
+
+        # For each location (index in distance matrix) gets the index for the
+        # centroid with the smallest distance
+        clusters = np.argmin(distances, axis=1)
+        return clusters
 
 
 class KMeans(Clustering):
