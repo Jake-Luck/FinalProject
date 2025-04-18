@@ -12,11 +12,13 @@ optimal route for each day.
 These routes can then be combined to form a complete route for the trip.
 The goal of our clustering algorithms is to find a set of clusters that, when combined with some routing algorithm,
 will produce a route that minimises the cost function.\\
-The code below shows how we can use a set of clusters alongside our graph and duration inputs to find a route:
-\begin{figure}[H]\label{fig:Clustering.find_route_from_clusters}
+The code in figure~\ref{fig:Clustering.find_route_from_clusters} shows how we can use a set of clusters alongside our
+graph and duration inputs to find a route.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Clustering.find_route_from_clusters}
-    \caption{From Clustering.find\_route\_from\_clusters in algorithms\textbackslash clustering.py}
+    \caption{Code from Clustering.find\_route\_from\_clusters in algorithms\textbackslash clustering.py}
+    \label{fig:Clustering.find_route_from_clusters}
 \end{figure}
 
 \noindent
@@ -42,54 +44,59 @@ area to the input, however this had the potential to create clusters with zero l
 in invalid trips.
 By starting with locations from the input, we can be sure that all clusters have at least one location assigned to them.
 We will be using the coordinates of our locations to calculate the Euclidean distances between locations and centroids,
-these locations will be assigned to the cluster of the closest centroid:
-\begin{figure}[H]\label{fig:Clustering._assign_nodes_to_centroid}
+these locations will be assigned to the cluster of the closest centroid.
+Figure~\ref{fig:Clustering._assign_nodes_to_centroid} shows how this was accomplished.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Clustering._assign_nodes_to_centroid}
-    \caption{from Clustering.\_assign\_nodes\_to\_centroid in algorithms\textbackslash clustering.py}
+    \caption{Code from Clustering.\_assign\_nodes\_to\_centroid in algorithms\textbackslash clustering.py}\label{fig:Clustering._assign_nodes_to_centroid}
 \end{figure}
 
 \noindent
 After assignment, the centroids are recalculated such that their coordinates are the average of all locations
-assigned to their cluster:
-\begin{figure}[H]\label{fig:KMeans._compute_means}
+assigned to their cluster.
+This is done by iterating through each cluster and calculating the mean of all locations assigned to it.
+Our implementation is shown in figure~\ref{fig:KMeans._compute_means}.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans._compute_means}
-    \caption{from KMeans.\_compute\_means in algorithms\textbackslash clustering.py}
+    \caption{Code from KMeans.\_compute\_means in algorithms\textbackslash clustering.py}\label{fig:KMeans._compute_means}
 \end{figure}
 
 \noindent
 These steps of cluster assignment and centroid recalculation are repeated until either a maximum allowed number of
 iterations is reached, or until the algorithm converges on an optimum solution.
 Our convergence criterion is that the centroids stop changing between iterations, i.e., the centroids are the same
-as the previous iteration:
-\begin{figure}[H]\label{fig:KMeans.find_clusters}
+as the previous iteration.
+Our python implementation of this is shown in figure~\ref{fig:KMeans.find_clusters}.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans.find_clusters}
-    \caption{from KMeans.find\_clusters in algorithms\textbackslash clustering.py}
+    \caption{Code from KMeans.find\_clusters in algorithms\textbackslash clustering.py}\label{fig:KMeans.find_clusters}
 \end{figure}
 
 \noindent
-Below is an example of the K-Means algorithm run on an input with 25 points of interest around London over seven days:
-\begin{figure}[H]\label{fig:KMeans_London_Step1}
+Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-Means algorithm run on an input with 25
+points of interest around London to be visited over seven days.
+\begin{figure}[H]
     \ContinuedFloat*
     \includegraphics[width = \textwidth]{KMeans_London_Step1}
-    \caption{Step 1, Initial centroid positions and cluster assignments.}
+    \caption{K-Means example Step 1, Initial centroid positions and cluster assignments.}\label{fig:KMeans_London_Step1}
 \end{figure}
-\begin{figure}[H]\label{fig:KMeans_London_Step2}
+\begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step2}
-    \caption{Step2, Centroids have been updated, locations are reassigned to their closest centroid.}
+    \caption{K-Means example Step2, Centroids have been updated, locations are reassigned to their closest centroid.}\label{fig:KMeans_London_Step2}
 \end{figure}
-\begin{figure}[H]\label{fig:KMeans_London_Step3}
+\begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step3}
-    \caption{Step3, Centroids updated again and locations updated.}
+    \caption{K-Means example Step3, Centroids updated again and locations updated.}\label{fig:KMeans_London_Step3}
 \end{figure}
-\begin{figure}[H]\label{fig:KMeans_London_Step4}
+\begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step4}
-    \caption{Step4, Centroids have updated and no locations have changed cluster, a solution has been found.}
+    \caption{K-Means example Step4, Centroids have updated and no locations have changed cluster, a solution has been found.}\label{fig:KMeans_London_Step4}
 \end{figure}
 
 \noindent
@@ -137,12 +144,13 @@ population size and $n$ being the number of locations.\\
 
 \noindent
 For this genetic clustering, an individual is represented by a genome, which will provide a mapping that assigns each
-location to a cluster, for example:
-\begin{figure}[H]\label{fig:barcelona-genome-example}
+location to a cluster.
+Figure~\ref{fig:barcelona-genome-example} shows an example of this.
+\begin{figure}[H]
     \centering
     Genome: [0, 0, 0, 1, 1, 1, 2, 2, 2]\\
     \includegraphics[width = \textwidth]{Barcelona_Genome_Example}
-    \caption{An example of how a genome corresponds to cluster assignments.}
+    \caption{Example of how an individual's genome corresponds to cluster assignments.}\label{fig:barcelona-genome-example}
 \end{figure}
 
 \noindent
@@ -159,22 +167,94 @@ From there, we repeat the following steps until we reach a maximum number of gen
 \noindent
 As previously discussed, we will evaluate the fitness of each individual by applying a routing algorithms to the
 clusters defined by the genome, and then applying our cost function to the resulting route.
-Once the population has been evaluated, the best two individuals are chosen as parents.
-\begin{figure}[H]\label{fig:Genetic_Clustering.find_clusters.select_parents}
+Once the population has been evaluated, the best two individuals are chosen as parents, as figure~\ref{fig:GeneticClustering.find_clusters.select_parents}
+shows.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.select_parents}
-    \caption{from Genetic\_Clustering.find\_clusters in algorithms\textbackslash genetic.py}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.select_parents}
 \end{figure}
 
 \noindent
-Excluding the two parents, who will be copied over, most of the next generation will be created using crossover.
-We do however, include some randomly generated individuals, in an effort to increase genetic diversity and
-exploration of the search space.
-\begin{figure}[H]\label{fig:GeneticClustering.find_clusters.crossover}
+Excluding the two parents, who will be copied over, the next generation will be created via crossover and mutation,
+or through random generation.
+We include some randomly generated individuals in an effort to increase genetic diversity and exploration of the
+search space.
+Figure ~\ref{fig:GeneticClustering.find_clusters.crossover} shows how this is decided in our implementation.
+For each individual a random number is generated between 0 and 1, if this number is lower than our crossover rate
+the individual is created via crossover, otherwise it will be randomly generated.
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.crossover}
-    \caption{from Genetic\_Clustering.find\_clusters in algorithms\textbackslash genetic.py}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.crossover}
 \end{figure}
+
+\noindent
+For our implementation of crossover, we will be performing a uniform crossover, using crossover masks.
+A crossover mask is a bit array the same length as the genome, with the parity of each bit indicating which parent
+to choose from for the corresponding bit in the created genome.
+In a uniform crossover mask, each bit has an 50\% chance of being a 0 or 1, meaning that each bit in the offspring
+genome has an equal chance of being from either parent
+\todo{Cite Uniform Crossover in Genetic Algorithms, Giblert Syswerda.}.
+If the two parents, being the best individuals in a population, agree on a bit it then it would appear likely it's a
+good choice.
+With our implementation of crossover, the offspring will always copy over the bits that parents agree on.
+Figure~\ref{fig:Crossover_Mask_Example} shows an example of how a crossover mask can be used to create a child from
+two parents, the example uses a hypothetical input including six locations and three clusters.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Crossover_Mask_Example}
+    \caption{Example of using a crossover mask to create a child from two parents.}\label{fig:Crossover_Mask_Example}
+\end{figure}
+
+\noindent
+There is however, one slight issue with applying this method to our problem.
+In the example shown in figure~\ref{fig:Crossover_Mask_Example}, parent 1's 0th cluster only includes the first
+location, similarly, parent 2's 2nd cluster also only includes the first location.
+Both parents are forming a cluster using these locations, however due to them being labelled differently, the
+offspring produced did not continue this clustering.
+To solve this problem a genome's clusters will be relabelled in order of their appearence in the genome, ensuring
+consistency between parents.
+Figure~\ref{fig:Crossover_Mask_Relabelling_Example} shows an example of this applied to the parents in figure~\ref{fig:Crossover_Mask_Example},
+and figure~\ref{fig:GeneticClustering._relabel_individuals_clusters} shows how this is accomplished in our python
+implementation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Crossover_Mask_Relabelling_Example}
+    \caption{Example of relabelling a parent's clusters and the resultant offspring}\label{fig:Crossover_Mask_Relabelling_Example}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering._relabel_individuals_clusters}
+    \caption{Code from GeneticClustering.\_relabel\_individuals\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering._relabel_individuals_clusters}
+\end{figure}
+
+\noindent
+After this relabelling, crossover can be performed without issue. Figure~\ref{fig:GeneticClustering._crossover} shows
+our python implementation of this.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering._crossover}
+    \caption{Code from GeneticClustering.\_crossover in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering._crossover}
+\end{figure}
+
+After crossover is complete, we randomly mutate the created offspring in the hopes of increasing genetic diversity
+and escaping local optima.
+We mutate our genome by iterating through each gene and randomly deciding if it will mutate or not, the likeliness
+of mutation is decided by our mutation rate.
+If a gene is chosen to mutate, it will assign itself to a random cluster.
+Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is implemented in python.
+\begin{figure}[H]
+    \centering
+    \includegraphic[width = \textwidth]{GeneticClustering.find_clusters.mutation}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.mutation}
+\end{figure}
+
+\noindent
+After the
+
+\noindent
+\todo{Discuss why chosen}
 
 \subsubsection{Genetic Centroid-based Clustering}
 \todo{Explain genetic centroid-based clustering and how it differs from general clustering.}
