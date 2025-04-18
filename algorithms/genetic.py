@@ -107,24 +107,7 @@ class GeneticClustering(Genetic, Clustering):
         :param parent2: Second parent's genome.
         :return: Offspring of each parent.
         """
-        def relabel_individuals_clusters(individual: ndarray) -> ndarray:
-            """
-            Renames cluster assignments to be in order of appearance. This
-            ensures consistency between parent1 and parent2
-            :param individual: The individual to rename.
-            :return: The individual with renamed clusters.
-            """
-            # Get unique values and the first index they're used
-            unique_vals, first_indices = np.unique(individual,
-                                                   return_index=True)
-
-            sorted_unique_vals = unique_vals[np.argsort(first_indices)]
-            mapping = {unique: sorted for unique, sorted in
-                       zip(unique_vals, sorted_unique_vals)}
-
-            renamed_individual = np.vectorize(mapping.get)(individual)
-            return renamed_individual
-        parent1 = relabel_individuals_clusters(parent1)
+        parent1 = self._relabel_individuals_clusters(parent1)
         parent2 = relabel_individuals_clusters(parent2)
 
         crossover_mask = np.random.randint(0, 2, size=len(parent1))
@@ -230,7 +213,6 @@ class GeneticClustering(Genetic, Clustering):
 
                 population[i] = self._crossover(parent1, parent2)
 
-
                 for j in range(num_locations - 1):
                     mutate = random.random() < self.mutation_probability
                     if not mutate:
@@ -240,6 +222,25 @@ class GeneticClustering(Genetic, Clustering):
         print(f"Cluster evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
         return parent1
+
+        @staticmethod
+        def _relabel_individuals_clusters(individual: ndarray) -> ndarray:
+            """
+            Renames cluster assignments to be in order of appearance. This
+            ensures consistency between parent1 and parent2
+            :param individual: The individual to rename.
+            :return: The individual with renamed clusters.
+            """
+            # Get unique values and the first index they're used
+            unique_vals, first_indices = np.unique(individual,
+                                                   return_index=True)
+
+            sorted_unique_vals = unique_vals[np.argsort(first_indices)]
+            mapping = {unique: sorted for unique, sorted in
+                       zip(unique_vals, sorted_unique_vals)}
+
+            renamed_individual = np.vectorize(mapping.get)(individual)
+            return renamed_individual
 
 
 class GeneticCentroidClustering(Genetic, Clustering):

@@ -93,7 +93,6 @@ class DataHandling:
             boundary /= 2
         return coordinates # Will return 0
 
-
     def _generate_graph(self,
                         coordinates: ndarray) -> ndarray | int:
         """

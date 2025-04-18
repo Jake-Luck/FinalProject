@@ -22,32 +22,6 @@ class Shorthands:
     algorithms.
     """
     @staticmethod
-    def _setup_inputs(num_locations: int,
-                      graph: ndarray | None = None,
-                      durations: ndarray | None = None,
-                      coordinates: ndarray | None = None) -> tuple:
-        """
-        Sets up our inputs so that if either our graph or coordinates aren't
-        provided, random ones will be chosen.
-        :param graph: The graph input to use if given. If not, a randomly
-        chosen graph & coordinates will be used.
-        :param durations: Duration spent at each location. If not given, random
-        durations will be generated.
-        :param coordinates: The coordinates input to use if given. If not, a
-        randomly chosen graph & coordinates will be used.
-        """
-        # If graph provided, but no coordinates, cannot plot
-        if durations is None:
-            durations = np.random.randint(1, 96, num_locations) * 15
-            durations[0] = 0
-
-        if graph is not None and coordinates is not None:
-            return graph[:num_locations], coordinates[:num_locations], durations
-
-        # Chooses a random graph from saved data.
-        return DataHandling.get_random_datum()
-
-    @staticmethod
     def brute_force(num_locations: int,
                     num_days: int,
                     graph: ndarray | None = None,
@@ -368,3 +342,29 @@ class Shorthands:
             Plotting.display_route(route, coordinates, centre, title,
                                    evaluation_per_day, durations)
         return route
+
+    @staticmethod
+    def _setup_inputs(num_locations: int,
+                      graph: ndarray | None = None,
+                      durations: ndarray | None = None,
+                      coordinates: ndarray | None = None) -> tuple:
+        """
+        Sets up our inputs so that if either our graph or coordinates aren't
+        provided, random ones will be chosen.
+        :param graph: The graph input to use if given. If not, a randomly
+        chosen graph & coordinates will be used.
+        :param durations: Duration spent at each location. If not given, random
+        durations will be generated.
+        :param coordinates: The coordinates input to use if given. If not, a
+        randomly chosen graph & coordinates will be used.
+        """
+        # If graph provided, but no coordinates, cannot plot
+        if durations is None:
+            durations = np.random.randint(1, 96, num_locations) * 15
+            durations[0] = 0
+
+        if graph is not None and coordinates is not None:
+            return graph[:num_locations], coordinates[:num_locations], durations
+
+        # Chooses a random graph from saved data.
+        return DataHandling.get_random_datum()

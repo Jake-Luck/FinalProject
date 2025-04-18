@@ -114,23 +114,6 @@ class KMeans(Clustering):
         self.show_stages = show_stages
         self.maximum_iterations = maximum_iterations
 
-    @staticmethod
-    def _compute_means(coordinates: ndarray,
-                       num_days: int) -> ndarray:
-        """
-        Computes the mean coordinate of each cluster.
-        :param coordinates: Coordinates of each cluster, a 2D array with shape
-        (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
-        :param num_days: The number of clusters/means to compute.
-        :return: Returns a list of means, 1D array.
-        """
-        computed_means = np.empty((num_days, 2))
-
-        for i in range(num_days):
-            cluster = coordinates[coordinates[:, 2] == i, :2]
-            computed_means[i] = cluster.mean(axis=0)
-        return computed_means
-
     def find_clusters(self,
                       coordinates: ndarray,
                       num_days: int,
@@ -175,3 +158,20 @@ class KMeans(Clustering):
             means = self._compute_means(coordinates, num_days)
 
         return cluster_assignments
+
+    @staticmethod
+    def _compute_means(coordinates: ndarray,
+                       num_days: int) -> ndarray:
+        """
+        Computes the mean coordinate of each cluster.
+        :param coordinates: Coordinates of each cluster, a 2D array with shape
+        (num_coordinates, 3). Second dimension is (x, y, assigned_cluster)
+        :param num_days: The number of clusters/means to compute.
+        :return: Returns a list of means, 1D array.
+        """
+        computed_means = np.empty((num_days, 2))
+
+        for i in range(num_days):
+            cluster = coordinates[coordinates[:, 2] == i, :2]
+            computed_means[i] = cluster.mean(axis=0)
+        return computed_means
