@@ -189,11 +189,10 @@ class GeneticClustering(Genetic, Clustering):
         :return: Offspring of each parent.
         """
         parent1 = self._relabel_individuals_clusters(parent1)
-        parent2 = relabel_individuals_clusters(parent2)
+        parent2 = self._relabel_individuals_clusters(parent2)
 
         crossover_mask = np.random.randint(0, 2, size=len(parent1))
         offspring = np.where(crossover_mask == 0, parent1, parent2)
-
         return offspring
 
     def _evaluate_population(self,
@@ -222,24 +221,24 @@ class GeneticClustering(Genetic, Clustering):
                 route, num_days, graph, durations)
         return evaluations
 
-        @staticmethod
-        def _relabel_individuals_clusters(individual: ndarray) -> ndarray:
-            """
-            Renames cluster assignments to be in order of appearance. This
-            ensures consistency between parent1 and parent2
-            :param individual: The individual to rename.
-            :return: The individual with renamed clusters.
-            """
-            # Get unique values and the first index they're used
-            unique_vals, first_indices = np.unique(individual,
-                                                   return_index=True)
+    @staticmethod
+    def _relabel_individuals_clusters(individual: ndarray) -> ndarray:
+        """
+        Relables cluster assignments to be in order of appearance. This
+        ensures consistency between parent1 and parent2
+        :param individual: The individual to relabel.
+        :return: The individual with relable clusters.
+        """
+        # Get unique values and the first index they're used                   ⠀
+        unique_vals, first_indices = np.unique(individual,
+                                               return_index=True)
 
-            sorted_unique_vals = unique_vals[np.argsort(first_indices)]
-            mapping = {unique: sorted for unique, sorted in
-                       zip(unique_vals, sorted_unique_vals)}
+        sorted_unique_vals = unique_vals[np.argsort(first_indices)]
+        mapping = {unique: sorted for unique, sorted in
+                   zip(unique_vals, sorted_unique_vals)}
 
-            renamed_individual = np.vectorize(mapping.get)(individual)
-            return renamed_individual
+        relabelled_individual = np.vectorize(mapping.get)(individual)
+        return relabelled_individual
 
 
 class GeneticCentroidClustering(Genetic, Clustering):
