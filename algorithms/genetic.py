@@ -169,11 +169,10 @@ class GeneticClustering(Genetic, Clustering):
 
                 population[i] = self._crossover(parent1, parent2)
 
-                for j in range(num_locations - 1):
+                for j in range(population[i].shape[0]):
                     mutate = random.random() < self.mutation_probability
-                    if not mutate:
-                        continue
-                    population[i, j] = random.randrange(num_days)
+                    if mutate:
+                        population[i, j] = random.randrange(num_days)
 
         print(f"Cluster evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
