@@ -515,7 +515,7 @@ class GeneticCentroidClustering(Genetic, Clustering):
                 durations, coordinates)
 
             evaluations[individual] = self.evaluate_route(route, num_days,
-                                                          graph, durations)    ⠀
+                                                          graph, durations)
         return evaluations
 
     def _generate_random_centroids(self,
