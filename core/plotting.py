@@ -2,6 +2,7 @@
 Provides Plotting class to display coordinates, clusters and routes. Uses plotly
 to get a world map which plots are drawn onto
 """
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
 import plotly.graph_objects as go
@@ -19,6 +20,62 @@ class Plotting:
     """
     Provides static methods to display coordinates, clusters and
     """
+    @staticmethod
+    def display_clusters(coordinates: ndarray,
+                         cluster_assignments: ndarray,
+                         num_days: int,
+                         centroids: ndarray | None = None,
+                         centre: ndarray | None = None,
+                         title: str | None = None) -> None:
+        """
+        Uses plotly to display provided clusters on a world map centred at a
+        given coordinate or the first item in coordinates.
+        :param coordinates: Coordinates to display.
+        :param cluster_assignments: Cluster assigned to each coordinate.
+        :param num_days: Number of days/clusters.
+        :param centroids: Central points of clusters, useful for step by step
+        plotting of centroid best clustering (such as kmeans).
+        :param centre: Point to centre the map on.
+        :param title: Title of the plot.
+        """
+        if centre is None:
+            centre = coordinates[0]
+
+        clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
+
+        figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 1][0],
+                                         lon=coordinates[clusters[0], 0][0],
+                                         mode='markers',
+                                         name="Day 1",
+                                         marker=dict(
+                                             size=10,
+                                             color=colour_set[0]
+                                         )))
+
+        for i in range(1, num_days):
+            figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
+                                  lon=coordinates[clusters[i], 0][0],
+                                  mode='markers',
+                                  name=f"Day {i + 1}",
+                                  marker=dict(
+                                      size=10,
+                                      color=colour_set[i]
+                                  ))
+
+        if centroids is not None:
+            for i in range(num_days):
+                figure.add_scattermap(lat=[centroids[i, 1]],
+                                      lon=[centroids[i, 0]],
+                                      mode='markers',
+                                      name=f"Centroid {i+1}",
+                                      marker=dict(
+                                          size=20,
+                                          color=colour_set[i],
+                                          opacity=0.5
+                                      ))
+
+        Plotting._update_layout_and_show_figure(title, centre, figure)
+
     @staticmethod
     def display_coordinates(coordinates: ndarray,
                             centre: ndarray | None = None,
@@ -107,60 +164,46 @@ class Plotting:
         Plotting._update_layout_and_show_figure(title, centre, figure)
 
     @staticmethod
-    def display_clusters(coordinates: ndarray,
-                         cluster_assignments: ndarray,
-                         num_days: int,
-                         centroids: ndarray | None = None,
-                         centre: ndarray | None = None,
-                         title: str | None = None) -> None:
+    def plot_line_graph(x_data: ndarray,
+                        y_data: ndarray,
+                        x_label: str,
+                        y_label: str,
+                        title: str) -> None:
         """
-        Uses plotly to display provided clusters on a world map centred at a
-        given coordinate or the first item in coordinates.
-        :param coordinates: Coordinates to display.
-        :param cluster_assignments: Cluster assigned to each coordinate.
-        :param num_days: Number of days/clusters.
-        :param centroids: Central points of clusters, useful for step by step
-        plotting of centroid best clustering (such as kmeans).
-        :param centre: Point to centre the map on.
-        :param title: Title of the plot.
+        Plots a line graph using matplotlib with the given x and y data.
+
+        :param x_data: 1D array representing the data for the x-axis.
+        :param y_data: 1D array representing the data for the y-axis.
+        :param x_label: Label for the x-axis.
+        :param y_label: Label for the y-axis.
+        :param title: Title of the graph.
         """
-        if centre is None:
-            centre = coordinates[0]
+        fig, ax = plt.subplots(dpi=600)
 
-        clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
+        ax.plot(x_data, y_data)
+        ax.set(xlabel=x_label, ylabel=y_label, title=title)
+        ax.grid()
 
-        figure = go.Figure(go.Scattermap(lat=coordinates[clusters[0], 1][0],
-                                         lon=coordinates[clusters[0], 0][0],
-                                         mode='markers',
-                                         name="Day 1",
-                                         marker=dict(
-                                             size=10,
-                                             color=colour_set[0]
-                                         )))
 
-        for i in range(1, num_days):
-            figure.add_scattermap(lat=coordinates[clusters[i], 1][0],
-                                  lon=coordinates[clusters[i], 0][0],
-                                  mode='markers',
-                                  name=f"Day {i + 1}",
-                                  marker=dict(
-                                      size=10,
-                                      color=colour_set[i]
-                                  ))
+        x_ticks = ax.get_xticks()
+        y_ticks = ax.get_yticks()
 
-        if centroids is not None:
-            for i in range(num_days):
-                figure.add_scattermap(lat=[centroids[i, 1]],
-                                      lon=[centroids[i, 0]],
-                                      mode='markers',
-                                      name=f"Centroid {i+1}",
-                                      marker=dict(
-                                          size=20,
-                                          color=colour_set[i],
-                                          opacity=0.5
-                                      ))
+        if x_data[0] not in x_ticks:
+            x_ticks = np.append(x_ticks, x_data[0])
+        if x_data[-1] not in x_ticks:
+            x_ticks = np.append(x_ticks, x_data[-1])
+        if y_data[0] not in y_ticks:
+            y_ticks = np.append(y_ticks, y_data[0])
+        if y_data[-1] not in y_ticks:
+            y_ticks = np.append(y_ticks, y_data[-1])
 
-        Plotting._update_layout_and_show_figure(title, centre, figure)
+        ax.set_xticks(x_ticks)
+        ax.set_yticks(y_ticks)
+        
+        plt.margins(x=0, y=0)
+
+        plt.show()
+
 
     @staticmethod
     def _update_layout_and_show_figure(title: str | None,

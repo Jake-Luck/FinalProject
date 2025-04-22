@@ -1,8 +1,8 @@
 """
 Handles the creation and use of data within the project.
 """
-from algorithms.clustering import KMeans
-from algorithms.genetic import GeneticClustering, GeneticCentroidClustering
+from algorithms.clustering import (
+    KMeans, GeneticClustering, GeneticCentroidClustering)
 from algorithms.routing import Routing
 from core import hidden
 
@@ -324,12 +324,13 @@ class DataHandling:
         return durations
 
     @staticmethod
-    def _loop_through_locations_and_days(graph,
-                                         durations,
-                                         coordinates,
-                                         kmeans,
-                                         genetic_clustering,
-                                         genetic_centroid_clustering) -> list:
+    def _loop_through_locations_and_days(
+            graph,
+            durations,
+            coordinates,
+            kmeans: KMeans,
+            genetic_clustering: GeneticClustering,
+            genetic_centroid_clustering: GeneticCentroidClustering) -> list:
         """
         Loops through every possible input for num_locations and num_days
         with the given input.

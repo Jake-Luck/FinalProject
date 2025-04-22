@@ -7,10 +7,9 @@ import numpy as np
 from core.data_handling import DataHandling
 from core.plotting import Plotting
 
-from algorithms.clustering import KMeans, Clustering
-from algorithms.genetic import (
-    GeneticClustering, GeneticCentroidClustering, GeneticRouting)
-from algorithms.routing import Routing
+from algorithms.clustering import (
+    KMeans, Clustering, GeneticClustering, GeneticCentroidClustering)
+from algorithms.routing import Routing, GeneticRouting
 
 from numpy import ndarray  # For type hints
 
@@ -69,7 +68,8 @@ class Shorthands:
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = None) -> ndarray:
+            seed: int | None = None,
+            plot_stages: bool = False) -> ndarray:
         """
         Shorthand for performing genetic clustering and performing routing
         using those clusters. Unless **both** graph and coordinates are
@@ -88,6 +88,7 @@ class Shorthands:
         update.
         :param plot: Whether to plot on each update and the final route.
         :param seed: Specified seed for random number generators.
+        :param plot_stages: Whether to plot the clusters.
         :return: Returns a 1D ndarray representing the found route.
         """
         graph, coordinates, durations = Shorthands._setup_inputs(
@@ -95,13 +96,15 @@ class Shorthands:
 
         genetic_algorithm = GeneticClustering(
             num_generations, population_size, crossover_probability,
-            mutation_probability, generations_per_update, False, seed)
+            mutation_probability, generations_per_update, plot, seed,
+            plot_stages)
         cluster_assignments = genetic_algorithm.find_clusters(
             graph, durations, num_locations, num_days, routing_algorithm,
             coordinates)
 
         route = genetic_algorithm.find_route_from_clusters(
-            cluster_assignments, num_days, routing_algorithm, graph, durations)
+            cluster_assignments, num_days, routing_algorithm, graph, durations,
+            coordinates)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
@@ -117,6 +120,7 @@ class Shorthands:
                  f"σ={std_deviation}")
 
         centre = coordinates.mean(axis=0)
+
         if plot:
             Plotting.display_route(route, coordinates, centre, title,
                                    evaluation_per_day, durations)
