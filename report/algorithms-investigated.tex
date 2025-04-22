@@ -340,7 +340,66 @@ This is shown in figure~\ref{fig:GeneticCentroids._evaluate_population}.
 \end{figure}
 
 \noindent
+The `\_assign\_nodes\_to\_centroid' method shown in figure~\ref{fig:GeneticCentroids._evaluate_population} is the same
+method we used for K-Means, shown in figure~\ref{fig:Clustering._assign_nodes_to_centroid}.
+With the population evaluated we can select the best individuals for use in creating the next generation.
+To create the next generation we enact the same stages of copying over the best individuals, generating some new
+individual's randomly and creating the rest via crossover and mutation.
 
+For this implementation of crossover, instead of selecting random genes from each parent, we will be taking the
+values of both parents and merging them together.
+In practice, this means taking the coordinates of each centroid from both parents and finding a point between them
+to generate a new centroid.
+How close this new centroid is to each parent is determined by generating a random weight, indicating how much
+influence each parent has on the offspring.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Centroid_Crossover_Example}
+    \caption{Example of merging two parents' centroids to create offspring}
+    \label{Centroid_Crossover_Example}
+\end{figure}
+\todo{Create and insert drawing of merging parent centroids}
+
+\noindent
+Similarly to the previous implementation of crossover, we need to reorder the centroids to ensure that both parents
+are consistent with each other.
+This time, because are genome isn't formed of discrete values we can rename, we will instead take an approach of
+finding the most similar centroids from each parent and merging them.
+This is performed by calculating the distances between each of parent 1s centroids to each of parent 2s, and
+reordering the genome to place the closest centroids together.
+Figure~\ref{fig:GeneticCentroids._crossover} shows this implementation of crossover, including how parents are
+reordered and merged together to produce offspring.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids._crossover}
+    \caption{Code from GeneticCentroidClustering.\_crossover in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticCentroids._crossover}
+\end{figure}
+\todo{Fix resolution}
+
+\noindent
+For mutation, we will go through each centroid of each individual and randomly decide if it will mutate or not.
+If a centroid is chosen to mutate, we will randomly select a new location for it within the bound of the input
+coordinates.
+The minimum and maximum latitude and longitude of the input are used to form a region within which new centroids can
+be generated, ensuring that the mutation is still relevant to the input.
+Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of mutation.
+\begin{figure}
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids.find_clusters.mutation}
+    \caption{Code from GeneticCentroidClustering.find_clusters in algorithms\textbackslash clustering.py}
+    \label{GeneticCentroids.find_clusters.mutation}
+\end{figure}
+\todo{Fix resolution}
+
+\noindent
+Once again, this process of selection, crossover and mutation is repeated until a maximum number of generations is reached.
+By the end of this process, we will have a population of individuals that have been evolved to find good centroids
+for clustering the input.
+\todo{Insert figure and reference it}
+
+\noindent
+\todo{Discuss why chosen, to investigate how a k-means like approach would work with a genetic algorithm and whether regular clustering is better.}
 
 \subsection{Routing}\label{subsec:routing}
 \todo{Explain purpose of routing/goal of algorithms.}
