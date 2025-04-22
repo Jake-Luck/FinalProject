@@ -53,7 +53,7 @@ class Clustering(Algorithm):
         :return: 1D ndarray representing the found route.
         """
         # uses a list of each locations cluster assignment to form a list of
-        # the index for each clustser's locations.
+        # the index for each cluster's locations.
         clusters = list[ndarray]()
         for i in range(num_days):
             indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
@@ -216,6 +216,14 @@ class GeneticClustering(Genetic, Clustering):
                                                  f"{generation_number}",
                                            durations=durations,)
 
+            if float('inf') in (evaluations[index1], evaluations[index2]):
+                population = self._generate_random_centroids(num_days, centre)
+                if evaluations[index1] != float('inf'):
+                    population[0] = parent1
+                if evaluations[index2] != float('inf'):
+                    population[0] = parent2
+                continue
+
             # Maintain best two individuals across generations.
             population[0] = parent1
             population[1] = parent2
@@ -292,6 +300,7 @@ class GeneticClustering(Genetic, Clustering):
             route = self.find_route_from_clusters(
                 population[individual], num_days, routing_method, graph,
                 durations, coordinates)
+
             evaluations[individual], _, _ = self.evaluate_route(
                 route, num_days, graph, durations)
         return evaluations
@@ -299,10 +308,10 @@ class GeneticClustering(Genetic, Clustering):
     @staticmethod
     def _relabel_individuals_clusters(individual: ndarray) -> ndarray:
         """
-        Relables cluster assignments to be in order of appearance. This
+        Relabels cluster assignments to be in order of appearance. This
         ensures consistency between parent1 and parent2
         :param individual: The individual to relabel.
-        :return: The individual with relable clusters.
+        :return: The individual with relabelled clusters.
         """
         # Get unique values and the first index they're used
         unique_vals, first_indices = np.unique(individual,
@@ -365,9 +374,12 @@ class GeneticCentroidClustering(Genetic, Clustering):
         evaluations = np.empty(self.population_size)
         evaluations[:] = float('inf')
 
-        # Randomly Assign Centroids
-        centre = coordinates.mean(axis=0)
-        population = self._generate_random_centroids(num_days, centre)
+        lon_range = (coordinates[:, 0].min(), coordinates[:, 0].max())
+        lat_range = (coordinates[:, 1].min(), coordinates[:, 1].max())
+
+        # Initialise coordinates
+        population = self._generate_random_centroids(num_days, lat_range,
+                                                     lon_range)
         cluster_coordinates = np.array(coordinates[1:], copy=True)
 
         # Assign these before loop just in case num_generations is 0 and these
@@ -417,19 +429,24 @@ class GeneticCentroidClustering(Genetic, Clustering):
 
                 # Generate random individual (increases genetic diversity)
                 if not use_crossover:
-                    population[individual] = np.random.uniform(centre[1] - 0.1,
-                                                               centre[1] + 0.1,
-                                                               (num_days, 2))
+                    new_lon = np.random.uniform(lon_range[0], lon_range[1],
+                                                num_days)
+                    new_lat = np.random.uniform(lat_range[0], lat_range[1],
+                                                num_days)
+                    population[individual] = np.vstack((new_lon, new_lat))
                     continue
 
                 population[individual] = self._crossover(parent1, parent2)
 
                 for cluster in range(num_days):
                     mutate = random.random() < self.mutation_probability
-                    if not mutate:
-                        continue
-                    mutation = np.random.uniform(-0.01, 0.01, 2)
-                    population[individual, cluster] += mutation
+                    if mutate:
+                        new_lon = np.random.uniform(lon_range[0], lon_range[1],
+                                                    num_days)
+                        new_lat = np.random.uniform(lat_range[0], lat_range[1],
+                                                    num_days)
+                        population[individual, cluster] = np.concatenate(
+                            (new_lon, new_lat))
 
         print(f"Centroid evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
@@ -467,7 +484,6 @@ class GeneticCentroidClustering(Genetic, Clustering):
         for i in range(num_days):
             weight = random.random()
             offspring[i] = weight * parent1[i] + (1-weight) * parent2[i]
-
         return offspring
 
     def _evaluate_population(self,
@@ -495,27 +511,29 @@ class GeneticCentroidClustering(Genetic, Clustering):
                                                       population[individual])
 
             route = self.find_route_from_clusters(
-                clusters, num_days, routing_method, graph, durations)
+                clusters, num_days, routing_method, graph,
+                durations, coordinates)
 
-            evaluations[individual], _, _ = self.evaluate_route(
-                route, num_days, graph, durations)
+            evaluations[individual] = self.evaluate_route(route, num_days,
+                                                          graph, durations)    ⠀
         return evaluations
 
     def _generate_random_centroids(self,
                                    num_days: int,
-                                   centre: ndarray):
+                                   lon_range: (float, float),
+                                   lat_range: (float, float)) -> ndarray:
         """
         Generates random centroids for each individual in the population.
         :param num_days: The number of days in the route.
         :param centre: The centre of the coordinates.
         :return: A population of random centroids.
         """
-        centroid_x_coordinates = np.random.uniform(centre[0] - 0.1,
-                                                   centre[0] + 0.1,
+        centroid_x_coordinates = np.random.uniform(lon_range[0],
+                                                   lon_range[1],
                                                    size=(self.population_size,
                                                          num_days))
-        centroid_y_coordinates = np.random.uniform(centre[1] - 0.1,
-                                                   centre[1] + 0.1,
+        centroid_y_coordinates = np.random.uniform(lat_range[0],
+                                                   lat_range[1],
                                                    size=(self.population_size,
                                                          num_days))
 

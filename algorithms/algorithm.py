@@ -1,6 +1,7 @@
 """
 Provides algorithm base class, which each algorithm will inherit from.
 """
+import math
 import numpy as np
 from numpy import ndarray  # For type hints
 
@@ -30,6 +31,7 @@ class Algorithm:
 
         # Sum durations in route
         for index in route:
+            # Invalid route returns infinite cost
             if previous_index == index or current_day >= num_days:
                 evaluation_per_day[:] = float('inf')
                 return float('inf'), float('inf'), evaluation_per_day
@@ -43,15 +45,7 @@ class Algorithm:
                 current_day += 1
             previous_index = index
 
-
-        # Multiply durations by 1 + standard deviation of time spent each day
-        #standard_deviation = float(np.std(evaluation_per_day))
-        #evaluation *= 1 + standard_deviation
-        
-        #return evaluation, standard_deviation, evaluation_per_day
-
-        # W/d + σ^2
-        evaluation /= num_days
+        evaluation /= math.sqrt(num_days)
         standard_deviation = float(np.std(evaluation_per_day))
         evaluation += standard_deviation
 
