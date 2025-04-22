@@ -30,9 +30,9 @@ K-Means is an iterative clustering algorithm that defines its clusters using a s
 given a location in the input space, a given location is assigned to the cluster of the `closest' centroid.
 The algorithm starts by initialising random centroids and iteratively improving the clustering from there, continuing
 until the algorithm converges (on a local optimum) or an iteration limit is reached.
-While the algorithm may not find the best solution, it is rather quick, with a time complexity of $O(mnki)$,
-where where $m$ is the number of locations, $n$ is the dimensionality of the input, $k$ is the number of clusters,
-and $i$ is the number of iterations iterations\todo{cite Algorithm AS 136: A K-Means Clustering Algorithm}.
+While the algorithm may not find the best solution, it is rather quick, with a time complexity of $O(m n k i)$,
+where $m$ is the number of locations, $n$ is the dimensionality of the input, $k$ is the number of clusters,
+and $i$ is the number of iterations\todo{cite Algorithm AS 136: A K-Means Clustering Algorithm}.
 Our inputs will always contain only two dimensions, and we will be setting a maximum number of iterations, this
 makes both $n$ and $i$ constants allowing us to simplify the time complexity to $O(mk)$.\\
 
@@ -213,7 +213,7 @@ In the example shown in figure~\ref{fig:Crossover_Mask_Example}, parent 1's 0th 
 location, similarly, parent 2's 2nd cluster also only includes the first location.
 Both parents are forming a cluster using these locations, however due to them being labelled differently, the
 offspring produced did not continue this clustering.
-To solve this problem a genome's clusters will be relabelled in order of their appearence in the genome, ensuring
+To solve this problem a genome's clusters will be relabelled in order of their appearance in the genome, ensuring
 consistency between parents.
 Figure~\ref{fig:Crossover_Mask_Relabelling_Example} shows an example of this applied to the parents in figure~\ref{fig:Crossover_Mask_Example},
 and figure~\ref{fig:GeneticClustering._relabel_individuals_clusters} shows how this is accomplished in our python
@@ -230,8 +230,8 @@ implementation.
 \end{figure}
 
 \noindent
-After this relabelling, crossover can be performed without issue. Figure~\ref{fig:GeneticClustering._crossover} shows
-our python implementation of this.
+After this relabelling, crossover can be performed without issue.
+Figure~\ref{fig:GeneticClustering._crossover} shows our python implementation of this.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering._crossover}
@@ -246,15 +246,15 @@ If a gene is chosen to mutate, it will assign itself to a random cluster.
 Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is implemented in python.
 \begin{figure}[H]
     \centering
-    \includegraphic[width = \textwidth]{GeneticClustering.find_clusters.mutation}
+    \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.mutation}
     \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.mutation}
 \end{figure}
 
 \noindent
-After the
-
-git test
-
+After the new population has been created, we restart the process for the next generation, repeating these steps
+until a maximum number of generations is reached.
+By time evolution is complete the population will hopefully have converged on a good solution.
+Figure~ref{fig:GeneticClustering_}
 
 \noindent
 \todo{Discuss why chosen}
