@@ -1,7 +1,25 @@
 \todo{There should be a link either here or at end of literature which forms the basic for different methods (clustering, routing, trip generation).}
 \todo{Paragraph describing different types of algorithm used (Routing then cluster, Cluster then Routing, Genetic, etc.)}
 \todo{Remember to justify the choice of algorithms. You may also need to explain how to adopt these algorithms in your work. A figure showing the ralationship between different components of your work may also help.}
-\todo{Include code for evaluating a route here.}
+
+\subsection{Objective Function}\label{subsec:algorithms-objective-function}
+Before describing the algorithms investigated, we will quickly cover the implementation of our objective function.
+As described in the \hyperref[sec:problem-formulation]{Problem Formulation}, our objective function aims to
+calculate a cost for a given route.
+This function is needed such that we can compare our approaches and algorithms based on the quality of their results.
+Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our project.
+\todo{Emphasise how graph is weighted using time instead of distance and why these don't directly correlate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Algorithm.evaluate_route}
+    \caption{Code from Algorithm.evaluate\_route in algorithms\textbackslash algorithm.py}
+    \label{fig:Algorithm.evaluate_route}
+\end{figure}
+
+\noindent
+All the code used in the project is available to find at: \url{https://git.cs.bham.ac.uk/projects-2024-25/jhl114}.
+Code snippets shown in this report, such as figure~\ref{Algorithm.evaluate_route}, are captioned
+detailing where in the git repository their code can be found.
 
 \subsection{Clustering}\label{subsec:clustering}
 Clustering as a concept can be described as `the unsupervised classification of patterns (observation, data items, or
@@ -9,11 +27,11 @@ feature vectors) into groups (clusters)'\todo{cite Data Clustering: A review, A.
 In our problem, clustering will be used to group locations together to form an itinerary for each day of the trip.
 These clusters, or days, will then be used as an input for some routing algorithm, which will try and find an
 optimal route for each day.
-These routes can then be combined to form a complete route for the trip.
+These routes can then be combined to form a complete trip.
 The goal of our clustering algorithms is to find a set of clusters that, when combined with some routing algorithm,
-will produce a route that minimises the cost function.\\
+will produce a trip with minimal cost.
 The code in figure~\ref{fig:Clustering.find_route_from_clusters} shows how we can use a set of clusters alongside our
-graph and duration inputs to find a route.
+graph and duration inputs to find a trip.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Clustering.find_route_from_clusters}
@@ -49,7 +67,8 @@ Figure~\ref{fig:Clustering._assign_nodes_to_centroid} shows how this was accompl
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Clustering._assign_nodes_to_centroid}
-    \caption{Code from Clustering.\_assign\_nodes\_to\_centroid in algorithms\textbackslash clustering.py}\label{fig:Clustering._assign_nodes_to_centroid}
+    \caption{Code from Clustering.\_assign\_nodes\_to\_centroid in algorithms\textbackslash clustering.py}
+    \label{fig:Clustering._assign_nodes_to_centroid}
 \end{figure}
 
 \noindent
@@ -60,7 +79,8 @@ Our implementation is shown in figure~\ref{fig:KMeans._compute_means}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans._compute_means}
-    \caption{Code from KMeans.\_compute\_means in algorithms\textbackslash clustering.py}\label{fig:KMeans._compute_means}
+    \caption{Code from KMeans.\_compute\_means in algorithms\textbackslash clustering.py}
+    \label{fig:KMeans._compute_means}
 \end{figure}
 
 \noindent
@@ -72,7 +92,8 @@ Our python implementation of this is shown in figure~\ref{fig:KMeans.find_cluste
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans.find_clusters}
-    \caption{Code from KMeans.find\_clusters in algorithms\textbackslash clustering.py}\label{fig:KMeans.find_clusters}
+    \caption{Code from KMeans.find\_clusters in algorithms\textbackslash clustering.py}
+    \label{fig:KMeans.find_clusters}
 \end{figure}
 
 \noindent
@@ -81,22 +102,26 @@ points of interest around London to be visited over seven days.
 \begin{figure}[H]
     \ContinuedFloat*
     \includegraphics[width = \textwidth]{KMeans_London_Step1}
-    \caption{K-Means example Step 1, Initial centroid positions and cluster assignments.}\label{fig:KMeans_London_Step1}
+    \caption{K-Means example Step 1, Initial centroid positions and cluster assignments.}
+    \label{fig:KMeans_London_Step1}
 \end{figure}
 \begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step2}
-    \caption{K-Means example Step2, Centroids have been updated, locations are reassigned to their closest centroid.}\label{fig:KMeans_London_Step2}
+    \caption{K-Means example Step2, Centroids have been updated, locations are reassigned to their closest centroid.}
+    \label{fig:KMeans_London_Step2}
 \end{figure}
 \begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step3}
-    \caption{K-Means example Step3, Centroids updated again and locations updated.}\label{fig:KMeans_London_Step3}
+    \caption{K-Means example Step3, Centroids updated again and locations updated.}
+    \label{fig:KMeans_London_Step3}
 \end{figure}
 \begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step4}
-    \caption{K-Means example Step4, Centroids have updated and no locations have changed cluster, a solution has been found.}\label{fig:KMeans_London_Step4}
+    \caption{K-Means example Step4, Centroids have updated and no locations have changed cluster, a solution has been found.}
+    \label{fig:KMeans_London_Step4}
 \end{figure}
 
 \noindent
@@ -138,9 +163,8 @@ determining how crossover is performed to create offspring; and in our case, the
 impact how clusters are used to form routes.
 These hyperparameters impact both the runtime of the algorithm and the exploration of the search space, indirectly
 impacting the quality of the solution.
-The time complexity of genetic clustering largely depends on the chosen routing algorithm, b
-Genetic clustering has a time complexity of $O(gpn)$, with $g$ being the number of generations, $p$ being the
-population size and $n$ being the number of locations.\\
+Genetic clustering has a time complexity of $O(gpr)$, with $g$ being the number of generations, $p$ being the
+population size and $r$ being the time complexity of the chosen routing algorithm.\\
 
 \noindent
 For this genetic clustering, an individual is represented by a genome, which will provide a mapping that assigns each
@@ -150,7 +174,8 @@ Figure~\ref{fig:barcelona-genome-example} shows an example of this.
     \centering
     Genome: [0, 0, 0, 1, 1, 1, 2, 2, 2]\\
     \includegraphics[width = \textwidth]{Barcelona_Genome_Example}
-    \caption{Example of how an individual's genome corresponds to cluster assignments.}\label{fig:barcelona-genome-example}
+    \caption{Example of how an individual's genome corresponds to cluster assignments.}
+    \label{fig:barcelona-genome-example}
 \end{figure}
 
 \noindent
@@ -167,12 +192,25 @@ From there, we repeat the following steps until we reach a maximum number of gen
 \noindent
 As previously discussed, we will evaluate the fitness of each individual by applying a routing algorithms to the
 clusters defined by the genome, and then applying our cost function to the resulting route.
+Figure~\ref{fig:GeneticClustering._evaluate_population} shows this route finding and evaluation.
+\begin{figure}
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering._evaluate_population}
+    \caption{Code from GeneticClustering.\_evaluate\_population in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticClustering._evaluate_population}
+\end{figure}
+
+\noindent
+The methods called in figure~\ref{fig:GeneticClustering._evaluate_population} are those previously shown in
+figure~\ref{fig:Clustering.find_route_from_clusters} (find_route_from_clusters) and
+figure~\ref{fig:Algorithm.evaluate_route} (evaluate_route).
 Once the population has been evaluated, the best two individuals are chosen as parents, as figure~\ref{fig:GeneticClustering.find_clusters.select_parents}
 shows.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.select_parents}
-    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.select_parents}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticClustering.find_clusters.select_parents}
 \end{figure}
 
 \noindent
@@ -186,7 +224,8 @@ the individual is created via crossover, otherwise it will be randomly generated
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.crossover}
-    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.crossover}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticClustering.find_clusters.crossover}
 \end{figure}
 
 \noindent
@@ -204,7 +243,8 @@ two parents, the example uses a hypothetical input including six locations and t
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Crossover_Mask_Example}
-    \caption{Example of using a crossover mask to create a child from two parents.}\label{fig:Crossover_Mask_Example}
+    \caption{Example of using a crossover mask to create a child from two parents.}
+    \label{fig:Crossover_Mask_Example}
 \end{figure}
 
 \noindent
@@ -221,12 +261,14 @@ implementation.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Crossover_Mask_Relabelling_Example}
-    \caption{Example of relabelling a parent's clusters and the resultant offspring}\label{fig:Crossover_Mask_Relabelling_Example}
+    \caption{Example of relabelling a parent's clusters and the resultant offspring}
+    \label{fig:Crossover_Mask_Relabelling_Example}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering._relabel_individuals_clusters}
-    \caption{Code from GeneticClustering.\_relabel\_individuals\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering._relabel_individuals_clusters}
+    \caption{Code from GeneticClustering.\_relabel\_individuals\_clusters in algorithms\textbackslash clusterin.py}
+    \label{fig:GeneticClustering._relabel_individuals_clusters}
 \end{figure}
 
 \noindent
@@ -235,7 +277,8 @@ Figure~\ref{fig:GeneticClustering._crossover} shows our python implementation of
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering._crossover}
-    \caption{Code from GeneticClustering.\_crossover in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering._crossover}
+    \caption{Code from GeneticClustering.\_crossover in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticClustering._crossover}
 \end{figure}
 
 After crossover is complete, we randomly mutate the created offspring in the hopes of increasing genetic diversity
@@ -247,20 +290,57 @@ Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is impl
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.mutation}
-    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash genetic.py}\label{fig:GeneticClustering.find_clusters.mutation}
+    \caption{Code from GeneticClustering.find\_clusters in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticClustering.find_clusters.mutation}
 \end{figure}
 
 \noindent
 After the new population has been created, we restart the process for the next generation, repeating these steps
 until a maximum number of generations is reached.
 By time evolution is complete the population will hopefully have converged on a good solution.
-Figure~ref{fig:GeneticClustering_}
+\todo{Insert figure and reference it}
 
 \noindent
-\todo{Discuss why chosen}
+\todo{Discuss how clusters may look unusual due to non-Euclidean distances.}
+\todo{Discuss why chosen, no clue what to put here, I just did it bc it's cool.}
 
-\subsubsection{Genetic Centroid-based Clustering}
+\subsubsection{Centroid-based Genetic Clustering}
 \todo{Explain genetic centroid-based clustering and how it differs from general clustering.}
+Inspired by K-Means, centroid-based genetic clustering uses a genetic algorithm to find the best set of centroids
+to cluster the data.
+The same process of evolution is used, as described previously, except this time the genome will specify the
+centroids to use for clustering.
+With a different genome structure, we will have to reconsider our crossover and mutation methods.
+Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(gpr)$, with $g$ being the
+number of generations, $p$ being the population size and $r$ being the time complexity of the chosen routing.\\
+
+\noindent
+Our new genome will be a list of coordinate pairs, representing the latitude and longitude of each centroid.
+Figure~\ref{fig:GeneticCentroids_Greenwich_Example} shows an example of how locations are clustered using our centroid-based genome.
+\begin{figure}[H]
+    \centering
+    Genome: $\begin{bmatrix}0.00 & 0.01 & -0.01 & 0.00 & 0.00\\51.477 & 51.477 & 51.477 & 51.482 & 51.472\end{bmatrix}$
+    \includegraphics[width = \textwidth]{GeneticCentroids_Greenwich_Example}
+    \caption{Example of how an individual's genome corresponds to cluster centroids.}
+    \label{fig:GeneticCentroids_Greenwich_Example}
+\end{figure}
+
+\noindent
+Once again, we will iteratively evolve our population through the process of selection, crossover and mutation.
+Our selection procedure is largely the same in that we evaluate each individual by generating a trip with the help
+of its genome and calculating the associated cost of these trips.
+The only difference is that, because our genome is no longer a direct assignment of clusters, we first need to
+assign each location to its nearest centroid.
+This is shown in figure~\ref{fig:GeneticCentroids._evaluate_population}.
+\begin{figure}
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids._evaluate_population}
+    \caption{From GeneticCentroidClustering.\_evaluate\_population in algorithms\textbackslash clustering.py}
+    \label{fig:GeneticCentroids._evaluate_population}
+\end{figure}
+
+\noindent
+
 
 \subsection{Routing}\label{subsec:routing}
 \todo{Explain purpose of routing/goal of algorithms.}
