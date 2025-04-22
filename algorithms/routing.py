@@ -15,6 +15,60 @@ class Routing(Algorithm):
     Provides various routing algorithms as static methods.
     """
     @staticmethod
+    def brute_force(num_locations: int,
+                    num_days: int,
+                    graph: ndarray,
+                    durations: ndarray) -> ndarray:
+        """
+        A brute force solver for the problem. Can be used on its own or with
+        clustering. When num_days equals 1, this becomes a TSP solver.
+        :param num_locations: The number of locations in the route.
+        :param num_days: The number of days in the route.
+        :param graph: The adjacency matrix for the graph.
+        :param durations: Duration spent at each location.
+        :return: 1D ndarray representing the best route.
+        """
+        if num_days < 1:
+            raise ValueError(f"num_days={num_days}, must be at least 1.")
+        if num_locations < 4:
+            # 3 locations only has 1 result, so just use greedy
+            return Routing.greedy_routing(num_locations, num_days,
+                                          graph, durations)
+
+        route_length = num_locations + num_days - 1
+
+        # get (route_length - 1)! Do -1 because all routes end at '0'
+        n_routes = 1
+        for i in range(2, route_length):
+            n_routes *= i
+
+        best_route = Algorithm.generate_route(0, n_routes,
+                                              num_locations, num_days,
+                                              route_length)
+        best_evaluation, _, _ = Algorithm.evaluate_route(best_route, num_days,
+                                                         graph, durations)
+
+        # iterations_per_update = n_routes / 10
+        # progress = 0
+
+        for i in range(1, n_routes):  # yikes
+            route = Algorithm.generate_route(i, n_routes, num_locations,
+                                             num_days, route_length)
+            evaluation, _, _ = Algorithm.evaluate_route(route, num_days, graph,
+                                                        durations)
+
+            if evaluation < best_evaluation:
+                best_route = np.array(route, copy=True)
+                best_evaluation = evaluation
+
+            # if (i+1) % iterations_per_update == 0:
+            #     progress += 10
+            #     print(f"Brute force {progress}% complete: {i+1}/{n_routes}.
+            #     Best evaluation: {best_evaluation}")
+
+        return best_route
+
+    @staticmethod
     def gift_wrapping(num_locations: int,
                       num_days: int,
                       coordinates: ndarray,
@@ -73,60 +127,6 @@ class Routing(Algorithm):
         route = np.roll(route, -np.where(route == 0)[0] - 1)
         return route
 
-
-    @staticmethod
-    def brute_force(num_locations: int,
-                    num_days: int,
-                    graph: ndarray,
-                    durations: ndarray) -> ndarray:
-        """
-        A brute force solver for the problem. Can be used on its own or with
-        clustering. When num_days equals 1, this becomes a TSP solver.
-        :param num_locations: The number of locations in the route.
-        :param num_days: The number of days in the route.
-        :param graph: The adjacency matrix for the graph.
-        :param durations: Duration spent at each location.
-        :return: 1D ndarray representing the best route.
-        """
-        if num_days < 1:
-            raise ValueError(f"num_days={num_days}, must be at least 1.")
-        if num_locations < 4:
-            # 3 locations only has 1 result, so just use greedy
-            return Routing.greedy_routing(num_locations, num_days,
-                                          graph, durations)
-
-        route_length = num_locations + num_days - 1
-
-        # get (route_length - 1)! Do -1 because all routes end at '0'
-        n_routes = 1
-        for i in range(2, route_length):
-            n_routes *= i
-
-        best_route = Algorithm.generate_route(0, n_routes,
-                                              num_locations, num_days,
-                                              route_length)
-        best_evaluation, _, _ = Algorithm.evaluate_route(best_route, num_days,
-                                                         graph, durations)
-
-        # iterations_per_update = n_routes / 10
-        # progress = 0
-
-        for i in range(1, n_routes):  # yikes
-            route = Algorithm.generate_route(i, n_routes, num_locations,
-                                             num_days, route_length)
-            evaluation, _, _ = Algorithm.evaluate_route(route, num_days, graph,
-                                                        durations)
-
-            if evaluation < best_evaluation:
-                best_route = np.array(route, copy=True)
-                best_evaluation = evaluation
-
-            # if (i+1) % iterations_per_update == 0:
-            #     progress += 10
-            #     print(f"Brute force {progress}% complete: {i+1}/{n_routes}.
-            #     Best evaluation: {best_evaluation}")
-
-        return best_route
 
     @staticmethod
     def greedy_routing(num_locations: int,
