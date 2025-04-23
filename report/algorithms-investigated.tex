@@ -97,8 +97,8 @@ Our python implementation of this is shown in figure~\ref{fig:KMeans.find_cluste
 \end{figure}
 
 \noindent
-Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-Means algorithm run on an input with 25
-points of interest around London to be visited over seven days.
+Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-Means algorithm run on an input with 12
+points of interest around London to be visited over 3.
 \begin{figure}[H]
     \ContinuedFloat*
     \includegraphics[width = \textwidth]{KMeans_London_Step1}
@@ -114,14 +114,8 @@ points of interest around London to be visited over seven days.
 \begin{figure}[H]
     \ContinuedFloat
     \includegraphics[width = \textwidth]{KMeans_London_Step3}
-    \caption{K-Means example Step3, Centroids updated again and locations updated.}
+    \caption{K-Means example Step3, Centroids have updated and no locations have changed cluster, a solution has been found.}
     \label{fig:KMeans_London_Step3}
-\end{figure}
-\begin{figure}[H]
-    \ContinuedFloat
-    \includegraphics[width = \textwidth]{KMeans_London_Step4}
-    \caption{K-Means example Step4, Centroids have updated and no locations have changed cluster, a solution has been found.}
-    \label{fig:KMeans_London_Step4}
 \end{figure}
 
 \noindent
@@ -298,10 +292,51 @@ Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is impl
 After the new population has been created, we restart the process for the next generation, repeating these steps
 until a maximum number of generations is reached.
 By time evolution is complete the population will hopefully have converged on a good solution.
-\todo{Insert figure and reference it}
-
+Figure~\ref{fig:GeneticClustering_London_Step1} shows an example of genetic clustering using the same input as for the
+K-Means example in figure~\ref{fig:KMeans_London_Step1}.
+In the example, genetic clustering is used alongside greedy routing (to be covered in section~\ref{subsubsec:greedy-routing})
+to form a complete trip, the best routes found within their respective generations are shown.
+The genetic clustering was run for 30 generations with a population size of 12, a crossover rate of 0.9 was used
+alongside a mutation rate of 0.1.
+Figure~\ref{fig:GeneticClustering_London_Evaluations} shows a line graph of the best evaluation found for each
+generation.
+\begin{figure}[H]
+    \ContinuedFloat*
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering_London_Generation1}
+    \caption{Genetic Clustering example, best route found in Generation 1.}
+    \label{fig:GeneticClustering_London_Generation1}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering_London_Generation5}
+    \caption{Genetic Clustering example, best route found in Generation 5.}
+    \label{fig:GeneticClustering_London_Generation2}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering_London_Generation10}
+    \caption{Genetic Clustering example, best route found in Generation 10.}
+    \label{fig:GeneticClustering_London_Generation10}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering_London_Generation30}
+    \caption{Genetic Clustering example, best route found in Generation 30, evolution is now complete.}
+    \label{fig:GeneticClustering_London_Generation30}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticClustering_London_Evaluations}
+    \caption{Line graph showing the best evaluation for each generation of clusters evolution process.}
+    \label{fig:GeneticClustering_London_Evaluations}
+\end{figure}
 \noindent
-\todo{Discuss how clusters may look unusual due to non-Euclidean distances.}
+
 \todo{Discuss why chosen, no clue what to put here, I just did it bc it's cool.}
 
 \subsubsection{Centroid-based Genetic Clustering}
@@ -375,7 +410,6 @@ reordered and merged together to produce offspring.
     \caption{Code from GeneticCentroidClustering.\_crossover in algorithms\textbackslash clustering.py}
     \label{fig:GeneticCentroids._crossover}
 \end{figure}
-\todo{Fix resolution}
 
 \noindent
 For mutation, we will go through each centroid of each individual and randomly decide if it will mutate or not.
@@ -387,16 +421,58 @@ Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of m
 \begin{figure}
     \centering
     \includegraphics[width = \textwidth]{GeneticCentroids.find_clusters.mutation}
-    \caption{Code from GeneticCentroidClustering.find_clusters in algorithms\textbackslash clustering.py}
+    \caption{Code from GeneticCentroidClustering.find\_clusters in algorithms\textbackslash clustering.py}
     \label{GeneticCentroids.find_clusters.mutation}
 \end{figure}
-\todo{Fix resolution}
 
 \noindent
 Once again, this process of selection, crossover and mutation is repeated until a maximum number of generations is reached.
 By the end of this process, we will have a population of individuals that have been evolved to find good centroids
 for clustering the input.
-\todo{Insert figure and reference it}
+Figure~\ref{fig:GeneticCentroids_London_Step1} shows an example of genetic centroid-based clustering using the same
+input as for previous clustering examples.
+Once again, this genetic clustering uses greedy routing to form its trips, trying to find the best set of clusters
+that minimises the cost of these trips.
+The genetic clustering was run for 30 generations with a population size of 12, a crossover rate of 0.9 was used
+alongside a mutation rate of 0.1.
+Figure~\ref{fig:GeneticCentroids_London_Evaluations} shows a line graph of the best evaluation found for each
+generation.
+\begin{figure}[H]
+    \ContinuedFloat*
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids_London_Generation1}
+    \caption{Genetic Centroid Clustering example, best route found in Generation 1.}
+    \label{fig:GeneticCentroids_London_Generation1}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids_London_Generation5}
+    \caption{Genetic Centroids Clustering example, best route found in Generation 5.}
+    \label{fig:GeneticCentroids_London_Generation5}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids_London_Generation10}
+    \caption{Genetic Centroids Clustering example, best route found in Generation 10.}
+    \label{fig:GeneticCentroids_London_Generation10}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids_London_Generation30}
+    \caption{Genetic Centroids Clustering example, best route found in Generation 30, evolution is now complete.}
+    \label{fig:GeneticCentroids_London_Generation30}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticCentroids_London_Evaluations}
+    \caption{Line graph showing the best evaluation for each generation of centroids evolution process.}
+    \label{fig:GeneticCentroids_London_Evaluations}
+\end{figure}
+\noindent
 
 \noindent
 \todo{Discuss why chosen, to investigate how a k-means like approach would work with a genetic algorithm and whether regular clustering is better.}
