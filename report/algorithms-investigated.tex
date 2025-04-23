@@ -18,7 +18,7 @@ Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our 
 
 \noindent
 All the code used in the project is available to find at: \url{https://git.cs.bham.ac.uk/projects-2024-25/jhl114}.
-Code snippets shown in this report, such as figure~\ref{Algorithm.evaluate_route}, are captioned
+Code snippets shown in this report, such as figure~\ref{fig:Algorithm.evaluate_route}, are captioned
 detailing where in the git repository their code can be found.
 
 \subsection{Clustering}\label{subsec:clustering}
@@ -97,8 +97,8 @@ Our python implementation of this is shown in figure~\ref{fig:KMeans.find_cluste
 \end{figure}
 
 \noindent
-Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-Means algorithm run on an input with 12
-points of interest around London to be visited over 3.
+Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-Means algorithm run on an input with
+12 points of interest around London to be visited over 3 days.
 \begin{figure}[H]
     \ContinuedFloat*
     \includegraphics[width = \textwidth]{KMeans_London_Step1}
@@ -196,8 +196,8 @@ Figure~\ref{fig:GeneticClustering._evaluate_population} shows this route finding
 
 \noindent
 The methods called in figure~\ref{fig:GeneticClustering._evaluate_population} are those previously shown in
-figure~\ref{fig:Clustering.find_route_from_clusters} (find_route_from_clusters) and
-figure~\ref{fig:Algorithm.evaluate_route} (evaluate_route).
+figure~\ref{fig:Clustering.find_route_from_clusters} (find\_route\_from\_clusters) and
+figure~\ref{fig:Algorithm.evaluate_route} (evaluate\_route).
 Once the population has been evaluated, the best two individuals are chosen as parents, as figure~\ref{fig:GeneticClustering.find_clusters.select_parents}
 shows.
 \begin{figure}[H]
@@ -233,7 +233,7 @@ If the two parents, being the best individuals in a population, agree on a bit i
 good choice.
 With our implementation of crossover, the offspring will always copy over the bits that parents agree on.
 Figure~\ref{fig:Crossover_Mask_Example} shows an example of how a crossover mask can be used to create a child from
-two parents, the example uses a hypothetical input including six locations and three clusters.
+two parents, the example uses a hypothetical input including 6 locations and 3 clusters.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Crossover_Mask_Example}
@@ -292,7 +292,7 @@ Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is impl
 After the new population has been created, we restart the process for the next generation, repeating these steps
 until a maximum number of generations is reached.
 By time evolution is complete the population will hopefully have converged on a good solution.
-Figure~\ref{fig:GeneticClustering_London_Step1} shows an example of genetic clustering using the same input as for the
+Figure~\ref{fig:GeneticClustering_London_Generation1} shows an example of genetic clustering using the same input as for the
 K-Means example in figure~\ref{fig:KMeans_London_Step1}.
 In the example, genetic clustering is used alongside greedy routing (to be covered in section~\ref{subsubsec:greedy-routing})
 to form a complete trip, the best routes found within their respective generations are shown.
@@ -329,7 +329,6 @@ generation.
     \label{fig:GeneticClustering_London_Generation30}
 \end{figure}
 \begin{figure}[H]
-    \ContinuedFloat
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering_London_Evaluations}
     \caption{Line graph showing the best evaluation for each generation of clusters evolution process.}
@@ -387,12 +386,6 @@ In practice, this means taking the coordinates of each centroid from both parent
 to generate a new centroid.
 How close this new centroid is to each parent is determined by generating a random weight, indicating how much
 influence each parent has on the offspring.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = \textwidth]{Centroid_Crossover_Example}
-    \caption{Example of merging two parents' centroids to create offspring}
-    \label{Centroid_Crossover_Example}
-\end{figure}
 \todo{Create and insert drawing of merging parent centroids}
 
 \noindent
@@ -422,21 +415,20 @@ Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of m
     \centering
     \includegraphics[width = \textwidth]{GeneticCentroids.find_clusters.mutation}
     \caption{Code from GeneticCentroidClustering.find\_clusters in algorithms\textbackslash clustering.py}
-    \label{GeneticCentroids.find_clusters.mutation}
+    \label{fig:GeneticCentroids.find_clusters.mutation}
 \end{figure}
 
 \noindent
 Once again, this process of selection, crossover and mutation is repeated until a maximum number of generations is reached.
 By the end of this process, we will have a population of individuals that have been evolved to find good centroids
 for clustering the input.
-Figure~\ref{fig:GeneticCentroids_London_Step1} shows an example of genetic centroid-based clustering using the same
+Figure~\ref{fig:GeneticCentroids_London_Generation1} shows an example of genetic centroid-based clustering using the same
 input as for previous clustering examples.
-Once again, this genetic clustering uses greedy routing to form its trips, trying to find the best set of clusters
-that minimises the cost of these trips.
-The genetic clustering was run for 30 generations with a population size of 12, a crossover rate of 0.9 was used
-alongside a mutation rate of 0.1.
-Figure~\ref{fig:GeneticCentroids_London_Evaluations} shows a line graph of the best evaluation found for each
-generation.
+This example of genetic centroid-based clustering used the same hyperparameters as the previous genetic clustering
+example, evolving 30 generations with a population size of 12, a crossover rate of 0.9, a mutation rate of 0.1 and
+once again using greedy routing alongside our clustering to produce trips.
+Again, a line graph of the best evaluation found for each generation of the process, this is shown in
+figure~\ref{fig:GeneticCentroids_London_Evaluations}.
 \begin{figure}[H]
     \ContinuedFloat*
     \centering
@@ -466,7 +458,6 @@ generation.
     \label{fig:GeneticCentroids_London_Generation30}
 \end{figure}
 \begin{figure}[H]
-    \ContinuedFloat
     \centering
     \includegraphics[width = \textwidth]{GeneticCentroids_London_Evaluations}
     \caption{Line graph showing the best evaluation for each generation of centroids evolution process.}
