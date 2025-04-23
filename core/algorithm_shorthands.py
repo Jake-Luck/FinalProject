@@ -141,7 +141,8 @@ class Shorthands:
                     Clustering.RoutingMethods.GREEDY,
             generations_per_update: int | None = 200,
             plot: bool = True,
-            seed: int | None = None) -> ndarray:
+            seed: int | None = None,
+            plot_stages: bool = False) -> ndarray:
         """
         Shorthand for performing genetic centroid clustering and performing
         routing using those clusters. Unless **both** graph and coordinates are
@@ -160,6 +161,7 @@ class Shorthands:
         update.
         :param plot: Whether to plot on each update and the final route.
         :param seed: Specified seed for random number generators.
+        :param plot_stages: Whether to plot the clusters.
         :return: Returns a 1D ndarray representing the found route.
         """
         graph, coordinates, durations = Shorthands._setup_inputs(
@@ -167,12 +169,14 @@ class Shorthands:
 
         genetic_algorithm = GeneticCentroidClustering(
             num_generations, population_size, crossover_probability,
-            mutation_probability, generations_per_update, False, seed)
+            mutation_probability, generations_per_update, plot, seed,
+            plot_stages)
         cluster_assignments = genetic_algorithm.find_clusters(
             coordinates, graph, durations, num_days, routing_algorithm)
 
         route = genetic_algorithm.find_route_from_clusters(
-            cluster_assignments, num_days, routing_algorithm, graph, durations)
+            cluster_assignments, num_days, routing_algorithm, graph, durations,
+            coordinates)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
@@ -305,7 +309,8 @@ class Shorthands:
                 routing_algorithm: Clustering.RoutingMethods =
                         Clustering.RoutingMethods.GREEDY,
                 plot: bool = True,
-                show_stages: bool = False) -> ndarray:
+                show_stages: bool = False,
+                seed: int | None = None) -> ndarray:
         """
         Shorthand for performing k-means clustering and performing routing
         using those clusters. Unless **both** graph and coordinates are
@@ -323,11 +328,11 @@ class Shorthands:
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
 
-        kmeans = KMeans(show_stages=show_stages)
+        kmeans = KMeans(show_stages=show_stages, random_seed=seed)
         cluster_assignments = kmeans.find_clusters(coordinates, num_days,
                                                    num_locations)
         route = kmeans.find_route_from_clusters(
-            cluster_assignments, num_days, routing_algorithm, graph, durations)
+            cluster_assignments, num_days, routing_algorithm, graph, durations, coordinates)
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
             route, num_days, graph, durations)
@@ -342,9 +347,12 @@ class Shorthands:
         title = f"K-Means{routing_string}: {evaluation}, σ={std_deviation}"
 
         centre = coordinates.mean(axis=0)
+
         if plot:
             Plotting.display_route(route, coordinates, centre, title,
                                    evaluation_per_day, durations)
+        else:
+            print(title)
         return route
 
     @staticmethod

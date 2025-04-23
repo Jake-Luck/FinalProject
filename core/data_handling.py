@@ -166,7 +166,7 @@ class DataHandling:
             'Content-Type': 'application/json; charset=utf-8'
         }
         call = requests.post(
-            url='https://api.openrouteservice.org/v2/matrix/foot-walking',
+            url='https://api.openrouteservice.org/v2/matrix/driving-car',
             json=body, headers=headers
         )
 

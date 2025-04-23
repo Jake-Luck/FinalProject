@@ -26,7 +26,8 @@ class Plotting:
                          num_days: int,
                          centroids: ndarray | None = None,
                          centre: ndarray | None = None,
-                         title: str | None = None) -> None:
+                         title: str | None = None,
+                         save_plot: bool = False) -> None:
         """
         Uses plotly to display provided clusters on a world map centred at a
         given coordinate or the first item in coordinates.
@@ -37,9 +38,10 @@ class Plotting:
         plotting of centroid best clustering (such as kmeans).
         :param centre: Point to centre the map on.
         :param title: Title of the plot.
+        :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates[0]
+            centre = coordinates.mean(axis=0)
 
         clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
 
@@ -74,21 +76,24 @@ class Plotting:
                                           opacity=0.5
                                       ))
 
-        Plotting._update_layout_and_show_figure(title, centre, figure)
+        Plotting._update_layout_and_show_figure(title, centre, figure,
+                                                save_plot)
 
     @staticmethod
     def display_coordinates(coordinates: ndarray,
                             centre: ndarray | None = None,
-                            title: str | None = None) -> None:
+                            title: str | None = None,
+                            save_plot: bool = False) -> None:
         """
         Uses plotly to display provided coordinates on a world map centred at a
         given coordinate or the first item in coordinates.
         :param coordinates: Coordinates to display.
         :param centre: Point to centre the map on.
         :param title: Title of the plot.
+        :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates[0]
+            centre = coordinates.mean(axis=0)
 
         figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
                                          lon=coordinates[:, 0],
@@ -99,7 +104,8 @@ class Plotting:
                                              color=colour_set[0]
                                          )))
 
-        Plotting._update_layout_and_show_figure(title, centre, figure)
+        Plotting._update_layout_and_show_figure(title, centre, figure,
+                                                save_plot)
 
     @staticmethod
     def display_route(route: ndarray,
@@ -107,7 +113,8 @@ class Plotting:
                       centre: ndarray | None = None,
                       title: str | None = None,
                       evaluation_per_day: ndarray | None = None,
-                      durations: ndarray | None = None) -> None:
+                      durations: ndarray | None = None,
+                      save_plot: bool = False) -> None:
         """
         Uses plotly to display provided route on a world map centred at a
         given coordinate or the first item in coordinates.
@@ -117,9 +124,10 @@ class Plotting:
         :param title: Title of the plot.
         :param evaluation_per_day: Evaluation per day. 1D array.
         :param durations: Evaluation per day. 1D array.
+        :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates[0]
+            centre = coordinates.mean(axis=0)
 
         route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
@@ -161,7 +169,7 @@ class Plotting:
                     color=colour_set[i]
                 ),
                 text=durations_per_day[i]))
-        Plotting._update_layout_and_show_figure(title, centre, figure)
+        Plotting._update_layout_and_show_figure(title, centre, figure, save_plot)
 
     @staticmethod
     def plot_line_graph(x_data: ndarray,
@@ -183,7 +191,6 @@ class Plotting:
         ax.plot(x_data, y_data)
         ax.set(xlabel=x_label, ylabel=y_label, title=title)
         ax.grid()
-
 
         x_ticks = ax.get_xticks()
         y_ticks = ax.get_yticks()
@@ -208,17 +215,20 @@ class Plotting:
     @staticmethod
     def _update_layout_and_show_figure(title: str | None,
                                        centre: ndarray,
-                                       figure: go.Figure):
+                                       figure: go.Figure,
+                                       save_plot: bool = False) -> None:
         """
         Updates figure layout and displays it.
         :param title: Title of the plot.
         :param centre: Point to centre the map on.
         :param figure: The figure to update and display.
+        :param save_plot: Whether to save the plot as an image.
         """
         if title is not None:
             figure.update_layout(title=title, title_x=0.5, title_y=0.91)
 
-        figure.update_layout(autosize=True,
+        figure.update_layout(width=1920,
+                             height=1080,
                              map=dict(
                                  bearing=0,
                                  center=dict(
@@ -226,8 +236,14 @@ class Plotting:
                                      lon=centre[0]
                                  ),
                                  pitch=0,
-                                 zoom=10,
+                                 zoom=13,
                                  style='carto-voyager'
                              ))
-
         figure.show()
+
+        if save_plot:
+            figure.update_layout(showlegend=False,
+                                 margin=dict(l=0, r=0, t=0, b=0),
+                                 title="")
+            figure.write_image(f"temp.png", scale=2)
+
