@@ -52,40 +52,31 @@ class Algorithm:
         return evaluation, standard_deviation, evaluation_per_day
 
     @staticmethod
-    # TODO: Move base_set construction outside of method. In case generate
-    #  route is to be run in parallel, in which want that computation to be
-    #  done outside and used repeatedly. Make sure to copy based set within
-    #  generate route.
     def generate_route(route_number: int,
                        n_routes: int,
-                       num_locations: int,
-                       num_days: int,
+                       location_set: list,
                        route_length: int) -> ndarray:
         """
         Generates a route using factorial based division.
         :param route_number: The route number/index of permutation.
         :param n_routes: The total number of routes (route_length - 1)!
-        :param num_locations: The number of locations in the route.
-        :param num_days: The number of days in the route.
+        :param location_set: The set of locations to choose from.
         :param route_length: The length of the route.
         :return: Returns a 1D np array representing the generated route.
         """
-        base_set = list()
-        for _ in range(num_days - 1):  # -1 because 0 added to end of routes
-            base_set.append(0)
-        for i in range(1, num_locations):
-            base_set.append(i)
-
-        n_factorial = int(n_routes / (route_length - 1))
         route = np.empty(route_length, dtype=int)
+
+        # This computes (n_routes - 1)!
+        n_factorial = int(n_routes / (route_length - 1))
+
         for i in range(route_length - 2, -1, -1):
             selected_index = int(route_number / n_factorial)
-            route[i] = base_set.pop(selected_index)
+            route[i] = location_set.pop(selected_index)
 
             if i == 0:
                 continue
 
             route_number %= n_factorial
             n_factorial /= i
-        route[route_length - 1] = 0  # All routes end going back to centre
+        route[route_length - 1] = 0  # All routes end going back to centre     ⠀
         return route

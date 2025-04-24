@@ -35,6 +35,12 @@ class Routing(Algorithm):
             return Routing.greedy_routing(num_locations, num_days,
                                           graph, durations)
 
+        location_set = list()
+        for _ in range(num_days - 1):  # -1 because 0 added to end of routes
+            location_set.append(0)
+        for i in range(1, num_locations):
+            location_set.append(i)
+
         route_length = num_locations + num_days - 1
 
         # get (route_length - 1)! Do -1 because all routes end at '0'
@@ -43,17 +49,16 @@ class Routing(Algorithm):
             n_routes *= i
 
         best_route = Algorithm.generate_route(0, n_routes,
-                                              num_locations, num_days,
-                                              route_length)
+                                              location_set[:], route_length)
         best_evaluation, _, _ = Algorithm.evaluate_route(best_route, num_days,
                                                          graph, durations)
 
         # iterations_per_update = n_routes / 10
         # progress = 0
 
-        for i in range(1, n_routes):  # yikes
-            route = Algorithm.generate_route(i, n_routes, num_locations,
-                                             num_days, route_length)
+        for i in range(0, n_routes):  # yikes
+            route = Algorithm.generate_route(i, n_routes, location_set[:],
+                                             route_length)
             evaluation, _, _ = Algorithm.evaluate_route(route, num_days, graph,
                                                         durations)
 
@@ -246,6 +251,12 @@ class GeneticRouting(Genetic):
             print("No coordinates provided, setting plotting to False")
             self.plotting = False
 
+        location_set = list()
+        for _ in range(num_days - 1):  # -1 because 0 added to end of routes
+            location_set.append(0)
+        for i in range(1, num_locations):
+            location_set.append(i)
+
         evaluations = np.empty(self.population_size)
         evaluations[:] = float('inf')
 
@@ -254,9 +265,10 @@ class GeneticRouting(Genetic):
         n_routes = 1
         for i in range(2, route_length):
             n_routes *= i
+
         # Assign random routes to each location
-        population = self._generate_random_routes(num_locations, num_days,
-                                                  n_routes, route_length)
+        population = self._generate_random_routes(num_locations,
+                                                  location_set, route_length)
 
         # Assign these before loop just in case num_generations is 0 and these
         # are used before initialisation
@@ -292,7 +304,7 @@ class GeneticRouting(Genetic):
                 if not use_crossover:
                     route_number = random.randint(0, n_routes)
                     population[i] = self.generate_route(route_number, n_routes,
-                                                        num_locations, num_days,
+                                                        location_set[:],
                                                         route_length)
                     continue
 
@@ -366,8 +378,7 @@ class GeneticRouting(Genetic):
         return evaluations
 
     def _generate_random_routes(self,
-                                num_locations: int,
-                                num_days: int,
+                                location_set: list
                                 n_routes: int,
                                 route_length: int) -> ndarray:
         """
@@ -382,6 +393,5 @@ class GeneticRouting(Genetic):
         for i in range(self.population_size):
             route_number = random.randint(0, n_routes)
             population[i] = self.generate_route(route_number, n_routes,
-                                                num_locations, num_days,
-                                                route_length)
+                                                location_set[:], route_length)
         return population
