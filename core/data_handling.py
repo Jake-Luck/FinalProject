@@ -207,7 +207,7 @@ class DataHandling:
                 "buffer": 2000,
                 "geojson": {"type": "Point", "coordinates": centre.tolist()}
             },
-            "filters": {"category_group_ids": [130, 220, 260, 420, 560]},
+            "filters": {"category_group_ids": [130, 220, 260, 420, 620]},
             "limit": 24
         }
         headers = {
