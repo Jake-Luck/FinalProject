@@ -41,7 +41,9 @@ class Plotting:
         :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates.mean(axis=0)
+            lon = (coordinates[:, 0].min() + coordinates[:, 0].max()) / 2
+            lat = (coordinates[:, 1].min() + coordinates[:, 1].max()) / 2
+            centre = np.ndarray((lon,lat))
 
         clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
 
@@ -93,7 +95,9 @@ class Plotting:
         :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates.mean(axis=0)
+            lon = (coordinates[:, 0].min() + coordinates[:, 0].max()) / 2
+            lat = (coordinates[:, 1].min() + coordinates[:, 1].max()) / 2
+            centre = np.array((lon,lat))
 
         figure = go.Figure(go.Scattermap(lat=coordinates[:, 1],
                                          lon=coordinates[:, 0],
@@ -127,7 +131,9 @@ class Plotting:
         :param save_plot: Whether to save the plot as an image.
         """
         if centre is None:
-            centre = coordinates.mean(axis=0)
+            lon = (coordinates[:, 0].min() + coordinates[:, 0].max()) / 2
+            lat = (coordinates[:, 1].min() + coordinates[:, 1].max()) / 2
+            centre = np.ndarray((lon,lat))
 
         route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
@@ -210,7 +216,6 @@ class Plotting:
         plt.margins(x=0, y=0)
 
         plt.show()
-
 
     @staticmethod
     def _update_layout_and_show_figure(title: str | None,
