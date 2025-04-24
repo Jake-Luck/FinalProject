@@ -1,14 +1,36 @@
 \todo{There should be a link either here or at end of literature which forms the basic for different methods (clustering, routing, trip generation).}
-\todo{Paragraph describing different types of algorithm used (Routing then cluster, Cluster then Routing, Genetic, etc.)}
+\todo{Brief Paragraph describing different types of algorithm used (Routing then cluster, Cluster then Routing, Genetic, etc.)}
 \todo{Remember to justify the choice of algorithms. You may also need to explain how to adopt these algorithms in your work. A figure showing the ralationship between different components of your work may also help.}
 
-\subsection{Objective Function}\label{subsec:algorithms-objective-function}
-Before describing the algorithms investigated, we will quickly cover the implementation of our objective function.
+\subsection{Implementation Pre-Requisites}\label{subsec:implementation-pre-requisites}
+There are two things need before we begin, a way of generating inputs to use our algorithms on, and an
+implementation of our objective function so we can evaluate our results.
+
+\subsubsection{Input Generation}\label{subsubsec:input-generation}
+For our input we will be using Openrouteservice's Points of Interest (PoI) and Distance Matrix API services.
+With the PoI service, we can input a location, such as a city centre, and retrieve a specified number of locations
+of interest around the area.
+The PoI service also allows us to limit the locations returned to certain categories allowing us to specifically find
+locations that one would likely be interested in visiting, for example points labelled 'tourism', 'historic' or
+'arts and culture'.
+
+After we have these locations, we can use the Distance Matrix to create a graph linking each location to each other
+with a weight associated with travelling between them.
+We can configure our API call to this service such that, instead of distance, the weights in the matrix represent
+the time taken to travel between locations via public transport.
+Unfortunately, the Distance Matrix service limits the number of locations in a call to 25, severely limiting the
+size of input we can test.
+Other alternative API's were looked into, such as the Google Maps API or Mapbox, but all the alternatives found were
+either too expensive or equally, if not more, restrictive.
+
+With these, we can generate a list of durations associated with the found locations, as well as a number of days for
+the trip, and then our input is ready.
+
+\subsubsection{Objective Function}\label{subsubsec:algorithms-objective-function}
 As described in the \hyperref[sec:problem-formulation]{Problem Formulation}, our objective function aims to
 calculate a cost for a given route.
 This function is needed such that we can compare our approaches and algorithms based on the quality of their results.
 Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our project.
-\todo{Emphasise how graph is weighted using time instead of distance and why these don't directly correlate}
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Algorithm.evaluate_route}
@@ -16,7 +38,7 @@ Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our 
     \label{fig:Algorithm.evaluate_route}
 \end{figure}
 
-\noindent
+\subsubsection{Project Code}\label{subsubsec:project-code}
 All the code used in the project is available to find at: \url{https://git.cs.bham.ac.uk/projects-2024-25/jhl114}.
 Code snippets shown in this report, such as figure~\ref{fig:Algorithm.evaluate_route}, are captioned
 detailing where in the git repository their code can be found.
@@ -26,8 +48,7 @@ Clustering as a concept can be described as `the unsupervised classification of 
 feature vectors) into groups (clusters)'\todo{cite Data Clustering: A review, A.K. Jain}.
 In our problem, clustering will be used to group locations together to form an itinerary for each day of the trip.
 These clusters, or days, will then be used as an input for some routing algorithm, which will try and find an
-optimal route for each day.
-These routes can then be combined to form a complete trip.
+optimal route for each day, which can then be combined to form a complete trip.
 The goal of our clustering algorithms is to find a set of clusters that, when combined with some routing algorithm,
 will produce a trip with minimal cost.
 The code in figure~\ref{fig:Clustering.find_route_from_clusters} shows how we can use a set of clusters alongside our
@@ -48,11 +69,11 @@ K-Means is an iterative clustering algorithm that defines its clusters using a s
 given a location in the input space, a given location is assigned to the cluster of the `closest' centroid.
 The algorithm starts by initialising random centroids and iteratively improving the clustering from there, continuing
 until the algorithm converges (on a local optimum) or an iteration limit is reached.
-While the algorithm may not find the best solution, it is rather quick, with a time complexity of $O(m n k i)$,
-where $m$ is the number of locations, $n$ is the dimensionality of the input, $k$ is the number of clusters,
-and $i$ is the number of iterations\todo{cite Algorithm AS 136: A K-Means Clustering Algorithm}.
+K-Means runs in linear time with a time complexity of $O(m n k i)$, where $m$ is the number of locations, $n$ is the
+dimensionality of the input, $k$ is the number of clusters, and $i$ is the number of iterations
+\todo{cite Algorithm AS 136: A K-Means Clustering Algorithm}.
 Our inputs will always contain only two dimensions, and we will be setting a maximum number of iterations, this
-makes both $n$ and $i$ constants allowing us to simplify the time complexity to $O(mk)$.\\
+makes both $n$ and $i$ constants allowing us to simplify the time complexity to $O(m k)$.\\
 
 \noindent
 In our implementation of K-Means we will initialise our centroids by randomly selecting unique locations from our
@@ -134,7 +155,6 @@ Hopefully it will offer a simple and computationally efficient baseline for comp
 algorithms.
 
 \subsubsection{Genetic Clustering}
-\todo{Explain genetic clustering}
 Genetic clustering applies genetic algorithms to attempt and find the best assignment of locations to clusters.
 Genetic algorithms are a type of evolutionary algorithm that aims to mimic biological evolution to find an optimal
 solution.
@@ -157,8 +177,9 @@ determining how crossover is performed to create offspring; and in our case, the
 impact how clusters are used to form routes.
 These hyperparameters impact both the runtime of the algorithm and the exploration of the search space, indirectly
 impacting the quality of the solution.
-Genetic clustering has a time complexity of $O(gpr)$, with $g$ being the number of generations, $p$ being the
+Genetic clustering has a time complexity of $O(g p r)$, with $g$ being the number of generations, $p$ being the
 population size and $r$ being the time complexity of the chosen routing algorithm.\\
+\todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
 
 \noindent
 For this genetic clustering, an individual is represented by a genome, which will provide a mapping that assigns each
@@ -187,7 +208,7 @@ From there, we repeat the following steps until we reach a maximum number of gen
 As previously discussed, we will evaluate the fitness of each individual by applying a routing algorithms to the
 clusters defined by the genome, and then applying our cost function to the resulting route.
 Figure~\ref{fig:GeneticClustering._evaluate_population} shows this route finding and evaluation.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering._evaluate_population}
     \caption{Code from GeneticClustering.\_evaluate\_population in algorithms\textbackslash clustering.py}
@@ -339,14 +360,14 @@ generation.
 \todo{Discuss why chosen, no clue what to put here, I just did it bc it's cool.}
 
 \subsubsection{Centroid-based Genetic Clustering}
-\todo{Explain genetic centroid-based clustering and how it differs from general clustering.}
 Inspired by K-Means, centroid-based genetic clustering uses a genetic algorithm to find the best set of centroids
 to cluster the data.
 The same process of evolution is used, as described previously, except this time the genome will specify the
 centroids to use for clustering.
 With a different genome structure, we will have to reconsider our crossover and mutation methods.
-Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(gpr)$, with $g$ being the
+Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(g p r)$, with $g$ being the
 number of generations, $p$ being the population size and $r$ being the time complexity of the chosen routing.\\
+\todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
 
 \noindent
 Our new genome will be a list of coordinate pairs, representing the latitude and longitude of each centroid.
@@ -366,7 +387,7 @@ of its genome and calculating the associated cost of these trips.
 The only difference is that, because our genome is no longer a direct assignment of clusters, we first need to
 assign each location to its nearest centroid.
 This is shown in figure~\ref{fig:GeneticCentroids._evaluate_population}.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticCentroids._evaluate_population}
     \caption{From GeneticCentroidClustering.\_evaluate\_population in algorithms\textbackslash clustering.py}
@@ -411,7 +432,7 @@ coordinates.
 The minimum and maximum latitude and longitude of the input are used to form a region within which new centroids can
 be generated, ensuring that the mutation is still relevant to the input.
 Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of mutation.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticCentroids.find_clusters.mutation}
     \caption{Code from GeneticCentroidClustering.find\_clusters in algorithms\textbackslash clustering.py}
@@ -469,22 +490,107 @@ figure~\ref{fig:GeneticCentroids_London_Evaluations}.
 \todo{Discuss why chosen, to investigate how a k-means like approach would work with a genetic algorithm and whether regular clustering is better.}
 
 \subsection{Routing}\label{subsec:routing}
-\todo{Explain purpose of routing/goal of algorithms.}
+The routing algorithms implemented in this project are TSP solvers, aiming to find a route with minimal travel time
+that visits all given locations.
+There are two ways in which routing will be used to form a trip either by using a clustering algorithm and then
+finding a route for each cluster (as previously described in section~\ref{subsec:clustering}), or by finding a route
+that visits every location, before splitting the route into multiple days (as will be described in section~\ref{subsec:route-insertion}).
+The routing algorithms implemented in this project are: Brute Force, Greedy, Gift Wrapping and Genetic.
+
 \subsubsection{Brute Force}\label{subsubsec:brute-force-routing}
 \todo{Write brute force explanation}
-The brute force algorithm is an exhaustive algorithm that tries every possible route to find one with the least cost.
-By checking every route it is guaranteed to find the optimal route, however, its computational cost becomes
-impractical as input size grows, having a time complexity of $O(n!)$.\todo{Maybe cite time complexity of brute force?}
-Considering we will be comparing algorithms based on their speed and the quality of their results, brute force is a
-useful benchmark, providing a lower bound for speed and an upper bound for quality.\\
-\\
-In our brute force implementation, where n is the number of locations in the route, we will be generating all $n-1!$
-permutations of the set $\{1, 2, \mathellipsis, n-1\}$, with each permutation representing the order of locations
-visited in a route.
-Each route will be evaluated according to our optimisation function, and the route with the lowest cost will be
+Brute Force is an exhaustive algorithm that tries every possible route to find one with the least cost.
+We find every route by generating all permutations of the locations to be visited, with the order of the locations
+in each permutation representing the order in which they will be visited.
+Each permutation is evaluated based on the amount of time it takes to travel the route, with the shortest route being
 returned.
-We only need to consider $n-1!$ permutations because all our routes will start and end at the same location.\\
+By checking every route Brute Force is guaranteed to find the best possible route but has a time complexity of $O(n!)$.
+\todo{Maybe cite time complexity of brute force or permutations of a set?}\\
 
+\noindent
+It's worth noting that in our implementation, since all routes must return to the starting point, the final location
+of a route is fixed, meaning we only need to consider $n-1$ locations, giving us $(n-1)!$ possible permutations.
+To check every route, we'll be creating a mapping between every integer $\{0, 1, \mathellipsis, (n-1!)-1\}$ to every
+permutation.
+For a given integer $k$, and a list of possible locations $L: \{0, 1, \mathellipsis, n-1\}$ we can calculate $k$'s
+corresponding permutation through the following steps:
+\begin{enumerate}
+    \item Divide $k$ by $(n-2)$ to find $x_1: \{0\leq x<n-1\}$, and the remainder $r_1$.
+    \item $x_1$ is used to select a location for $L$, which will be the first location in our permutation. $L_{x_1}$ is
+    removed from L.
+    \item Divide $r_1$ by $(n-3)!$ to find $x_2: \{0\leq x<n-2\}$, and the remainder $r_2$.
+    \item $x_2$ is used to select another location from $L$, which will be the second location in our permutation.
+    Again, $L_{x_2}$ is removed from L.
+    \item Repeat this process until all locations are assigned a position.
+\end{enumerate}
+
+\noindent
+To help explain this, an example is shown in figure~\ref{fig:permutation-calculation-example}, generating a
+permutation $P$ of the set $L = \{a, b, c, d\}$ that maps to $k = 17$.
+\begin{figure}[H]
+    \textbf{Step 1:} Divide $k = 17$ by $(n-1)! = 3! = 6$\\
+    $17 \div 6 = 2$ with remainder $5$. Thus $x_1 = 2, r_1 = 5$\\
+    We select $L_{x_1} = L_2 = c$ as the first element of our permutation.\\
+    Updated sets: $L = \{a, b, d\}, P = \{c\}$\\
+
+    \textbf{Step 2:} Divide $r_1 = 5$ by $(n-2)! = 2! = 2$\\
+    $5 \div 2 = 2$ with remainder $1$. Thus $x_2 = 2, r_2 = 1$\\
+    We select $L_{x_2} = L_2 = d$ as the second element of our permutation.\\
+    Updated sets: $L = \{a, b\}, P = \{c, d\}$\\
+
+    \textbf{Step 3:} Divide $r_2 = 1$ by $(n-3)! = 1! = 1$\\
+    $1 \div 1 = 1$ with remainder $0$. Thus, $x_3 = 1, r_3 = 0$\\
+    We select $L_{x_3} = L_1 = b$ as the third element of our permutation.\\
+    Updated sets: $L = \{a\}, P = \{c, d, b\}$\\
+
+    \textbf{Step 4:} There's only one element left, so $a$ becomes the last element.\\
+    Updated sets: $P = \{c, d, b, a\}$
+    \caption{Example of generating a permutation of a set using an integer mapping}
+    \label{fig:permutation-calculation-example}
+\end{figure}
+
+\noindent
+This method ensures that each integer maps to a unique permutation, allowing us to check every possible route.
+Our python version of this is shown in figure \ref{fig:Algorithm.generate_route}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Algorithm.generate_route}
+    \caption{Code from Algorithm.generate\_route in algorithms\textbackslash algorithm.py}
+    \label{fig:Algorithm.generate_route}
+\end{figure}
+
+\noindent
+With this method of generating routes in place, we just need to iterate through them all, evaluate them, and keep
+track of the best found.
+Our implementation of this is shown in figure~\ref{fig:Routing.brute_force}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Routing.brute_force}
+    \caption{Code from Routing.brute\_force in algorithms\textbackslash routing.py}
+    \label{fig:Routing.brute_force}
+\end{figure}
+
+\noindent
+Figure~\ref{Bruteforce_Birmingham_Example} shows an example of the route find by performing Brute Force on an input
+of 10 locations around Birmingham.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Bruteforce_Birmingham_Example}
+    \caption{Example of a route found visiting 10 locations around Birmingham using Brute Force routing}
+    \label{fig:Bruteforce_Birmingham_Example}
+\end{figure}
+
+\noindent
+Being able to find a perfect route is certainly useful, but the computational cost of Brute Force becomes
+impractical as the input size grows.
+In calculating the 10 location route shown in figure~\ref{fig:Bruteforce_Birmingham_Example} 362,880 possible routes
+were considered, taking around 15 seconds.
+If we were to use our maximum input size of 25 locations, over 620 sextillion routes would be considered \textemdash
+which, assuming the same rate of routes evaluated per second, would take over 800 billion years.
+
+Brute force was included in this project for its use as a benchmark.
+Considering we will be evaluating algorithms based on their speed and the quality of their results, Brute Force offers
+both an upper bound for quality and a lower bound for speed.
 
 \subsubsection{Greedy Routing}\label{subsubsec:greedy-routing}
 \todo{Explain greedy routing algorithm}
