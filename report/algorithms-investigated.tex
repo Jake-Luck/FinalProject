@@ -498,18 +498,18 @@ that visits every location, before splitting the route into multiple days (as wi
 The routing algorithms implemented in this project are: Brute Force, Greedy, Gift Wrapping and Genetic.
 
 \subsubsection{Brute Force}\label{subsubsec:brute-force-routing}
-\todo{Write brute force explanation}
 Brute Force is an exhaustive algorithm that tries every possible route to find one with the least cost.
 We find every route by generating all permutations of the locations to be visited, with the order of the locations
 in each permutation representing the order in which they will be visited.
 Each permutation is evaluated based on the amount of time it takes to travel the route, with the shortest route being
 returned.
-By checking every route Brute Force is guaranteed to find the best possible route but has a time complexity of $O(n!)$.
+By checking every route Brute Force is guaranteed to find the best possible route, but has a time complexity of $O(n!)$.
 \todo{Maybe cite time complexity of brute force or permutations of a set?}\\
 
 \noindent
 It's worth noting that in our implementation, since all routes must return to the starting point, the final location
-of a route is fixed, meaning we only need to consider $n-1$ locations, giving us $(n-1)!$ possible permutations.
+of a route is fixed.
+Therefore, we only need to consider $n-1$ locations, resulting in $(n-1)!$ possible permutations.
 To check every route, we'll be creating a mapping between every integer $\{0, 1, \mathellipsis, (n-1!)-1\}$ to every
 permutation.
 For a given integer $k$, and a list of possible locations $L: \{0, 1, \mathellipsis, n-1\}$ we can calculate $k$'s
@@ -551,7 +551,7 @@ permutation $P$ of the set $L = \{a, b, c, d\}$ that maps to $k = 17$.
 
 \noindent
 This method ensures that each integer maps to a unique permutation, allowing us to check every possible route.
-Our python version of this is shown in figure \ref{fig:Algorithm.generate_route}.
+Our python version of this is shown in figure~\ref{fig:Algorithm.generate_route}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Algorithm.generate_route}
@@ -571,8 +571,10 @@ Our implementation of this is shown in figure~\ref{fig:Routing.brute_force}.
 \end{figure}
 
 \noindent
-Figure~\ref{Bruteforce_Birmingham_Example} shows an example of the route find by performing Brute Force on an input
+Figure~\ref{fig:Bruteforce_Birmingham_Example} shows an example of the route find by performing Brute Force on an input
 of 10 locations around Birmingham.
+The location marked in green represents the starting point, and the blue marker indicates the first location
+visited (showing the direction of the route).
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Bruteforce_Birmingham_Example}
@@ -583,7 +585,7 @@ of 10 locations around Birmingham.
 \noindent
 Being able to find a perfect route is certainly useful, but the computational cost of Brute Force becomes
 impractical as the input size grows.
-In calculating the 10 location route shown in figure~\ref{fig:Bruteforce_Birmingham_Example} 362,880 possible routes
+In calculating the 10 location route shown in figure~\ref{fig:Bruteforce_Birmingham_Example}, 362,880 possible routes
 were considered, taking around 15 seconds.
 If we were to use our maximum input size of 25 locations, over 620 sextillion routes would be considered \textemdash
 which, assuming the same rate of routes evaluated per second, would take over 800 billion years.
@@ -593,11 +595,52 @@ Considering we will be evaluating algorithms based on their speed and the qualit
 both an upper bound for quality and a lower bound for speed.
 
 \subsubsection{Greedy Routing}\label{subsubsec:greedy-routing}
-\todo{Explain greedy routing algorithm}
-Greedy routing
+Greedy routing is a heuristic algorithm that builds a route iteratively, always choosing the next location according
+to the shortest available path.
+This is done by starting at the first location and then repeatedly selecting the next closest location until all
+locations have been visited, then returning home.
+At every location, we are checking the distance of every other location to find the closest, giving our greedy
+algorithm a time complexity of $O(n^2)$.
+
+\noindent
+Greedy routing was by far the simplest algorithm to implement, and does not require much explanation.
+For our implementation we will simply make a copy of our input, then iteratively find the closest locations.
+When a location is visited, the edges leading to it are given an infinite cost to ensure that it is not visited again.
+Our python implementation of greedy routing is shown in figure~\ref{fig:Routing.greedy_routing}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Routing.greedy_routing}
+    \caption{Code from Routing.greedy\_routing in algorithms\textbackslash routing.py}
+    \label{fig:Routing.greedy_routing}
+\end{figure}
+
+\noindent
+Figure~\ref{fig:GreedyRouting_Birmingham_Example} shows an example of a route find by greedy routing, using the same
+Birmingham input as that shown for Brute Force in figure~\ref{fig:Bruteforce_Birmingham_Example}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GreedyRouting_Birmingham_Example}
+    \caption{Example of a route found visiting 10 locations around Birmingham using Greedy routing}
+    \label{fig:GreedyRouting_Birmingham_Example}
+\end{figure}
+
+\noindent
+As is perhaps evident from its example, greedy routing isn't always a great fit, with the effectiveness of the
+algorithm being highly dependent on the input.
+It may just happen that for some inputs the greedy algorithm will find a good route, but as input size grows and
+routes become more complex, this becomes increasingly unlikely.
+
+Where greedy routing does excell, and the reason for its inclusion in this project, is in its speed.
+The algorithm found a route for the 10 location Birmingham input in less than a thousandth of a second, over 500,000
+times faster than Brute Force.
+Some fast routing algorithms are needed in order to use alongside our genetic clustering methods which, for
+evaluation, require a route to be found for every individual in a population.
+
 \subsubsection{Gift Wrapping}\label{subsubsec:gift-wrapping}
 \todo{Explain gift wrapping algorithm}
 \todo{Something like: "Once gift wrapping has found a convex hull, a greedy insertion algorithm is used to find the optimal route within the convex hull."}
+
+
 \subsubsection{Genetic Routing}
 \todo{Explain genetic routing}
 
