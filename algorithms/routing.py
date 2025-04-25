@@ -138,6 +138,7 @@ class Routing(Algorithm):
                        num_days: int,
                        graph: ndarray,
                        durations: ndarray):
+
         """
         A very simple solver for use with clustering, will not find a valid
         route on its own. This is a conventional TSP solver.
@@ -152,7 +153,8 @@ class Routing(Algorithm):
         index = 0
         working_graph = np.array(graph, copy=True)
         for i in range(route_length):
-            working_graph[:, index] = np.iinfo(np.int32).max
+            # Sets edges leading here to inf so the location isn't visited again
+            working_graph[:, index] = np.inf
             index = working_graph[index].argmin()
             route[i] = index
 
