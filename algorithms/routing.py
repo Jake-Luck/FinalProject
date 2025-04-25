@@ -181,10 +181,9 @@ class Routing(Algorithm):
         """
         num_days = np.count_nonzero(route == 0)
         num_days += np.count_nonzero(new_locations == 0)
-        working_route = np.array(route, copy=True)
+        working_route = np.array(route, copy=True, dtype=int)
 
         # For each new location, find the best insertion point in the route
-
         for location in new_locations:
             best_route = np.insert(working_route, 0, location)
             best_evaluation, _, _ = Routing.evaluate_route(best_route, num_days,
@@ -193,7 +192,7 @@ class Routing(Algorithm):
             for i in range(1, len(working_route) + 1):
                 new_route = np.insert(working_route, i, location)
                 evaluation, _, _ = Routing.evaluate_route(new_route, num_days,
-                                                         graph, durations)
+                                                          graph, durations)
 
                 if evaluation < best_evaluation:
                     best_route = new_route

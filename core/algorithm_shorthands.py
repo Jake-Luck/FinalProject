@@ -324,6 +324,36 @@ class Shorthands:
         return route
 
     @staticmethod
+    def greedy_insertion(num_locations: int,
+                         num_days: int,
+                         graph: ndarray | None = None,
+                         durations: ndarray | None = None,
+                         coordinates: ndarray | None = None,
+                         plot: bool = True) -> ndarray:
+        graph, coordinates, durations = Shorthands._setup_inputs(
+            num_locations, graph, durations, coordinates)
+
+        location_set = list()
+        for _ in range(num_days):  # -1 because 0 added to end of routes
+            location_set.append(0)
+        for i in range(1, num_locations):
+            location_set.append(i)
+        time_start = time.perf_counter()
+        route = Routing.greedy_insertion(np.array([]), np.array(location_set), graph, durations)
+        time_end = time.perf_counter()
+        print(f"Greedy insertion time: {time_end - time_start} seconds")
+
+        evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
+            route, num_days, graph, durations)
+        title = f"Greedy Insertion: {evaluation}, σ={std_deviation}"
+
+        centre = coordinates.mean(axis=0)
+        if plot:
+            Plotting.display_route(route, coordinates, centre, title,
+                                   evaluation_per_day, durations)
+        return route
+
+    @staticmethod
     def k_means(num_locations: int,
                 num_days: int,
                 graph: ndarray | None = None,
