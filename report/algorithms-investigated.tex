@@ -11,8 +11,8 @@ For our input we will be using Openrouteservice's Points of Interest (PoI) and D
 With the PoI service, we can input a location, such as a city centre, and retrieve a specified number of locations
 of interest around the area.
 The PoI service also allows us to limit the locations returned to certain categories allowing us to specifically find
-locations that one would likely be interested in visiting, for example points labelled 'tourism', 'historic' or
-'arts and culture'.
+locations that one would likely be interested in visiting, for example points labelled `tourism', `historic' or
+`arts and culture'.
 
 After we have these locations, we can use the Distance Matrix to create a graph linking each location to each other
 with a weight associated with travelling between them.
@@ -494,8 +494,11 @@ The routing algorithms implemented in this project are TSP solvers, aiming to fi
 that visits all given locations.
 There are two ways in which routing will be used to form a trip either by using a clustering algorithm and then
 finding a route for each cluster (as previously described in section~\ref{subsec:clustering}), or by finding a route
-that visits every location, before splitting the route into multiple days (as will be described in section~\ref{subsec:route-insertion}).
-The routing algorithms implemented in this project are: Brute Force, Greedy, Gift Wrapping and Genetic.
+that visits every location, before splitting the route into multiple days.
+This approach of splitting a route into multiple days will be covered as we introduce our greedy insertion
+algorithm which, on top of finding routes of its own, can also be used to build upon existing routes.
+The routing algorithms implemented in this project are: Brute Force Routing, Greedy Routing, Greedy Insertion, Convex
+Hull-Based Routing and Genetic Routing.
 
 \subsubsection{Brute Force}\label{subsubsec:brute-force-routing}
 Brute Force is an exhaustive algorithm that tries every possible route to find one with the least cost.
@@ -604,7 +607,7 @@ algorithm a time complexity of $O(n^2)$.
 
 \noindent
 Greedy routing was by far the simplest algorithm to implement, and does not require much explanation.
-For our implementation we will simply make a copy of our input, then iteratively find the closest locations.
+For our implementation we will simply make a copy of our graph input, then iteratively find the closest locations.
 When a location is visited, the edges leading to it are given an infinite cost to ensure that it is not visited again.
 Our python implementation of greedy routing is shown in figure~\ref{fig:Routing.greedy_routing}.
 \begin{figure}[H]
@@ -636,20 +639,73 @@ times faster than Brute Force.
 Some fast routing algorithms are needed in order to use alongside our genetic clustering methods which, for
 evaluation, require a route to be found for every individual in a population.
 
-\subsubsection{Gift Wrapping}\label{subsubsec:gift-wrapping}
+\subsubsection{Greedy Insertion}\label{subsubsec:greedy-insertion}
+Similar to greedy routing, greedy insertion is another heuristic algorithm that iteratively builds routes.
+This time, instead of selecting the next location to add into our route, we will be working through the set of
+unvisited locations and finding the best location to insert each one into our route.
+To find the best insertion point, we will evaluate the cost of the route if the location is inserted at every possible
+position.
+Compared to greedy routing, this adds an extra $O(n)$ step to each iteration, increasing the time complexity to
+$O(n^3)$.
+
+\noindent
+While greedy insertion is a more complex algorithm than greedy routing, it is still relatively simple to implement.
+All that's required is to iterate through the list of locations, evaluate the route created by inserting them at
+each position, and keeping the best route each time.
+The code used for greedy insertion can be seen in figure~\ref{fig:Routing.greedy_insertion}
+\begin{figure}[H]
+    \centering
+    \includegraphics{Routing.greedy_insertion}
+    \caption{Code from Routing.greedy\_insertion in algorithms\textbackslash routing.py}
+    \label{fig:Routing.greedy_insertion}
+\end{figure}
+
+\noindent
+An example of a route found by applying greedy insertion to the 10 location Birmingam input is shown in figure\ref{fig:GreedyInsertion_Birmingham_Example}.
+\begin{figure}
+    \centering
+    \includegraphics{GreedyInsertion_Birmingham_Example}
+    \caption{Example of a route found visiting 10 locations around Birmingham using greedy insertion}
+    \label{fig:GreedyInsertion_Birmingham_Example}
+\end{figure}
+
+\noindent
+For this input, greedy insertion was able to find the optimal solution, as indicated by it returning the same route
+as brute force.
+Finding said route took greedy insertion a few thousandths of a second, which while several times slower than greedy
+routing, is still a huge improvement on brute force.
+Hopefully greedy insertion can provide better results than greedy routing, without too much of a cost in terms of
+time improvement.
+
+Finding routes isn't where insertion's usefullness ends though, it can also be used to build upon existing routes,
+or to split a route up into multiple days.
+Perhaps we have a route already, but want to add more locations for it, we can perform greedy insertion and find the
+best point for each location to insert into the pre-existing route.
+Furthermore, if for our new locations input, we provide a set consisting of a route's starting point $d$ number of
+times, we can add $d$ number of days to a trip.
+This allows us to create multi-day trips out of the routes found via our routing algorithms, by taking their routes
+and splitting them where greedy insertion believes is best.
+
+\subsubsection{Convex Hull}\label{subsubsec:convex-hull}
 \todo{Explain gift wrapping algorithm}
 \todo{Something like: "Once gift wrapping has found a convex hull, a greedy insertion algorithm is used to find the optimal route within the convex hull."}
+Given a set of points, its convex hull is the smallest border one can draw between them, such that all points are
+contained inside.
+For two-dimensional problems such as our own, it can be described as the shape a rubber band would take if stretched 
+around the points.
+Figure~\ref{fig:ConvexHull_Example} shows a drawing of a convex hull surrounding a set of points
+\begin{figure}
+    \centering
+    \includegraphics{ConvexHull_Example}
+    \caption{Drawing of a convex hull around a set of points}
+    \label{fig:ConvexHull_Example}
+\end{figure}
 
+\noindent
+Convex hulls can be useful for routing by giving
 
-\subsubsection{Genetic Routing}
+\subsubsection{Genetic Routing}\label{subsubsec:genetic-routing}
 \todo{Explain genetic routing}
-
-\subsection{Route Insertion}\label{subsec:route-insertion}
-\todo{Explain route insertion, how it is used in route planning and the goal of our algorithms.}
-\subsubsection{Brute Force}\label{subsubsec:brute-force-route-insertion}
-\todo{Explain how brute force algorithm can be modified for route insertion.}
-\subsubsection{Greedy Insertion}\label{subsubsec:greedy-insertion}
-\todo{Explain how greedy algorithm can be modified for route insertion.}
 
 \subsection{Trip Generation}\label{subsec:trip-generation}
 \todo{Explain trip generation, how it is used in route planning and the goal of our algorithms.}
