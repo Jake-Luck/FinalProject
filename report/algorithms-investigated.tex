@@ -603,7 +603,7 @@ to the shortest available path.
 This is done by starting at the first location and then repeatedly selecting the next closest location until all
 locations have been visited, then returning home.
 At every location, we are checking the distance of every other location to find the closest, giving our greedy
-algorithm a time complexity of $O(n^2)$.
+algorithm a time complexity of $O(n^2)$.\\
 
 \noindent
 Greedy routing was by far the simplest algorithm to implement, and does not require much explanation.
@@ -646,7 +646,7 @@ unvisited locations and finding the best location to insert each one into our ro
 To find the best insertion point, we will evaluate the cost of the route if the location is inserted at every possible
 position.
 Compared to greedy routing, this adds an extra $O(n)$ step to each iteration, increasing the time complexity to
-$O(n^3)$.
+$O(n^3)$.\\
 
 \noindent
 While greedy insertion is a more complex algorithm than greedy routing, it is still relatively simple to implement.
@@ -655,16 +655,16 @@ each position, and keeping the best route each time.
 The code used for greedy insertion can be seen in figure~\ref{fig:Routing.greedy_insertion}
 \begin{figure}[H]
     \centering
-    \includegraphics{Routing.greedy_insertion}
+    \includegraphics[width = \textwidth]{Routing.greedy_insertion}
     \caption{Code from Routing.greedy\_insertion in algorithms\textbackslash routing.py}
     \label{fig:Routing.greedy_insertion}
 \end{figure}
 
 \noindent
 An example of a route found by applying greedy insertion to the 10 location Birmingam input is shown in figure\ref{fig:GreedyInsertion_Birmingham_Example}.
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \includegraphics{GreedyInsertion_Birmingham_Example}
+    \includegraphics[width = \textwidth]{GreedyInsertion_Birmingham_Example}
     \caption{Example of a route found visiting 10 locations around Birmingham using greedy insertion}
     \label{fig:GreedyInsertion_Birmingham_Example}
 \end{figure}
@@ -677,7 +677,7 @@ routing, is still a huge improvement on brute force.
 Hopefully greedy insertion can provide better results than greedy routing, without too much of a cost in terms of
 time improvement.
 
-Finding routes isn't where insertion's usefullness ends though, it can also be used to build upon existing routes,
+Finding routes isn't where insertion's usefulness ends though, it can also be used to build upon existing routes,
 or to split a route up into multiple days.
 Perhaps we have a route already, but want to add more locations for it, we can perform greedy insertion and find the
 best point for each location to insert into the pre-existing route.
@@ -687,22 +687,71 @@ This allows us to create multi-day trips out of the routes found via our routing
 and splitting them where greedy insertion believes is best.
 
 \subsubsection{Convex Hull}\label{subsubsec:convex-hull}
-\todo{Explain gift wrapping algorithm}
-\todo{Something like: "Once gift wrapping has found a convex hull, a greedy insertion algorithm is used to find the optimal route within the convex hull."}
 Given a set of points, its convex hull is the smallest border one can draw between them, such that all points are
 contained inside.
 For two-dimensional problems such as our own, it can be described as the shape a rubber band would take if stretched 
 around the points.
 Figure~\ref{fig:ConvexHull_Example} shows a drawing of a convex hull surrounding a set of points
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \includegraphics{ConvexHull_Example}
+    \includegraphics[width = \textwidth]{ConvexHull_Example}
     \caption{Drawing of a convex hull around a set of points}
     \label{fig:ConvexHull_Example}
 \end{figure}
 
 \noindent
-Convex hulls can be useful for routing by giving
+If all locations happen to fall on the border of the convex hull, then the convex hull is itself an optimal route;
+although, this is rather unlikely to happen.
+Regardless, the convex hull does still indicate that an optimal route will visit the border cities in the order they
+appear on the hull.
+\todo{cite TSP: a computational study pg 46}
+With this in mind, we can use the convex hull as a starting point, and then use greedy insertion to find a full route.
+The time complexity of finding a convex hull is $O(nh)$, where $n$ is the number of locations, and $h$ is the number
+of points on the hull. In the worst case, where all of the points are on the hull, this becomes $O(n^2)$.
+\todo{Cite time complexity?}
+
+To find a convex hull we will be using a gift wrapping, or jarvis march, algorithm.
+This algorithm works by finding the leftmost point in the set and then progressively finding the most counter-clockwise
+point to add to the hull.
+To discover the most counter-clockwise point we can arbitrarily select a point as a candidate for the next point on
+the hull, then calculating the cross product $\vec{HC} \times \vec{HI}$, where $H$ is the most recently added hull
+point, $C$ is the candidate point and $I$ is the point being evaluated.
+If the cross product is positive, then $I$ is more counter-clockwise than $C$, and we can replace $C$ with $I$ as
+the new candidate to be added to the hull.
+This process is repeated until the next hull candidate is the original starting point of the hull.
+
+Figures~\ref{fig:Routing.gift_wrapping} and~\ref{fig:ConvexHull_Birmingham_Hull} show how this was accomplished in
+python, and the hull formed around the birmingham example, respectively.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Routing.gift_wrapping}
+    \caption{Code from Routing.gift\_wrapping in algorithms\textbackslash routing.py}
+    \label{fig:Routing.gift_wrapping}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{ConvexHull_Birmingham_Hull}
+    \caption{Example of the convex hull found around 10 locations in Birmingham}
+    \label{fig:ConvexHull_Birmingham_Hull}
+\end{figure}
+
+\noindent
+Once our hull is found, we can use it as a starting point for greedy insertion.
+We will use the hull as our starting route, and all the interior points as locations for insertion.
+Figure~\ref{fig:ConvexHull_Birmingham_Route} shows the route found by applying greedy insertion to the hull found
+around our birmingham example.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{ConvexHull_Birmingham_Route}
+    \caption{Example of a route found using greedy insertion and the convex hull of 10 locations in Birmingham}
+    \label{fig:ConvexHull_Birmingham_Route}
+\end{figure}
+
+\noindent
+Convex hull was included in this project to investigate how well it would work as a starting point for greedy
+insertion.
+It will be interesting to see whether starting from a convex hull could improve the results and/or the speed of
+greedy insertion, as opposed to running greedy insertion on the whole set of locations.
 
 \subsubsection{Genetic Routing}\label{subsubsec:genetic-routing}
 \todo{Explain genetic routing}
