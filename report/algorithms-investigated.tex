@@ -177,8 +177,9 @@ determining how crossover is performed to create offspring; and in our case, the
 impact how clusters are used to form routes.
 These hyperparameters impact both the runtime of the algorithm and the exploration of the search space, indirectly
 impacting the quality of the solution.
-Genetic clustering has a time complexity of $O(g p r)$, with $g$ being the number of generations, $p$ being the
-population size and $r$ being the time complexity of the chosen routing algorithm.\\
+Genetic clustering has a time complexity of $O(g p r n)$, with $g$ being the number of generations, $p$ being the
+population size, $r$ being the time complexity of the chosen routing algorithm and $n$ being the number of locations
+and days.\\
 \todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
 
 \noindent
@@ -253,12 +254,12 @@ genome has an equal chance of being from either parent
 If the two parents, being the best individuals in a population, agree on a bit it then it would appear likely it's a
 good choice.
 With our implementation of crossover, the offspring will always copy over the bits that parents agree on.
-Figure~\ref{fig:Crossover_Mask_Example} shows an example of how a crossover mask can be used to create a child from
+Figure~\ref{fig:Crossover_Mask_Example} shows an example of how a crossover mask can be used to create offspring from
 two parents, the example uses a hypothetical input including 6 locations and 3 clusters.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Crossover_Mask_Example}
-    \caption{Example of using a crossover mask to create a child from two parents.}
+    \caption{Example of using a crossover mask to create offspring from two parents.}
     \label{fig:Crossover_Mask_Example}
 \end{figure}
 
@@ -365,8 +366,9 @@ to cluster the data.
 The same process of evolution is used, as described previously, except this time the genome will specify the
 centroids to use for clustering.
 With a different genome structure, we will have to reconsider our crossover and mutation methods.
-Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(g p r)$, with $g$ being the
-number of generations, $p$ being the population size and $r$ being the time complexity of the chosen routing.\\
+Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(g p r n)$, with $g$
+being the number of generations, $p$ being the population size, $r$ being the time complexity of the chosen
+routing algorithm and $n$ being number of locations and days.\\
 \todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
 
 \noindent
@@ -754,7 +756,97 @@ It will be interesting to see whether starting from a convex hull could improve 
 greedy insertion, as opposed to running greedy insertion on the whole set of locations.
 
 \subsubsection{Genetic Routing}\label{subsubsec:genetic-routing}
-\todo{Explain genetic routing}
+As well as clustering, we can also use genetic algorithms for routing.
+We will evolve a population of potential routes similarly to before, this time with each genome representing a
+potential route, and with new crossover and mutation techniques to account for this.
+Without the need to use another routing algorithm in order to evaluate its population, genetic routing has a
+slightly faster time complexity of $O(g p n)$, with $g$ being the number of generations, $p$ being the population
+size and $n$ being number of locations in the route.\\
+
+\noindent
+By finding a route directly, selection is simpler, no longer requiring us to use a routing algorithm on our genome
+and evaluate these routes.
+This time, a genome will represent a permutation of the locations to be visited, with the order of the locations in the
+genome representing the order in which they will be visited, similar to the brute force algorithm.
+We will be selecting the best individuals in a population by evaluating the route formed in their genome.
+Via crossover and mutation, we will be shuffling the order in which locations are visited to try and find a better
+route.
+Our crossover algorithm will be a simple single-point crossover, a random point in the genome will be chosen and all
+locations up to that point will be taken from one parent.
+Then, all the remaining locations will be added in the order they appear in the second parent's genome.
+A simple example of single-point crossover is shown in figure~\ref{fig:Point_Crossover_Example}, using two
+hypothetical genomes with 6 locations.
+Our python implementation of this crossover method is shown in figure~\ref{fig:GeneticRouting._crossover}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{Point_Crossover_Example}
+    \caption{Example of using single point crossover to create offspring from two parents.}
+    \label{fig:Point_Crossover_Example}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting._crossover}
+    \caption{Code from GeneticRouting.\_crossover in algorithms\textbackslash routing.py}
+    \label{fig:GeneticRouting._crossover}
+\end{figure}
+
+\noindent
+For mutation, we will randomly decide a number of individuals to mutate inline with the algorithms mutation
+probability.
+Chosen individuals will have two locations in their route randomly chosen and swapped.
+This implementation is shown in figure~ref{fig:GeneticRouting.mutation}, the final location isn't considered for
+swapping, as all routes end at the starting point.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting.mutation}
+    \caption{Code from GeneticRouting.find\_route in algorithms\textbackslash routing.py}
+    \label{fig:GeneticRouting.mutation}
+\end{figure}
+
+\noindent
+By repeatedly performing selection, crossover and mutation our population will hopefully converge on a better route.
+Figure~\ref{fig:GeneticRouting_Birmingham_Generation1} shows an example of genetic routing performed on the 10
+location Birmingham input.
+For this example, 30 generations were evolved with a population size of 12, a crossover rate of 0.9 and a mutation
+rate of 0.4.
+A line graph of the best evaluation found for each generation is shown in figure~\ref{fig:GeneticRouting_Birmingham_Evaluations}.
+\begin{figure}[H]
+    \ContinuedFloat*
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting_Birmingham_Generation1}
+    \caption{Genetic Routing example, best route found in Generation 1.}
+    \label{fig:GeneticRouting_Birmingham_Generation1}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting_Birmingham_Generation5}
+    \caption{Genetic Routing example, best route found in Generation 5.}
+    \label{fig:GeneticRouting_Birmingham_Generation5}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting_Birmingham_Generation10}
+    \caption{Genetic routing example, best route found in Generation 10.}
+    \label{fig:GeneticRouting_Birmingham_Generation10}
+\end{figure}
+\begin{figure}[H]
+    \ContinuedFloat
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting_Birmingham_Generation30}
+    \caption{Genetic Routing example, best route found in Generation 30, evolution is now complete.}
+    \label{fig:GeneticRouting_Birmingham_Generation30}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{GeneticRouting_Birmingham_Evaluations}
+    \caption{Line graph showing the best evaluation for each generation of routing evolution process.}
+    \label{fig:GeneticRouting_Birmingham_Evaluations}
+\end{figure}
+
+\noindent
+\todo{Discuss why chosen, seriously what do I put here? I just thought they were cool.}
 
 \subsection{Trip Generation}\label{subsec:trip-generation}
 \todo{Explain trip generation, how it is used in route planning and the goal of our algorithms.}
