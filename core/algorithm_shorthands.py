@@ -228,7 +228,7 @@ class Shorthands:
 
         genetic_algorithm = GeneticRouting(
             num_generations, population_size, crossover_probability,
-            mutation_probability, generations_per_update, False, seed)
+            mutation_probability, generations_per_update, plot, seed)
 
         time_start = time.perf_counter()
         route = genetic_algorithm.find_route(num_locations, num_days,
