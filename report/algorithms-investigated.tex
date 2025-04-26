@@ -849,8 +849,11 @@ A line graph of the best evaluation found for each generation is shown in figure
 \todo{Discuss why chosen, seriously what do I put here? I just thought they were cool.}
 
 \subsection{Trip Generation}\label{subsec:trip-generation}
-\todo{Explain trip generation, how it is used in route planning and the goal of our algorithms.}
-\subsubsection{Brute Force}\label{subsubsec:brute-force-trip-generation}
-\todo{Explain how brute force algorithm can be modified for trip generation.}
-\subsubsection{Genetic Trip Generation}
-\todo{Explain genetic trip generation}
+We have now discussed how routing can be combined with both clustering and insertion to form complete trips, but
+there is still one more approach that will be considered in this project.
+By modifying our permutation based routing algorithms, brute force and genetic routing, we can use them to generate
+full trips in one go.
+It was previously shown how, when given a set of locations, these algorithms attempt to find an optimal permutation
+of the set.
+If this set of locations is expanded, to include the starting point of the trip $d$ times, we can use the same
+algorithms to find a multi-day trip.
