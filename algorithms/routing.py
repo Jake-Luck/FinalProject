@@ -89,33 +89,28 @@ class Routing(Algorithm):
         :param durations: Duration spent at each location.
         :return: 1D ndarray representing the best route.
         """
-        # Gets the westernmost point (guaranteed to be on outside).
-        starting_index = np.argmin(coordinates[:, 0])
         hull = []
-
-        current_index = starting_index
-
+        starting_index = np.argmin(coordinates[:, 0])
+        hull_point = starting_index
         while True:
-            hull.append(current_index)
-            next_index = (current_index + 1) % num_locations
+            hull.append(hull_point)
+            hull_candidate = (hull_point + 1) % num_locations
 
             for i in range(num_locations):
-                if i == current_index:
+                if i == hull_point:
                     continue
 
                 orientation = np.cross(
-                    coordinates[next_index] - coordinates[current_index],
-                    coordinates[i] - coordinates[current_index])
+                    coordinates[hull_candidate] - coordinates[hull_point],
+                    coordinates[i] - coordinates[hull_point])
 
                 # If point i is more counter-clockwise
                 if orientation > 0:
-                    next_index = i
-
+                    hull_candidate = i
             # If returned to start, finish
-            if next_index == starting_index:
+            if hull_candidate == starting_index:
                 break
-
-            current_index = next_index
+            hull_point = hull_candidate
 
         all_points = np.arange(num_locations)
         interior_points = np.setdiff1d(all_points, hull)
