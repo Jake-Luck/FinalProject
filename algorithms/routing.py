@@ -210,7 +210,8 @@ class GeneticRouting(Genetic):
                  mutation_probability: float,
                  generations_per_update: int | None = 1,
                  plotting: bool = True,
-                 random_seed: int | None = None):
+                 random_seed: int | None = None,
+                 plot_stages: bool = False):
         """
         Initialises genetic routing with given parameters.
         :param num_generations: Number of generations to run.
@@ -225,6 +226,7 @@ class GeneticRouting(Genetic):
         super().__init__(num_generations, population_size,
                          crossover_probability, mutation_probability,
                          generations_per_update, plotting, random_seed)
+        self.plot_stages = plot_stages
 
     def find_route(self,
                    num_locations: int,
@@ -263,13 +265,16 @@ class GeneticRouting(Genetic):
             n_routes *= i
 
         # Assign random routes to each location
-        population = self._generate_random_routes(num_locations,
-                                                  location_set, route_length)
+        population = self._generate_random_routes(location_set, n_routes,
+                                                  route_length)
 
         # Assign these before loop just in case num_generations is 0 and these
         # are used before initialisation
         index1 = 0
         parent1 = population[index1]
+
+        if self.plotting:
+            best_evaluation_per_generation = np.empty(self.num_generations)
 
         for generation_number in range(self.num_generations):
             evaluations = self._evaluate_population(population, num_days, graph,
@@ -286,8 +291,13 @@ class GeneticRouting(Genetic):
                       f"{generation_number}/{self.num_generations} completed. "
                       f"Best evaluation: {evaluations[index1]}")
 
-                if self.plotting:
-                    Plotting.display_route(coordinates, parent1)
+                if self.plot_stages:
+                    Plotting.display_route(
+                        parent1, coordinates,
+                        title=f"Genetic Routing. Best route from generation "
+                              f"{generation_number + 1} - Cost: "
+                              f"{evaluations[index1]}",
+                        durations=durations, save_plot=True)
 
             # Crossover
             population[0] = parent1
@@ -308,16 +318,25 @@ class GeneticRouting(Genetic):
 
                 mutate = random.random() < self.mutation_probability
                 if not mutate:
-                    continue
-                # swap two elements
-                mutation_index1, mutation_index2 = random.sample(
-                    range(num_locations), 2)
-                temp = population[i, mutation_index1]
-                population[i, mutation_index1] = population[i, mutation_index2]
-                population[i, mutation_index2] = temp
+                    # swap two elements
+                    mutation_index1, mutation_index2 = random.sample(
+                        range(num_locations), 2)
+                    temp = population[i, mutation_index1]
+                    population[i, mutation_index1] = population[i, mutation_index2]
+                    population[i, mutation_index2] = temp
+
+            if self.plotting:
+                best_evaluation_per_generation[generation_number] = \
+                    evaluations[index1]
 
         print(f"Route evolution complete. "
               f"Best evaluation: {evaluations[index1]}")
+        if self.plotting:
+            x_axis = np.arange(1, self.num_generations + 1, dtype=float)
+            Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
+                                     "Generation number",
+                                     "Best evaluation",
+                                     "Best evaluation per generation",)
         return parent1
 
     def _crossover(self,
@@ -351,7 +370,7 @@ class GeneticRouting(Genetic):
                     days_left -= 1
 
         # Return to start at end of route
-        offspring[offspring.shape[0]-1] = 0
+        offspring[offspring.shape[0] - 1] = 0
         return offspring
 
     def _evaluate_population(self,
