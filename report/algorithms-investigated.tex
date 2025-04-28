@@ -44,8 +44,9 @@ Code snippets shown in this report, such as figure~\ref{fig:Algorithm.evaluate_r
 detailing where in the git repository their code can be found.
 
 \subsection{Clustering}\label{subsec:clustering}
-Clustering as a concept can be described as `the unsupervised classification of patterns (observation, data items, or
-feature vectors) into groups (clusters)'\todo{cite Data Clustering: A review, A.K. Jain}.
+Clustering as a concept can be described as `
+organization of a collection of patterns (usually represented as a vector of measurements, or a point in a multidimensional
+space) into clusters based on similarity'\parencite[p. 265]{jain1999data}.
 In our problem, clustering will be used to group locations together to form an itinerary for each day of the trip.
 These clusters, or days, will then be used as an input for some routing algorithm, which will try and find an
 optimal route for each day, which can then be combined to form a complete trip.
@@ -70,8 +71,7 @@ given a location in the input space, a given location is assigned to the cluster
 The algorithm starts by initialising random centroids and iteratively improving the clustering from there, continuing
 until the algorithm converges (on a local optimum) or an iteration limit is reached.
 K-Means runs in linear time with a time complexity of $O(m n k i)$, where $m$ is the number of locations, $n$ is the
-dimensionality of the input, $k$ is the number of clusters, and $i$ is the number of iterations
-\todo{cite Algorithm AS 136: A K-Means Clustering Algorithm}.
+dimensionality of the input, $k$ is the number of clusters, and $i$ is the number of iterations\parencite[p. 102]{hartigan1979algorithm}.
 Our inputs will always contain only two dimensions, and we will be setting a maximum number of iterations, this
 makes both $n$ and $i$ constants allowing us to simplify the time complexity to $O(m k)$.\\
 
@@ -249,8 +249,7 @@ For our implementation of crossover, we will be performing a uniform crossover, 
 A crossover mask is a bit array the same length as the genome, with the parity of each bit indicating which parent
 to choose from for the corresponding bit in the created genome.
 In a uniform crossover mask, each bit has an 50\% chance of being a 0 or 1, meaning that each bit in the offspring
-genome has an equal chance of being from either parent
-\todo{Cite Uniform Crossover in Genetic Algorithms, Giblert Syswerda.}.
+genome has an equal chance of being from either parent\parencite{syswerda1989uniform}.
 If the two parents, being the best individuals in a population, agree on a bit it then it would appear likely it's a
 good choice.
 With our implementation of crossover, the offspring will always copy over the bits that parents agree on.
@@ -705,8 +704,7 @@ Figure~\ref{fig:ConvexHull_Example} shows a drawing of a convex hull surrounding
 If all locations happen to fall on the border of the convex hull, then the convex hull is itself an optimal route;
 although, this is rather unlikely to happen.
 Regardless, the convex hull does still indicate that an optimal route will visit the border cities in the order they
-appear on the hull.
-\todo{cite TSP: a computational study pg 46}
+appear on the hull\parencite[p. 46]{applegate2006traveling}.
 With this in mind, we can use the convex hull as a starting point, and then use greedy insertion to find a full route.
 The time complexity of finding a convex hull is $O(nh)$, where $n$ is the number of locations, and $h$ is the number
 of points on the hull. In the worst case, where all of the points are on the hull, this becomes $O(n^2)$.

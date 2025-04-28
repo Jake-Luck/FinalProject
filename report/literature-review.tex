@@ -7,29 +7,48 @@ By gaining an understanding of the strengths and limitations of existing approac
 better informed decisions regarding which approaches to investigate, how they may be adapted to suit our specific
 constraints and how they might be implemented in practice.
 While the approaches taken to these problems may not be directly applicable to our own, it is likely we can adapt their
-techniques to suit the specific constraints of this problem.\\
+techniques to suit the specific constraints of this problem.
+
 
 The Travelling Salesman Problem (TSP) is perhaps one of the most studied optimisation problems.
 This extensive research on the problem has acted as an `engine of discovery for general-purpose techniques' offering
-large contributions across a wide range of mathematics. \todo{cite tsp: a computational study, pg 40--41}
 The TSP can be described simply as: Given a set of locations and the cost of travel between them, find the shortest
-route that visits each location and returns to the start\todo{cite tsp: a computational study, pg 1}.\\
+route that visits each location and returns to the start\parencite[p. 1]{applegate2006traveling}.
+The problem relates directly to our own in their shared goal of minimising travel time, in fact, for inputs where
+$d = 1$, our problem becomes the TSP, with greater values of $d$ introducing additional complexity.
 
-There are clear similarities between the TSP and our own problem, both involve finding a route that visits every
-node, while attempting to minimise the time taken travelling said route.
-In fact, with an input of $d=1$ our problem becomes the TSP, with greater values of $d$ introducing additional
-complexity.
-With this in mind we are able to investigate existing approaches to the TSP and consider how they can be applied to
-our problem.
-The TSP is proven to be NP-hard\todo{cite introduction to algorithms, pg 1096--1097}, meaning that there are no
-known algorithms capable of solving the problem in polynomial time.
-Considering this, and the aforementioned similarities to our own problem, we can conclude that our problem is also
-NP-hard.
-\todo{Discuss how knowledge of NP-hardness can be used to decide which algorithms to investigate.}
+The TSP is proven to be NP-hard\parencite[p. 1096--1097{cormen2022introduction}, meaning that there
+are no known algorithms capable of solving the problem in polynomial time.
+Exact methods, such as brute force, branch-and-bound and dynamic programming are capable of finding optimal
+solutions, they just take an impractically long time to do so.
+\textcite[p. 489--530]{applegate2006traveling} discusses how the best solvers of the time had solved problems of
+thousands of locations, but took many CPU years to do so.
+Even with advances in computer processing, finding exact solutions appear too impractical in the context of our project.
+Naturally, this leads towards the investigation of heuristic and approximation algorithms, which aim to find a near
+optimal solution within a reasonable time frame.
 
-\todo{Discuss a couple of solutions/types of solution}
+TSP heuristics can be broadly categorised into two groups: construction heuristics and improvement heuristics.
+Construction heuristics build a solution from scratch, progressively adding locations to the route, while improvement
+heuristics take an existing solution and attempt to improve it\parencite[p. 242]{laporte1992traveling}.\\
 
-\todo{sentence about TSP variants, leads into paragraph about mTSP}
+\noindent
+The multiple travelling salesman problem (mTSP) is an extension of the TSP, this time aiming to find a set of $m$
+routes that together visit every location once, with the goal of minimising the total cost of all
+routes\parencite[p. 209]{bektas2006multiple}.
+This comes closer to our own problem, in which we are looking for several routes over multiple days, but without the
+optimisation objective of balancing routes.\\
+
+\noindent
+The Tourist Trip Design Problem (TTDP) takes potential points of interest (PoIs) and attempts to find the most
+interesting route based on a number of criteria.
+TTDP shares the same motivation of tourist route planning as our own problem and often considers similar parameters,
+such as travel time between PoIs and the desired time spent at each one\parencite{gavalas2014mobile}.
+A large difference though, is that it does not require every location to be visited, prioritising the visitation of
+certain PoIs according to user preference.
+Nevertheless, due to the similarities in the problem, it is worth investigating the approaches taken to solve TTDPs.
+
+\textcite{vansteenwegen2007mobile}
+
 
 
 \subsection{Classical Traveling Salesman Problem (TSP)}
@@ -128,22 +147,6 @@ NP-hard.
     \item Liu, R., Xie, X., Augusto, V., \& Rodriguez, C. (2013). ``Heuristic algorithms for a vehicle routing problem with simultaneous delivery and pickup and time windows in home health care.'' \textit{European Journal of Operational Research}, 230(3), 475-486.
 \end{itemize}
 
-\subsection{Time-Dependent Routing Problems}
-\begin{itemize}
-    \item Integration of visit durations into routing decisions
-    \item Time windows and scheduling constraints
-    \item Solution approaches for time-dependent problems
-    \item Relevance to our edge weight definition that incorporates visit duration
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Ichoua, S., Gendreau, M., \& Potvin, J. Y. (2003). ``Vehicle dispatching with time-dependent travel times.'' \textit{European Journal of Operational Research}, 144(2), 379-396.
-    \item Donati, A. V., Montemanni, R., Casagrande, N., Rizzoli, A. E., \& Gambardella, L. M. (2008). ``Time dependent vehicle routing problem with a multi ant colony system.'' \textit{European Journal of Operational Research}, 185(3), 1174-1191.
-    \item Hashimoto, H., Yagiura, M., \& Ibaraki, T. (2008). ``An iterated local search algorithm for the time-dependent vehicle routing problem with time windows.'' \textit{Discrete Optimization}, 5(2), 434-456.
-    \item Figliozzi, M. A. (2012). ``The time dependent vehicle routing problem with time windows: Benchmark problems, an efficient solution algorithm, and solution characteristics.'' \textit{Transportation Research Part E: Logistics and Transportation Review}, 48(3), 616-636.
-\end{itemize}
-
 \subsection{Synthesis and Research Gaps}
 \begin{itemize}
     \item Comparison of problem characteristics across reviewed literature
@@ -165,12 +168,4 @@ NP-hard.
     \item Summary of most relevant approaches
     \item Recommendation for methodological direction
     \item Justification for selected approach based on literature findings
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Gendreau, M., Potvin, J. Y., Bräumlaysy, O., Hasle, G., \& Løkketangen, A. (2008). ``Metaheuristics for the vehicle routing problem and its extensions: A categorized bibliography.'' In \textit{The vehicle routing problem: Latest advances and new challenges} (pp. 143-169). Springer.
-    \item Bräysy, O., \& Gendreau, M. (2005). ``Vehicle routing problem with time windows, Part I: Route construction and local search algorithms.'' \textit{Transportation Science}, 39(1), 104-118.
-    \item Glover, F., \& Kochenberger, G. A. (Eds.). (2003). \textit{Handbook of Metaheuristics}. Springer.
-    \item Talbi, E. G. (2009). \textit{Metaheuristics: From Design to Implementation}. John Wiley \& Sons.
 \end{itemize}

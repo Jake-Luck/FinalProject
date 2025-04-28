@@ -28,11 +28,15 @@
 \usepackage{graphicx}
 \graphicspath{{images/}}
 
-\usepackage{biblatex}
+\renewcommand{\includegraphics}[2][]{\fbox{}}
+
+
+\usepackage[style=authoryear-ibid,backend=biber]{biblatex}
 \addbibresource{bibliography.bib}
 
  % Set inline as default for todos
 \usepackage{regexpatch}
+\usepackage{lstmisc}
 \makeatletter
 \xpatchcmd{\@todo}{\setkeys{todonotes}{#1}}{\setkeys{todonotes}{inline,#1}}{}{}
 \makeatother
@@ -42,7 +46,7 @@
     \begin{titlepage}
         \centering
         \vspace*{8ex}
-        \includegraphics[width = 1\textwidth]{UoB_Logo}\\[10ex]
+        \includegraphics[width = \textwidth]{UoB_Logo}\\[10ex]
         \Huge{A Comparison of Approaches to Combinatorial Optimisation for Multi-Day Route Planning}\\[3ex]
         \LARGE{Jacob Luck}\\
         \large{2338114}\\[18ex]
