@@ -16,7 +16,7 @@ from numpy import ndarray  # For type hints
 import openrouteservice
 import random
 import requests
-from time import perf_counter, sleep
+from time import process_time, sleep
 
 NUMBER_OF_NODES = 25  # Max allowed by ORS api
 
@@ -352,10 +352,10 @@ class DataHandling:
                 _coordinates = coordinates[:n]
                 # brute force
                 if n + d < 11:
-                    start = perf_counter()
+                    start = process_time()
                     route = Routing.brute_force(n, d, _graph,
                                                 _durations)
-                    end = perf_counter()
+                    end = process_time()
                     time = end - start
                     evaluation, _, _ = Routing.evaluate_route(
                         route, d, _graph, _durations)
@@ -363,9 +363,9 @@ class DataHandling:
                         ["Brute Force", n, d, evaluation, time,
                          "W * (1+σ)"])
                 # greedy routing & greedy insertion
-                start = perf_counter()
+                start = process_time()
                 route = Routing.greedy_routing(n, d, _graph, _durations)
-                end = perf_counter()
+                end = process_time()
                 time = end - start
                 evaluation, _, _ = Routing.evaluate_route(route, d,
                                                           _graph,
@@ -377,12 +377,12 @@ class DataHandling:
                 if d <= 1:  # No need to cluster if days is 1
                     continue
 
-                start = perf_counter()
+                start = process_time()
                 clusters = kmeans.find_clusters(_coordinates, d, n)
                 route = kmeans.find_route_from_clusters(
                     clusters, d, kmeans.RoutingMethods.GREEDY,
                     _graph, _durations)
-                end = perf_counter()
+                end = process_time()
                 time = end - start
                 evaluation, _, _ = Routing.evaluate_route(
                     route, d, _graph, _durations)
@@ -390,7 +390,7 @@ class DataHandling:
                     ["K-Means & Greedy", n, d, evaluation, time,
                      "W * (1+\\sigma)"])
                 # kmeans & brute force
-                start = perf_counter()
+                start = process_time()
                 clusters = kmeans.find_clusters(_coordinates, d, n)
                 counts = np.bincount(clusters)
                 biggest_cluster = np.max(counts)
@@ -399,26 +399,26 @@ class DataHandling:
                         clusters, d,
                         kmeans.RoutingMethods.BRUTE_FORCE, _graph,
                         _durations)
-                    end = perf_counter()
+                    end = process_time()
                     time = end - start
                     evaluation, _, _ = Routing.evaluate_route(
                         route, d, _graph, _durations)
                 else:
-                    end = perf_counter()
+                    end = process_time()
                     time = end - start
                     evaluation = float('inf')
                 new_rows.append(
                     ["K-Means & Brute Force", n, d, evaluation,
                      time, "W * (1+\\sigma)"])
                 # Genetic Clustering + Greedy
-                start = perf_counter()
+                start = process_time()
                 clusters = genetic_clustering.find_clusters(
                     _graph, _durations, n, d, n + d - 1,
                     genetic_clustering.RoutingMethods.GREEDY)
                 route = genetic_clustering.find_route_from_clusters(
                     clusters, d, genetic_clustering.RoutingMethods.GREEDY,
                     _graph, _durations)
-                end = perf_counter()
+                end = process_time()
                 time = end - start
                 evaluation, _, _ = Routing.evaluate_route(route, d,
                                                           _graph,
@@ -427,7 +427,7 @@ class DataHandling:
                     ["Genetic Clustering & Greedy Routing", n, d,
                      evaluation, time, "W * (1+\\sigma)"])
                 # Genetic Centroid Clustering + Greedy
-                start = perf_counter()
+                start = process_time()
                 clusters = genetic_centroid_clustering.find_clusters(
                     _coordinates, _graph, _durations, d,
                     genetic_centroid_clustering.RoutingMethods.GREEDY)
@@ -435,7 +435,7 @@ class DataHandling:
                     clusters, d,
                     genetic_clustering.RoutingMethods.GREEDY,
                     _graph, _durations)
-                end = perf_counter()
+                end = process_time()
                 time = end - start
                 evaluation, _, _ = Routing.evaluate_route(route, d,
                                                           _graph,

@@ -13,6 +13,8 @@ def main():
     """
     Launching point of the program, always starts a thread for collecting data.
     """
+    return
+
     data_handler = DataHandling()
     data_collection_thread = threading.Thread(
         target=data_handler.collect_test_data)

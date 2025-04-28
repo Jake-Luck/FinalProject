@@ -3,7 +3,7 @@ Provides Shorthands class to easily run different algorithms with
 random/default inputs.
 """
 import numpy as np
-import time
+from time import process_time
 
 from core.data_handling import DataHandling
 from core.plotting import Plotting
@@ -42,9 +42,9 @@ class Shorthands:
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         route = Routing.brute_force(num_locations, num_days, graph, durations)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Brute Force time: {time_end - time_start} seconds")
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
@@ -103,11 +103,11 @@ class Shorthands:
             mutation_probability, generations_per_update, plot, seed,
             plot_stages)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         cluster_assignments = genetic_algorithm.find_clusters(
             graph, durations, num_locations, num_days, routing_algorithm,
             coordinates)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Genetic Clustering time: {time_end - time_start} seconds")
 
         route = genetic_algorithm.find_route_from_clusters(
@@ -180,10 +180,10 @@ class Shorthands:
             mutation_probability, generations_per_update, plot, seed,
             plot_stages)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         cluster_assignments = genetic_algorithm.find_clusters(
             coordinates, graph, durations, num_days, routing_algorithm)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Genetic Centroid time: {time_end - time_start} seconds")
 
         route = genetic_algorithm.find_route_from_clusters(
@@ -230,10 +230,10 @@ class Shorthands:
             num_generations, population_size, crossover_probability,
             mutation_probability, generations_per_update, plot, seed)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         route = genetic_algorithm.find_route(num_locations, num_days,
             graph, durations, coordinates)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Genetic routing time: {time_end - time_start} seconds")
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
@@ -269,10 +269,10 @@ class Shorthands:
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         route = Routing.gift_wrapping(
             num_locations, num_days, coordinates, graph, durations)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Giftwrapping time: {time_end - time_start} seconds")
 
 
@@ -307,10 +307,10 @@ class Shorthands:
         graph, coordinates, durations = Shorthands._setup_inputs(
             num_locations, graph, durations, coordinates)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         route = Routing.greedy_routing(
             num_locations, num_days, graph, durations)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Greedy routing time: {time_end - time_start} seconds")
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
@@ -338,9 +338,9 @@ class Shorthands:
             location_set.append(0)
         for i in range(1, num_locations):
             location_set.append(i)
-        time_start = time.perf_counter()
+        time_start = process_time()
         route = Routing.greedy_insertion(np.array([]), np.array(location_set), graph, durations)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"Greedy insertion time: {time_end - time_start} seconds")
 
         evaluation, std_deviation, evaluation_per_day = Routing.evaluate_route(
@@ -383,10 +383,10 @@ class Shorthands:
 
         kmeans = KMeans(show_stages=show_stages, random_seed=seed)
 
-        time_start = time.perf_counter()
+        time_start = process_time()
         cluster_assignments = kmeans.find_clusters(coordinates, num_days,
                                                    num_locations)
-        time_end = time.perf_counter()
+        time_end = process_time()
         print(f"K-Means time: {time_end - time_start} seconds")
 
         route = kmeans.find_route_from_clusters(

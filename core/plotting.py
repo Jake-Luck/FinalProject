@@ -43,7 +43,7 @@ class Plotting:
         if centre is None:
             lon = (coordinates[:, 0].min() + coordinates[:, 0].max()) / 2
             lat = (coordinates[:, 1].min() + coordinates[:, 1].max()) / 2
-            centre = np.ndarray((lon,lat))
+            centre = np.array((lon,lat))
 
         clusters = [np.where(cluster_assignments == i) for i in range(num_days)]
 
@@ -133,7 +133,7 @@ class Plotting:
         if centre is None:
             lon = (coordinates[:, 0].min() + coordinates[:, 0].max()) / 2
             lat = (coordinates[:, 1].min() + coordinates[:, 1].max()) / 2
-            centre = np.ndarray((lon,lat))
+            centre = np.array((lon,lat))
 
         route_per_day = np.split(route, np.where(route == 0)[0])[:-1]
 
