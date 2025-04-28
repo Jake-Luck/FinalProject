@@ -7,17 +7,17 @@ By gaining an understanding of the strengths and limitations of existing approac
 better informed decisions regarding which approaches to investigate, how they may be adapted to suit our specific
 constraints and how they might be implemented in practice.
 While the approaches taken to these problems may not be directly applicable to our own, it is likely we can adapt their
-techniques to suit the specific constraints of this problem.
+techniques to suit the specific constraints of this problem.\\
 
-
+\noindent
 The Travelling Salesman Problem (TSP) is perhaps one of the most studied optimisation problems.
 This extensive research on the problem has acted as an `engine of discovery for general-purpose techniques' offering
 The TSP can be described simply as: Given a set of locations and the cost of travel between them, find the shortest
-route that visits each location and returns to the start\parencite[p. 1]{applegate2006traveling}.
+route that visits each location and returns to the start~\parencite[p. 1]{applegate2006traveling}.
 The problem relates directly to our own in their shared goal of minimising travel time, in fact, for inputs where
 $d = 1$, our problem becomes the TSP, with greater values of $d$ introducing additional complexity.
 
-The TSP is proven to be NP-hard\parencite[p. 1096--1097{cormen2022introduction}, meaning that there
+The TSP is proven to be NP-hard~\parencite[p. 1096--1097]{cormen2022introduction}, meaning that there
 are no known algorithms capable of solving the problem in polynomial time.
 Exact methods, such as brute force, branch-and-bound and dynamic programming are capable of finding optimal
 solutions, they just take an impractically long time to do so.
@@ -27,14 +27,30 @@ Even with advances in computer processing, finding exact solutions appear too im
 Naturally, this leads towards the investigation of heuristic and approximation algorithms, which aim to find a near
 optimal solution within a reasonable time frame.
 
-TSP heuristics can be broadly categorised into two groups: construction heuristics and improvement heuristics.
-Construction heuristics build a solution from scratch, progressively adding locations to the route, while improvement
-heuristics take an existing solution and attempt to improve it\parencite[p. 242]{laporte1992traveling}.\\
+
+\textcite{laporte1992traveling} categorises TSP heuristics as either constructive or improvement heuristics, and
+claims that the best approaches to the problem are a combination of both.
+The paper presents a number of heuristic algorithms across these three approaches including: nearest neighbour
+routing, which iteratively adds the nearest location to a route; r-opt swapping, which takes an existing route,
+removes r connections and rebuilds the tour optimally; and the CCAO algorithm, which uses a convex hull and cheapest
+insertion procedure to build a route, before improving it via angle maximisation and r-opt swapping.
+While the various algorithms presented in the paper are certainly interesting, there isn't much discussion over the
+performance of these algorithms, and the comparisons they do make lack supporting evidence.
+
+
+A recent study by~\textcite{goutham2023convex} investigated performance of the Convex Hull and Cheapest Insertion (CHCI)
+steps of the CCAO algorithm for travelling salesman problems in non-Euclidean space.
+The study used existing TSP datasets and modified them to add separators to the graph, or by using the $\mathcal{L}_1$
+norm to calculate distances, however the convex hull was still formed according to the initial Euclidean graph.
+Despite this, CHCI was shown to outperform other heuristic and meta-heuristic approaches, such as Nearest Insertion or
+Ant Colony Optimisation, the majority of the time.
+While the non-Euclidean spaces considered differ to our own problem, in which our graph is asymmetric and based on
+travel time between locations, perhaps we could also use Euclidean heuristics as a starting point for finding routes.\\
 
 \noindent
 The multiple travelling salesman problem (mTSP) is an extension of the TSP, this time aiming to find a set of $m$
 routes that together visit every location once, with the goal of minimising the total cost of all
-routes\parencite[p. 209]{bektas2006multiple}.
+routes~\parencite[p. 209]{bektas2006multiple}.
 This comes closer to our own problem, in which we are looking for several routes over multiple days, but without the
 optimisation objective of balancing routes.\\
 
@@ -42,12 +58,12 @@ optimisation objective of balancing routes.\\
 The Tourist Trip Design Problem (TTDP) takes potential points of interest (PoIs) and attempts to find the most
 interesting route based on a number of criteria.
 TTDP shares the same motivation of tourist route planning as our own problem and often considers similar parameters,
-such as travel time between PoIs and the desired time spent at each one\parencite{gavalas2014mobile}.
+such as travel time between PoIs and the desired time spent at each one~\parencite{vansteenwegen2007mobile}.
 A large difference though, is that it does not require every location to be visited, prioritising the visitation of
 certain PoIs according to user preference.
 Nevertheless, due to the similarities in the problem, it is worth investigating the approaches taken to solve TTDPs.
 
-\textcite{vansteenwegen2007mobile}
+\textcite{gavalas2014mobile}
 
 
 
