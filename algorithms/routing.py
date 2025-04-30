@@ -53,8 +53,8 @@ class Routing(Algorithm):
         best_evaluation, _, _ = Algorithm.evaluate_route(best_route, num_days,
                                                          graph, durations)
 
-        iterations_per_update = n_routes / 10
-        progress = 0
+        # iterations_per_update = n_routes / 10
+        # progress = 0
 
         for i in range(1, n_routes):  # yikes
             route = Algorithm.generate_route(i, n_routes, location_set[:],
@@ -66,10 +66,10 @@ class Routing(Algorithm):
                 best_route = np.array(route, copy=True)
                 best_evaluation = evaluation
 
-            if (i+1) % iterations_per_update == 0:
-                progress += 10
-                print(f"Brute force {progress}% complete: {i+1}/{n_routes}. "
-                      f"Best evaluation: {best_evaluation}")
+            # if (i+1) % iterations_per_update == 0:
+            #    progress += 10
+            #    print(f"Brute force {progress}% complete: {i+1}/{n_routes}. "
+            #          f"Best evaluation: {best_evaluation}")
 
         return best_route
 
@@ -308,7 +308,7 @@ class GeneticRouting(Genetic):
 
                 # Generate random individual (increases genetic diversity)
                 if not use_crossover:
-                    route_number = random.randint(0, n_routes)
+                    route_number = random.randint(0, n_routes-1)
                     population[i] = self.generate_route(route_number, n_routes,
                                                         location_set[:],
                                                         route_length)
@@ -329,14 +329,15 @@ class GeneticRouting(Genetic):
                 best_evaluation_per_generation[generation_number] = \
                     evaluations[index1]
 
-        print(f"Route evolution complete. "
-              f"Best evaluation: {evaluations[index1]}")
-        if self.plotting:
-            x_axis = np.arange(1, self.num_generations + 1, dtype=float)
-            Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
-                                     "Generation number",
-                                     "Best evaluation",
-                                     "Best evaluation per generation",)
+        if self.generations_per_update is not None:
+            print(f"Route evolution complete. "
+                  f"Best evaluation: {evaluations[index1]}")
+            if self.plotting:
+                x_axis = np.arange(1, self.num_generations + 1, dtype=float)
+                Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
+                                         "Generation number",
+                                         "Best evaluation",
+                                         "Best evaluation per generation",)
         return parent1
 
     def _crossover(self,
@@ -406,7 +407,7 @@ class GeneticRouting(Genetic):
         population = np.empty(shape=(self.population_size, route_length),
                               dtype=int)
         for i in range(self.population_size):
-            route_number = random.randint(0, n_routes)
+            route_number = random.randint(0, n_routes-1)
             population[i] = self.generate_route(route_number, n_routes,
                                                 location_set[:], route_length)
         return population

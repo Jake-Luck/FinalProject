@@ -307,7 +307,6 @@ class DataHandling:
         with h5py.File("data/training_data.h5", "w") as f:
             f.create_dataset("city_coordinates", data=city_coordinates)
             f.create_group(DataGroups.graphs.value)
-            f.create_group(DataGroups.algorithm_performance.value)
 
     @staticmethod
     def _generate_durations() -> ndarray:

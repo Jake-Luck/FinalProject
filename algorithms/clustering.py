@@ -33,6 +33,8 @@ class Clustering(Algorithm):
         'Uses a genetic algorithm to find the best route.'
         CONVEX_HULL = 3
         'Uses the convex hull of the points to find the best route.'
+        GREEDY_INSERTION = 4
+        'Uses greedy insertion to find route'
 
     @staticmethod
     def find_route_from_clusters(cluster_assignments: ndarray,
@@ -59,17 +61,18 @@ class Clustering(Algorithm):
             indexes_in_cluster = np.where(cluster_assignments == i)[0] + 1
             clusters.append(np.concatenate(([0], indexes_in_cluster)))
 
-        routing = Routing()
         match routing_method:
             case Clustering.RoutingMethods.BRUTE_FORCE:
-                routing_function = routing.brute_force
+                routing_function = Routing.brute_force
             case Clustering.RoutingMethods.GREEDY:
-                routing_function = routing.greedy_routing
+                routing_function = Routing.greedy_routing
+            case Clustering.RoutingMethods.GREEDY_INSERTION:
+                routing_function = Routing.greedy_insertion
             case Clustering.RoutingMethods.GENETIC:
-                genetic_routing = GeneticRouting(50, 20, 0.9, 0.1, None, False)
+                genetic_routing = GeneticRouting(150, 50, 0.9, 0.4, None, False, 0, False)
                 routing_function = genetic_routing.find_route
             case Clustering.RoutingMethods.CONVEX_HULL:
-                routing_function = routing.gift_wrapping
+                routing_function = Routing.gift_wrapping
             case _:
                 print("Invalid routing method, defaulting to greedy")
                 routing_function = routing.greedy_routing
@@ -91,6 +94,9 @@ class Clustering(Algorithm):
                 sub_route = routing_function(
                     num_locations, num_days, sub_coordinates, sub_graph,
                     sub_durations)
+            elif routing_method == Clustering.RoutingMethods.GREEDY_INSERTION:
+                new_locations = np.arange(1, num_locations)
+                sub_route = routing_function(np.array([]), new_locations, sub_graph, sub_durations)
             else:
                 sub_route = routing_function(num_locations, num_days, sub_graph,
                                              sub_durations)
@@ -250,14 +256,15 @@ class GeneticClustering(Genetic, Clustering):
                 best_evaluation_per_generation[generation_number] = \
                     evaluations[index1]
 
-        print(f"Cluster evolution complete. "
-              f"Best evaluation: {evaluations[index1]}")
-        if self.plotting:
-            x_axis = np.arange(1, self.num_generations + 1, dtype=float)
-            Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
-                                     "Generation number",
-                                     "Best evaluation",
-                                     "Best evaluation per generation",)
+        if self.generations_per_update is not None:
+            print(f"Cluster evolution complete. "
+                  f"Best evaluation: {evaluations[index1]}")
+            if self.plotting:
+                x_axis = np.arange(1, self.num_generations + 1, dtype=float)
+                Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
+                                         "Generation number",
+                                         "Best evaluation",
+                                         "Best evaluation per generation",)
 
         return parent1
 
@@ -462,14 +469,15 @@ class GeneticCentroidClustering(Genetic, Clustering):
                 best_evaluation_per_generation[generation_number] = \
                     evaluations[index1]
 
-        print(f"Centroid evolution complete. "
-              f"Best evaluation: {evaluations[index1]}")
-        if self.plotting:
-            x_axis = np.arange(1, self.num_generations + 1, dtype=float)
-            Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
-                                     "Generation number",
-                                     "Best evaluation",
-                                     "Best evaluation per generation")
+        if self.generations_per_update is not None:
+            print(f"Centroid evolution complete. "
+                  f"Best evaluation: {evaluations[index1]}")
+            if self.plotting:
+                x_axis = np.arange(1, self.num_generations + 1, dtype=float)
+                Plotting.plot_line_graph(x_axis, best_evaluation_per_generation,
+                                         "Generation number",
+                                         "Best evaluation",
+                                         "Best evaluation per generation")
 
         cluster_assignments = self._assign_nodes_to_centroid(
             cluster_coordinates, parent1)
@@ -495,16 +503,13 @@ class GeneticCentroidClustering(Genetic, Clustering):
         num_days = parent1.shape[0]
 
         # Reorder parent2 so clusters are similar to parent1
-        for i in range(num_days):
-            best_match = np.argmin(distances[i])
-            reordered_parent2[i] = parent2[best_match]
-
-            distances[:, best_match] = np.inf
+        match_indices = np.argmin(distances, axis=1)
+        reordered_parent2 = parent2[match_indices]
 
         # Create centroids in-between parents'
-        for i in range(num_days):
-            weight = random.random()
-            offspring[i] = weight * parent1[i] + (1-weight) * parent2[i]
+        weights = np.random.random(num_days)[:, np.newaxis]
+        offspring = weights * parent1 + (1 - weights) * reordered_parent2
+
         return offspring
 
     def _evaluate_population(self,
@@ -604,7 +609,6 @@ class KMeans(Clustering):
         chosen_indices = np.random.choice(coordinates.shape[0], num_days,
                                           replace=False)
         means = coordinates[chosen_indices]
-        means = np.array([[-0.1817, 51.5209, 0], [-0.1534, 51.5313, 0], [-0.134, 51.5098, 0]])
         for _ in range(self.maximum_iterations):
             cluster_assignments = self._assign_nodes_to_centroid(coordinates,
                                                                  means)
@@ -635,6 +639,7 @@ class KMeans(Clustering):
         :param num_days: The number of clusters/means to compute.
         :return: Returns a list of means, 1D array.
         """
+        np.seterr(all='raise')
         computed_means = np.empty((num_days, 2))
 
         for i in range(num_days):

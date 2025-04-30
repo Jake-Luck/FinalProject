@@ -1,21 +1,22 @@
-This literature review aims to explore existing research and approaches to other combinatorial optimisation problems.
-There is extensive previous research on various combinatorial problems, for example, the Travelling Salesman
-Problem, Vehicle Routing Problem and Tourist Trip Design Problem.
-It is important to understand how these problems are similar to the one presented in this report, as well as where
-those similarities end.
-By gaining an understanding of the strengths and limitations of existing approaches to similar problems, we can make
-better informed decisions regarding which approaches to investigate, how they may be adapted to suit our specific
-constraints and how they might be implemented in practice.
-While the approaches taken to these problems may not be directly applicable to our own, it is likely we can adapt their
-techniques to suit the specific constraints of this problem.\\
+This literature review will explore existing research and approaches to other combinatorial optimisation problems.
+In this review existing research for the Travelling Salesman Problem, Multiple Travelling Salesman
+Problem, Vehicle Routing Problem and Tourist Trip Design Problem, will be covered.
+By gaining an understanding of the strengths and limitations of existing approaches to similar problems, better informed
+decisions can be made regarding which approaches to investigate, how they may be adapted to suit specific constraints of
+the Multi-Day Trip Planning Problem, and how these approaches might be implemented in practice.
+While the approaches taken to these problems may not be directly applicable to this study, it is likely their
+techniques can be adapted to better suit the problem investigated in this report.\\
 
 \noindent
-The Travelling Salesman Problem (TSP) is perhaps one of the most studied optimisation problems.
-This extensive research on the problem has acted as an `engine of discovery for general-purpose techniques' offering
+The Travelling Salesman Problem (TSP) is perhaps one of the most studied combinatorial optimisation problems in
+computer science.
+The extensive research on the problem has acted as an `engine of discovery for general-purpose techniques' offering
+large contributions across a wide range of mathematics\parencite[p. 40--41]{applegate2006traveling}.
 The TSP can be described simply as: Given a set of locations and the cost of travel between them, find the shortest
 route that visits each location and returns to the start~\parencite[p. 1]{applegate2006traveling}.
-The problem relates directly to our own in their shared goal of minimising travel time, in fact, for inputs where
-$d = 1$, our problem becomes the TSP, with greater values of $d$ introducing additional complexity.
+The problem relates directly to this goal of minimising travel time considered in this study, in fact, for inputs where
+$d = 1$, the Multi-Day Trip Planning problem becomes the TSP, with greater values of $d$ introducing additional
+complexity.
 
 The TSP is proven to be NP-hard~\parencite[p. 1096--1097]{cormen2022introduction}, meaning that there
 are no known algorithms capable of solving the problem in polynomial time.
@@ -23,10 +24,9 @@ Exact methods, such as brute force, branch-and-bound and dynamic programming are
 solutions, they just take an impractically long time to do so.
 \textcite[p. 489--530]{applegate2006traveling} discusses how the best solvers of the time had solved problems of
 thousands of locations, but took many CPU years to do so.
-Even with advances in computer processing, finding exact solutions appear too impractical in the context of our project.
-Naturally, this leads towards the investigation of heuristic and approximation algorithms, which aim to find a near
-optimal solution within a reasonable time frame.
-
+Even with advances in computer processing, finding exact solutions appear too impractical in the context of this study.
+This leads towards the investigation of heuristic and approximation algorithms, which aim to find a near optimal
+solution within a reasonable time frame.
 
 \textcite{laporte1992traveling} categorises TSP heuristics as either constructive or improvement heuristics, and
 claims that the best approaches to the problem are a combination of both.
@@ -34,9 +34,8 @@ The paper presents a number of heuristic algorithms across these three approache
 routing, which iteratively adds the nearest location to a route; r-opt swapping, which takes an existing route,
 removes r connections and rebuilds the tour optimally; and the CCAO algorithm, which uses a convex hull and cheapest
 insertion procedure to build a route, before improving it via angle maximisation and r-opt swapping.
-While the various algorithms presented in the paper are certainly interesting, there isn't much discussion over the
-performance of these algorithms, and the comparisons they do make lack supporting evidence.
-
+While the various algorithms presented in the paper are worthy of note, there is a lack of significant discussion
+regarding the performance of these algorithms, and the comparisons they do make, lack supporting evidence.
 
 A recent study by~\textcite{goutham2023convex} investigated performance of the Convex Hull and Cheapest Insertion (CHCI)
 steps of the CCAO algorithm for travelling salesman problems in non-Euclidean space.
@@ -44,144 +43,112 @@ The study used existing TSP datasets and modified them to add separators to the 
 norm to calculate distances, however the convex hull was still formed according to the initial Euclidean graph.
 Despite this, CHCI was shown to outperform other heuristic and meta-heuristic approaches, such as Nearest Insertion or
 Ant Colony Optimisation, the majority of the time.
-While the non-Euclidean spaces considered differ to our own problem, in which our graph is asymmetric and based on
-travel time between locations, perhaps we could also use Euclidean heuristics as a starting point for finding routes.\\
+While the non-Euclidean spaces considered differ to the input space used in this study, in which graphs are asymmetric
+and based on travel time between locations, there is potential to utilise Euclidean heuristics as a starting point for
+finding routes.\\
 
 \noindent
 The multiple travelling salesman problem (mTSP) is an extension of the TSP, this time aiming to find a set of $m$
 routes that together visit every location once, with the goal of minimising the total cost of all
 routes~\parencite[p. 209]{bektas2006multiple}.
-This comes closer to our own problem, in which we are looking for several routes over multiple days, but without the
-optimisation objective of balancing routes.\\
+This comes closer to the focus of this study, in which several routes are sought over multiple days, but without the
+optimisation objective of balancing routes.
+A literature review by~\textcite{bektas2006multiple} provides a comprehensive overview of procedures for solving the
+mTSP, of particular interest are~\textcite{bellmore1974transformation}'s transformation of the mTSP into the TSP,
+and~\textcite{tang2000multiple}'s Modified Genetic Algorithm solution.
+
+By transforming the mTSP into a TSP, one is able to use existing TSP algorithms to find mTSP routes.
+If similar transformations could be applied within this study, the possibility exists to take advantage of existing TSP
+research to implement algorithms that are already known to be effective.
+\textcite{bellmore1974transformation} propose a method of modifying a TSP graph to include artificial nodes and
+edges, with the nodes indicating the end of one salesman's route and the start of another and the edges including
+the cost of including additional salesmen in the problem.
+
+\textcite{tang2000multiple} modelled the schedulling of steel production as an mTSP before performing a similar
+transformation to \textcite{bellmore1974transformation}'s, to convert their mTSP into a TSP and solve the problem
+using their modified genetic algorithm (MGA).
+Typically at the time, genetic algorithms used a selection procedure in which both parents were chosen semi-randomly
+from the population, with each individuals fitness increasing their chance to be chosen.
+\textcite{tang2000multiple}'s MGA altered this selection so one of the parents would always be the best individual,
+helping to maintain good solutions and reach convergence quicker.
+Not only did this MGA approach prove effective in computational testing, but when employed for scheduling in an iron
+and steel complex in Shanghai, showed an average improvement of 20\%~\parencite[p. 278--281]{tang2000multiple}.
+
+Unfortunately, considering how the objective function of this study differs from most other combinatorial optimisation
+problems, it is likely that performing such a transformation could overly complicate the resultant problem.
+Nevertheless, the effectiveness of applying TSP solvers to other problems, related or not is certainly interesting.
+It would be worth considering scenarios that would allow the utilisation of pre-existing algorithms without too much
+modification.\\
+
+\noindent
+First introduced by \textcite{dantzig1959truck}, the Vehicle Routing Problem (VRP) is similar to the mTSP, considering
+multiple vehicles departing from, and returning to, a central depot while visiting a number of locations.
+The VRP typically extends the problem to include a number of constraints related to the context of servicing
+customers, which does bring it to differ from the problem being studied.
+
+One approach of particular interest is the generalised assignment heuristic considered by~\textcite{fisher1981generalized},
+which divided the input space geometrically, assigning each vehicle to one of these divisions.
+After these locations were assigned to a vehicle a route visiting them was found and optimised to reduce travel time.
+The generalised heuristic was shown to outperform the methods it was compared against~\parencite[p. 123]{fisher1981generalized}.
+
+Further investigation into this approach has been carried out by those such as~\textcite{nallusamy2010optimization}, who
+combined the use of both k-means clustering and genetic algorithms to approximate solutions to the mVRP.
+K-Means was used to group nearby locations and have them visited by the same vehicle, then genetic algorithms were
+used to find the routes of each vehicle independently.
+These approaches seem particularly relevant to this study's problem, locations could be assigned to given days of the
+overall trip.\\
 
 \noindent
 The Tourist Trip Design Problem (TTDP) takes potential points of interest (PoIs) and attempts to find the most
 interesting route based on a number of criteria.
-TTDP shares the same motivation of tourist route planning as our own problem and often considers similar parameters,
-such as travel time between PoIs and the desired time spent at each one~\parencite{vansteenwegen2007mobile}.
+The TTDP shares the same motivation of tourist route planning as the problem investigated in this study and often
+considers similar parameters, such as travel time between PoIs and the desired time spent at each one~\parencite{vansteenwegen2007mobile}.
 A large difference though, is that it does not require every location to be visited, prioritising the visitation of
 certain PoIs according to user preference.
-Nevertheless, due to the similarities in the problem, it is worth investigating the approaches taken to solve TTDPs.
 
-\textcite{gavalas2014mobile}
+\textcite{vansteenwegen2007mobile} discusses modelling multiple day trip planning through the Team Orienteering
+Problem (TOP).
+The TOP aims to find a set of routes that visit a number of locations, with the goal of maximising the total value of
+the locations visited within some time limit.
+\textcite{vansteenwegen2011orienteering}'s survey provides a summary of the best TOP algorithms according
+to benchmarks on their speed and solution quality.
+Among the best performing algorithms were meta-heuristics such as Genetic Based Tabu Search, Ant Colony Optimisation
+and Greedy Randomised Adaptive Search Procedure.
+The paper also discusses how different local search algorithms apply different `local search moves' to improve the
+quality of a solution.
+While a wide range of moves exist, all effective search algorithms used greedy insertion as part of their
+solution, perhaps indicating its effectiveness.\\
 
+\noindent
+The literature reviewed in this section provides valuable insights into how the problem may be tackled.
+With the expansive pre-existing research into the TSP, mTSP, VRP and TTDP, existing
+approaches and how they may be applicable for this project, may be evaluated.
+A diverse range of approximate solutions are considered in the reviewed literature, from simple construction
+heuristics such as nearest neighbour routing or greedy insertion, to complex meta-heuristics such as genetic
+algorithms or ant colony optimisation.
 
+Among the most promising approaches are those that combine both clustering and routing algorithms to split up locations
+and find multiple routes from these divisions.
+It is unfortunate that unlike this study's problem, the literature covering these techniques are only concerned with
+minimising overall route length, hopefully these methods will still prove useful despite these differences.
 
-\subsection{Classical Traveling Salesman Problem (TSP)}
+Much of the research reviewed does not consider the optimisation of multiple objectives, with none of
+it sharing the goals of this study to minimise both travel and route variance, this would suggest that more research is
+needed in this area.\\
+
+\noindent
+Considering the lack of investigation into solving problems with the constraints and optimisation objectives applied in
+this study, this project will compare a swathe of approaches and algorithms, aiming to identify which are most
+appropriate for the problem at hand.
+
+The majority of approaches will be those that split routing and assignment into two steps, which will be performed
+in one of two ways:
 \begin{itemize}
-    \item Definition and mathematical formulation
-    \item Complexity analysis and NP-hardness
-    \item Key solution approaches
-    \item Relevance and limitations in relation to our specific problem
+    \item Assigning locations to a given day in the trip and then finding routes for each group, as previously
+    described by~\textcite{fisher1981generalized} and~\textcite{nallusamy2010optimization}.
+    \item Finding a route between all locations and then using insertion algorithms, such as those compared by~\textcite{vansteenwegen2011orienteering},
+    to break the route up into a multiple day trip.
 \end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Applegate, D. L., Bixby, R. E., Chvátal, V., \& Cook, W. J. (2006). \textit{The Traveling Salesman Problem: A Computational Study}. Princeton University Press.
-    \item Laporte, G. (1992). ``The traveling salesman problem: An overview of exact and approximate algorithms.'' \textit{European Journal of Operational Research}, 59(2), 231-247.
-    \item Lin, S., \& Kernighan, B. W. (1973). ``An effective heuristic algorithm for the traveling-salesman problem.'' \textit{Operations Research}, 21(2), 498-516.
-    \item Helsgaun, K. (2000). ``An effective implementation of the Lin–Kernighan heuristic.'' \textit{European Journal of Operational Research}, 126(1), 106-130.
-\end{itemize}
-
-\subsection{Multiple Traveling Salesman Problem (mTSP)}
-\begin{itemize}
-    \item Extension of the TSP with multiple agents
-    \item Mathematical formulation differences from TSP
-    \item Application to multi-day planning scenarios
-    \item Connection to our requirement of visiting the starting point $d$ times
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Bektas, T. (2006). ``The multiple traveling salesman problem: an overview of formulations and solution procedures.'' \textit{Omega}, 34(3), 209-219.
-    \item Kara, I., \& Bektas, T. (2006). ``Integer linear programming formulations of multiple salesman problems and its variations.'' \textit{European Journal of Operational Research}, 174(3), 1449-1458.
-    \item Gavish, B., \& Srikanth, K. (1986). ``An optimal solution method for large-scale multiple traveling salesmen problems.'' \textit{Operations Research}, 34(5), 698-717.
-    \item Carter, A. E., \& Ragsdale, C. T. (2006). ``A new approach to solving the multiple traveling salesperson problem using genetic algorithms.'' \textit{European Journal of Operational Research}, 175(1), 246-257.
-\end{itemize}
-
-\subsection{Vehicle Routing Problem (VRP) and Variants}
-\begin{itemize}
-    \item Basic VRP definition and formulation
-    \item Vehicle Routing Problem with Multiple Trips (VRPMT)
-    \item Capacitated VRP and other variants
-    \item Relevance to our balanced route planning requirement
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Toth, P., \& Vigo, D. (Eds.). (2002). \textit{The Vehicle Routing Problem}. SIAM Monographs on Discrete Mathematics and Applications.
-    \item Cattaruzza, D., Absi, N., \& Feillet, D. (2016). ``Vehicle routing problems with multiple trips.'' \textit{4OR}, 14(3), 223-259.
-    \item Brandão, J., \& Mercer, A. (1997). ``A tabu search algorithm for the multi-trip vehicle routing and scheduling problem.'' \textit{European Journal of Operational Research}, 100(1), 180-191.
-    \item Olivera, A., \& Viera, O. (2007). ``Adaptive memory programming for the vehicle routing problem with multiple trips.'' \textit{Computers \& Operations Research}, 34(1), 28-47.
-\end{itemize}
-
-\subsection{Tourist Trip Design Problem (TTDP)}
-\begin{itemize}
-    \item Problem definition focusing on tourist-specific constraints
-    \item Time-dependent considerations and point-of-interest selection
-    \item Personalization aspects in tourist routing
-    \item Direct applicability to our problem's tourism context
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Vansteenwegen, P., Souffriau, W., \& Van Oudheusden, D. (2011). ``The orienteering problem: A survey.'' \textit{European Journal of Operational Research}, 209(1), 1-10.
-    \item Gavalas, D., Konstantopoulos, C., Mastakas, K., \& Pantziou, G. (2014). ``A survey on algorithmic approaches for solving tourist trip design problems.'' \textit{Journal of Heuristics}, 20(3), 291-328.
-    \item Souffriau, W., Vansteenwegen, P., Vanden Berghe, G., \& Van Oudheusden, D. (2013). ``The planning of cycle trips in the province of East Flanders.'' \textit{Omega}, 41(3), 522-531.
-    \item Garcia, A., Vansteenwegen, P., Arbelaitz, O., Souffriau, W., \& Linaza, M. T. (2013). ``Integrating public transportation in personalised electronic tourist guides.'' \textit{Computers \& Operations Research}, 40(3), 758-774.
-\end{itemize}
-
-\subsection{Multi-Objective Optimization in Routing Problems}
-\begin{itemize}
-    \item Balancing competing objectives (like total weight vs. variance)
-    \item Pareto optimality concepts
-    \item Solution approaches for multi-objective routing
-    \item Applicability to our dual-objective function
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Jozefowiez, N., Semet, F., \& Talbi, E. G. (2008). ``Multi-objective vehicle routing problems.'' \textit{European Journal of Operational Research}, 189(2), 293-309.
-    \item Paquete, L., \& Stützle, T. (2006). ``A study of stochastic local search algorithms for the biobjective QAP with correlated flow matrices.'' \textit{European Journal of Operational Research}, 169(3), 943-959.
-    \item Laporte, G., Semet, F., Matl, P., \& Voß, S. (2018). ``Multi-objective vehicle routing problem.'' \textit{Operations Research Perspectives}, 5, 50-57.
-    \item Coello, C. A. C., Lamont, G. B., \& Van Veldhuizen, D. A. (2007). \textit{Evolutionary Algorithms for Solving Multi-Objective Problems}. Springer.
-\end{itemize}
-
-\subsection{Balance-Oriented Routing Problems}
-\begin{itemize}
-    \item Problems focusing on workload balancing
-    \item Min-max objectives in routing
-    \item Variance minimization approaches
-    \item Connection to our goal of minimizing variance between trips
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Jozefowiez, N., Semet, F., \& Talbi, E. G. (2009). ``An evolutionary algorithm for the vehicle routing problem with route balancing.'' \textit{European Journal of Operational Research}, 195(3), 761-769.
-    \item Dell'Amico, M., Monaci, M., Pagani, C., \& Vigo, D. (2007). ``Heuristic approaches for the fleet size and mix vehicle routing problem with time windows.'' \textit{Transportation Science}, 41(4), 516-526.
-    \item Lee, T. R., \& Ueng, J. H. (1999). ``A study of vehicle routing problems with load-balancing.'' \textit{International Journal of Physical Distribution \& Logistics Management}, 29(10), 646-657.
-    \item Liu, R., Xie, X., Augusto, V., \& Rodriguez, C. (2013). ``Heuristic algorithms for a vehicle routing problem with simultaneous delivery and pickup and time windows in home health care.'' \textit{European Journal of Operational Research}, 230(3), 475-486.
-\end{itemize}
-
-\subsection{Synthesis and Research Gaps}
-\begin{itemize}
-    \item Comparison of problem characteristics across reviewed literature
-    \item Key methodological approaches applicable to our problem
-    \item Identification of research gaps in addressing our specific problem constraints
-    \item Potential directions for adaptation of existing methodologies
-\end{itemize}
-
-\noindent\textbf{Recommended Literature:}
-\begin{itemize}
-    \item Laporte, G. (2009). ``Fifty years of vehicle routing.'' \textit{Transportation Science}, 43(4), 408-416.
-    \item Cordeau, J. F., Gendreau, M., Laporte, G., Potvin, J. Y., \& Semet, F. (2002). ``A guide to vehicle routing heuristics.'' \textit{Journal of the Operational Research Society}, 53(5), 512-522.
-    \item Eksioglu, B., Vural, A. V., \& Reisman, A. (2009). ``The vehicle routing problem: A taxonomic review.'' \textit{Computers \& Industrial Engineering}, 57(4), 1472-1483.
-    \item Vidal, T., Crainic, T. G., Gendreau, M., \& Prins, C. (2013). ``Heuristics for multi-attribute vehicle routing problems: A survey and synthesis.'' \textit{European Journal of Operational Research}, 231(1), 1-21.
-\end{itemize}
-
-\subsection{Conclusion}
-\begin{itemize}
-    \item Summary of most relevant approaches
-    \item Recommendation for methodological direction
-    \item Justification for selected approach based on literature findings
-\end{itemize}
+\noindent
+Multiple routing and clustering algorithms will be implemented for use in these approaches, as will be described in
+the next section of this report.

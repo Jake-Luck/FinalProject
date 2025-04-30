@@ -14,6 +14,7 @@
 \usepackage{float}
 \usepackage[margin=1in]{geometry}
 \usepackage[hidelinks]{hyperref}
+\usepackage{longtable}
 \usepackage{titlesec}
 \usepackage{todonotes}
 \usepackage{setspace}
@@ -27,8 +28,8 @@
 
 \usepackage{graphicx}
 \graphicspath{{images/}}
-
-\renewcommand{\includegraphics}[2][]{\fbox{}}
+% Uncomment command to hide all pictures - used for faster compilation
+\renewcommand{\includegraphics}[2][]{\fbox{#2}}
 
 
 \usepackage[style=authoryear,backend=biber]{biblatex}
@@ -36,6 +37,7 @@
 
  % Set inline as default for todos
 \usepackage{regexpatch}
+\usepackage{array}
 \makeatletter
 \xpatchcmd{\@todo}{\setkeys{todonotes}{#1}}{\setkeys{todonotes}{inline,#1}}{}{}
 \makeatother
@@ -52,18 +54,34 @@
         \Large{B.Sc. Computer Science with a Year in Industry}\\
         \Large{Project Supervisor - Leandro Minku}\\[6ex]
         \large{April 2025}\\
-        \large{xxxx Words}
+        \large{9814 Words}
     \end{titlepage}
 
     \doublespacing
 
-    \section*{Abstract}\label{sec:abstract}
-    \todo{Write abstract}
+    \section*{Acknowledgements}\label{sec:acknowledgements}
+    I would like to thank openrouteservice and OpenStreetMap contributors, without whose efforts this project may
+    not have been possible.\\
+
+    \noindent
+    I would also like to thank my project supervisor, Leandro Minku, for his guidance and support throughout the
+    development of this project and report.\\
 
     \pagebreak
 
-    \section*{Acknowledgements}\label{sec:acknowledgements}
-    \todo{Write acknowledgements, must include openrouteservice and OpenStreetMap contributors.}
+    \section*{Abstract}\label{sec:abstract}
+    The Multi-Day Trip Planning problem presented in this report is a combinatorial optimisation problem that aims
+    to plan a trip across multiple days, visiting a specified set of locations.
+    The problem is optimised according to the amount of time spent travelling in the trip, and the balance of time
+    spent across each day.
+    An effective solution to this problem would allow a user to easily plan trips that efficiently visit the locations
+    they wish to see.
+
+    In this report a number of different approaches to solving this problem are investigated, including algorithms
+    shown to be effective in similar optimisation problems.
+    These approaches are evaluated against each other to try and determine the most practical solutions to the problem.
+    By the end of this report it is shown that a combination of genetic clustering algorithms with approximate and
+    exact routing methods seem to be the most promising approaches.
 
     \pagebreak
 
@@ -72,15 +90,7 @@
     \pagebreak
 
     \section{Introduction}\label{sec:introduction}
-    \subsection{Motivation}\label{subsec:motivation}
-    \todo{Write about reasoning for this project, can copy a little bit over from presentation slides. Explain problem informally. Link into aims and objectives.}
-    \subsection{Aims and Objectives}\label{subsec:aims-and-objectives}
-    \todo{Explin goals of the project, link in to methodology.}
-    \subsection{Methodology}\label{subsec:methodology}
-    \todo{Briefly explain how the project will be carried out. A more thorough description can be provided later on, i.e., when describing algorithms.}
-    \todo{Mention code being available from github. Include a code segment and explain how figure captions denote filepath within the repository.}
-    \subsection{Summary}\label{subsec:summary}
-    \todo{Explain what is in the rest of the report. "In this report I shall...", cover each section, etc.}
+    \input{introduction}
 
     \pagebreak
 
@@ -90,8 +100,6 @@
     \pagebreak
 
     \section{Literature Review}\label{sec:literature-review}
-    \todo{Plan (and write) literature review}
-    \todo{Remember to write about the strengths and weaknesses of existing work. At the end of this chapter you can then give a summary of the gaps that you'll be trying to improve with your work, and on the strengths that you will be maintaining in your work.}
     \input{literature-review}
 
     \pagebreak
@@ -101,25 +109,13 @@
 
     \pagebreak
 
-    \section{Evaluation and Comparison}\label{sec:evaluation-and-comparison}
-    \subsection{Methodology}\label{subsec:evaluation-methodology}
-    \subsubsection{Constraints}\label{subsubsec:constraints}
-    \subsection{Results \& Analysis}\label{subsec:results-and-analysis}
-    \todo{Gather data for London and Birmingham with POI}
-    \todo{Write paragraph about experiment process. Comparison based on computation time and route evaluation. Describe how route is evaluated. Describe data being tested on.}
-    \todo{Present comparison of different combinations of algorithms on different inputs.}
-    \todo{Reflect about the questionns you are trying to answer with your evaluation. You can have onne subsection for each question that you are trying to answer. It's also important to justify your choices when it comes to the methodology used for evaluation.}
+    \section{Algorithm Evaluation and Results}\label{sec:evaluation-and-results}
+    \input{evaluation-and-results}
 
     \pagebreak
 
     \section{Conclusion and Future Work}\label{sec:conclusion-and-future-work}
-    \todo{Write conclusion, discuss results, comparison of algorithms, etc.}
-    \subsection{Project Reflection}
-    \todo{Reflect on the project, what went well, what didn't go well, what I would do differently. This should lead into future work.}
-    \subsection{Future work}\label{subsec:future-work}
-    \todo{Discuss further work, what I will be doing to improve the project}
-    \todo{Discuss spectral clustering}
-    \todo{Discuss Neural Networks}
+    \input{conclusion-and-future-work}
 
     \pagebreak
 

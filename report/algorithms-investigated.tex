@@ -1,36 +1,72 @@
-\todo{There should be a link either here or at end of literature which forms the basic for different methods (clustering, routing, trip generation).}
-\todo{Brief Paragraph describing different types of algorithm used (Routing then cluster, Cluster then Routing, Genetic, etc.)}
-\todo{Remember to justify the choice of algorithms. You may also need to explain how to adopt these algorithms in your work. A figure showing the ralationship between different components of your work may also help.}
+Based on what was learned during the literature review, the decision was made to investigate three distinct approaches
+to the Multi Day Route Planning problem:
+\begin{itemize}
+    \item Cluster then Route, where a clustering algorithm is used to group together locations in the input,
+    before a routing algorithm is applied to each group.
+    \item Route then Insert, where a route is found that visits all locations, before the end of each day is
+    inserted somewhere appropriate in the route.
+    \item Trip Generation, which aims to find a whole multi day trip in one step.
+\end{itemize}
+To form these approaches a number of clustering, routing and trip generation algorithms were implemented, with each
+of these listed below:\\
+\noindent
+\textbf{Clustering}
+\begin{itemize}
+    \item K-Means Clustering,
+    \item Genetic Clustering,
+    \item Centroid-Based Genetic Clustering.
+\end{itemize}\\
+\noindent
+\textbf{Routing}
+\begin{itemize}
+    \item Brute Force Routing,
+    \item Greedy Routing,
+    \item Greedy Insertion Routing\footnote{Greedy Insertion Routing will also be extended to allow its usage for splitting routes into multiple days.},
+    \item Convex Hull Routing,
+    \item Genetic Routing.
+\end{itemize}\\
+\noindent
+\textbf{Trip Generation}
+\begin{itemize}
+    \item Brute Force Trip Generation,
+    \item Genetic Trip Generation,
+    \item Greedy Insertion Trip Generation.
+\end{itemize}
+
+\noindent
+After describing the pre-requisites to implementing these algorithms, this section of the report will include a
+description for all the algorithms listed above, as well as explain how each was implemented within python.
 
 \subsection{Implementation Pre-Requisites}\label{subsec:implementation-pre-requisites}
-There are two things need before we begin, a way of generating inputs to use our algorithms on, and an
-implementation of our objective function so we can evaluate our results.
+There are two things needed before beginning to implement the chosen algorithms, a method for generating inputs on which
+to use these algorithms, and an implementation of an objective function to enable the evaluation of routes.
 
 \subsubsection{Input Generation}\label{subsubsec:input-generation}
-For our input we will be using Openrouteservice's Points of Interest (PoI) and Distance Matrix API services.
-With the PoI service, we can input a location, such as a city centre, and retrieve a specified number of locations
-of interest around the area.
-The PoI service also allows us to limit the locations returned to certain categories allowing us to specifically find
-locations that one would likely be interested in visiting, for example points labelled `tourism', `historic' or
+For generating inputs Openrouteservice's Points of Interest (PoI) and Distance Matrix API services will be used.
+With the PoI service, locations such as a city centres can be input, and a specified number of locations of interest
+around the area will be returned.
+The PoI service also allows the limitation of locations returned to certain categories and the identification of
+specific that a user would likely be interested in visiting, for example points labelled `tourism', `historic' or
 `arts and culture'.
 
-After we have these locations, we can use the Distance Matrix to create a graph linking each location to each other
-with a weight associated with travelling between them.
-We can configure our API call to this service such that, instead of distance, the weights in the matrix represent
+After these locations have been identified, the Distance Matrix can be used to create a graph linking each location to
+one another with a weight associated with travelling between them.
+The API call to this service can be configured such that, instead of distance, the weights in the matrix represent
 the time taken to travel between locations via public transport.
 Unfortunately, the Distance Matrix service limits the number of locations in a call to 25, severely limiting the
-size of input we can test.
-Other alternative API's were looked into, such as the Google Maps API or Mapbox, but all the alternatives found were
-either too expensive or equally, if not more, restrictive.
+size of input that can be test.
+Other alternative API's were considered, such as the Google Maps API or Mapbox, but all the alternatives were either too
+expensive or equally, if not more, restrictive.
 
-With these, we can generate a list of durations associated with the found locations, as well as a number of days for
-the trip, and then our input is ready.
+With these, a list of durations associated with the found locations can be generated, as well as a number of days for
+the trip, to finally have the input ready.
 
 \subsubsection{Objective Function}\label{subsubsec:algorithms-objective-function}
-As described in the \hyperref[sec:problem-formulation]{Problem Formulation}, our objective function aims to
-calculate a cost for a given route.
-This function is needed such that we can compare our approaches and algorithms based on the quality of their results.
-Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our project.
+As described in the \hyperref[sec:problem-formulation]{Problem Formulation}, the Multi-Day Planning Problem's objective
+function aims to calculate a cost for a given trip.
+This function is needed such that different approaches and algorithms can be compared based on the quality of their
+results.
+Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in this project.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Algorithm.evaluate_route}
@@ -38,20 +74,15 @@ Figure~\ref{fig:Algorithm.evaluate_route} shows how this was implemented in our 
     \label{fig:Algorithm.evaluate_route}
 \end{figure}
 
-\subsubsection{Project Code}\label{subsubsec:project-code}
-All the code used in the project is available to find at: \url{https://git.cs.bham.ac.uk/projects-2024-25/jhl114}.
-Code snippets shown in this report, such as figure~\ref{fig:Algorithm.evaluate_route}, are captioned
-detailing where in the git repository their code can be found.
-
 \subsection{Clustering}\label{subsec:clustering}
 Clustering as a concept can be described as the `organization of a collection of patterns (usually represented as a
 vector of measurements, or a point in a multidimensional space) into clusters based on similarity'~\parencite[p. 265]{jain1999data}.
-In our problem, clustering will be used to group locations together to form an itinerary for each day of the trip.
+For this problem, clustering will be used to group locations together to form an itinerary for each day of the trip.
 These clusters, or days, will then be used as an input for some routing algorithm, which will try and find an
 optimal route for each day, which can then be combined to form a complete trip.
-The goal of our clustering algorithms is to find a set of clusters that, when combined with some routing algorithm,
+Here, the goal of clustering algorithms is to find a set of clusters that, when combined with some routing algorithm,
 will produce a trip with minimal cost.
-The code in figure~\ref{fig:Clustering.find_route_from_clusters} shows how we can use a set of clusters alongside our
+The code in figure~\ref{fig:Clustering.find_route_from_clusters} shows how a set of clusters can be used alongside
 graph and duration inputs to find a trip.
 \begin{figure}[H]
     \centering
@@ -64,25 +95,26 @@ graph and duration inputs to find a trip.
 The clustering algorithms implemented in this project are: K-Means, Genetic Clustering and Genetic Centroid-based
 Clustering.
 
-\subsubsection{K-Means}\label{subsubsec:k-means}
+\subsubsection{K-Means Clustering}\label{subsubsec:k-means}
 K-Means is an iterative clustering algorithm that defines its clusters using a set of centroids (means) which are
 given a location in the input space, a given location is assigned to the cluster of the `closest' centroid.
 The algorithm starts by initialising random centroids and iteratively improving the clustering from there, continuing
 until the algorithm converges (on a local optimum) or an iteration limit is reached.
 K-Means runs in linear time with a time complexity of $O(m n k i)$, where $m$ is the number of locations, $n$ is the
 dimensionality of the input, $k$ is the number of clusters, and $i$ is the number of iterations~\parencite[p. 102]{hartigan1979algorithm}.
-Our inputs will always contain only two dimensions, and we will be setting a maximum number of iterations, this
-makes both $n$ and $i$ constants allowing us to simplify the time complexity to $O(m k)$.\\
+The inputs will always contain only two dimensions, and a maximum number of iterations will be set, making both $n$ and
+$i$ constants, allowing the simplification of the time complexity to $O(m k)$.\\
 
 \noindent
-In our implementation of K-Means we will initialise our centroids by randomly selecting unique locations from our
-input, and placing our centroids at their coordinates.
+In this implementation of K-Means centroids will be initialised by randomly selecting unique locations from the input,
+and placing the initial centroids at their coordinates.
 A different approach was considered, which involved initialising the centroids with random coordinates in a similar
 area to the input, however this had the potential to create clusters with zero locations assigned to them resulting
 in invalid trips.
-By starting with locations from the input, we can be sure that all clusters have at least one location assigned to them.
-We will be using the coordinates of our locations to calculate the Euclidean distances between locations and centroids,
-these locations will be assigned to the cluster of the closest centroid.
+By starting with locations from the input, there is certainty that all clusters have at least one location assigned to
+them.
+We will be the coordinates of inputted locations will be used to calculate the Euclidean distances between locations
+and centroids, these locations are then assigned to the cluster of the closest centroid.
 Figure~\ref{fig:Clustering._assign_nodes_to_centroid} shows how this was accomplished.
 \begin{figure}[H]
     \centering
@@ -95,7 +127,7 @@ Figure~\ref{fig:Clustering._assign_nodes_to_centroid} shows how this was accompl
 After assignment, the centroids are recalculated such that their coordinates are the average of all locations
 assigned to their cluster.
 This is done by iterating through each cluster and calculating the mean of all locations assigned to it.
-Our implementation is shown in figure~\ref{fig:KMeans._compute_means}.
+The implementation of this is shown in figure~\ref{fig:KMeans._compute_means}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans._compute_means}
@@ -106,9 +138,9 @@ Our implementation is shown in figure~\ref{fig:KMeans._compute_means}.
 \noindent
 These steps of cluster assignment and centroid recalculation are repeated until either a maximum allowed number of
 iterations is reached, or until the algorithm converges on an optimum solution.
-Our convergence criterion is that the centroids stop changing between iterations, i.e., the centroids are the same
+The convergence criterion is that the centroids stop changing between iterations, i.e., the centroids are the same
 as the previous iteration.
-Our python implementation of this is shown in figure~\ref{fig:KMeans.find_clusters}.
+The python implementation of this is shown in figure~\ref{fig:KMeans.find_clusters}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{KMeans.find_clusters}
@@ -121,18 +153,21 @@ Figure~\ref{fig:KMeans_London_Step1} shows an example of the iterations of a K-M
 12 points of interest around London to be visited over 3 days.
 \begin{figure}[H]
     \ContinuedFloat*
+    \centering
     \includegraphics[width = \textwidth]{KMeans_London_Step1}
     \caption{K-Means example Step 1, Initial centroid positions and cluster assignments.}
     \label{fig:KMeans_London_Step1}
 \end{figure}
 \begin{figure}[H]
     \ContinuedFloat
+    \centering
     \includegraphics[width = \textwidth]{KMeans_London_Step2}
     \caption{K-Means example Step2, Centroids have been updated, locations are reassigned to their closest centroid.}
     \label{fig:KMeans_London_Step2}
 \end{figure}
 \begin{figure}[H]
     \ContinuedFloat
+    \centering
     \includegraphics[width = \textwidth]{KMeans_London_Step3}
     \caption{K-Means example Step3, Centroids have updated and no locations have changed cluster, a solution has been found.}
     \label{fig:KMeans_London_Step3}
@@ -144,7 +179,7 @@ that are close geographically.
 However, as formally described in the \hyperref[subsec:objective-function]{Objective Function} section of the
 \hyperref[sec:problem-formulation]{Problem Formulation}, a good trip will minimise both the route length of the trip
 and the variance between time spent each day.
-K-Means does not aim to optimise for the variance between days, it doesn't even consider the time spent at each
+K-Means does not aim to optimise for the variance between days, it fails to consider the time spent at each
 location.
 Furthermore, while each cluster might be optimised for distance, how close two locations are may not reflect the travel
 time between them.
@@ -162,28 +197,26 @@ through selection (keeping the best individuals in the population, akin to natur
 individuals to create offspring, akin to sexual reproduction), and mutation (randomly altering the genomes
 of individuals in the population, akin to biological mutation).
 
-For us to perform selection, and find the best solutions in a population, we need to assign some fitness to each
-individual.
-To do this we will combine the cluster assignments with a chosen routing algorithm, and then apply our cost function
-to the route found.
-This cost will be used to rank our population, helping us find clusters that can produce a good trip.
+To perform selection, and find the best solutions in a population, each individual requires some fitness assigned to it.
+To calculate this fitness cluster assignments will be combined with a chosen routing algorithm, and a cost function
+applied to the route found.
+This cost will be used to rank a population, assisting in the identification of clusters that can produce a good trip.
 
 The performance of Genetic algorithms is highly dependent on its hyperparameters: mutation rate, determining how
 common mutation is; crossover rate, determining how often offspring are created via crossover, as opposed to new
 additions to the population; population size, determining how many individuals there are per generation; number of
 generations, determining how many generations will be evolved to reach a solution; crossover method used,
-determining how crossover is performed to create offspring; and in our case, the routing algorithm used, which may
+determining how crossover is performed to create offspring; and in this case, the routing algorithm used, which may
 impact how clusters are used to form routes.
 These hyperparameters impact both the runtime of the algorithm and the exploration of the search space, indirectly
 impacting the quality of the solution.
-Genetic clustering has a time complexity of $O(g p r n)$, with $g$ being the number of generations, $p$ being the
-population size, $r$ being the time complexity of the chosen routing algorithm and $n$ being the number of locations
-and days.\\
-\todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
+For each generation, Genetic Clustering has to route and evaluate each individual in the population, yielding a time
+complexity of $O(g p r n)$, with $g$ being the number of generations, $p$ being the population size,
+$r$ being the time complexity of the chosen routing algorithm and $n$ being the number of locations and days.\\
 
 \noindent
-For this genetic clustering, an individual is represented by a genome, which will provide a mapping that assigns each
-location to a cluster.
+For this Genetic Clustering implementation, an individual is represented by a genome, which will provide a mapping
+that assigns each location to a cluster.
 Figure~\ref{fig:barcelona-genome-example} shows an example of this.
 \begin{figure}[H]
     \centering
@@ -194,19 +227,19 @@ Figure~\ref{fig:barcelona-genome-example} shows an example of this.
 \end{figure}
 
 \noindent
-These genomes are our target for performing crossover and mutations.
-We begin our evolution process by randomly generating an initial population of individuals.
-From there, we repeat the following steps until we reach a maximum number of generations:
+These genomes are the target for performing crossover and mutations.
+We begin this evolution process by randomly generating an initial population of individuals.
+From there, following steps are repeated until reach a maximum number of generations is reached:
 \begin{enumerate}
-    \item Evaluate the fitness of each individual in the population.
-    \item Select the best individuals from the population, these will be carried over into the next generation, as
+    \item Evaluation of the fitness of each individual in the population.
+    \item Selection of the best individuals from the population, these will be carried over into the next generation, as
     well as be used to create offspring.
-    \item Generate new population using crossover and mutation.
+    \item Creation of the new population using crossover and mutation.
 \end{enumerate}
 
 \noindent
-As previously discussed, we will evaluate the fitness of each individual by applying a routing algorithms to the
-clusters defined by the genome, and then applying our cost function to the resulting route.
+As previously discussed, the fitness of each individual is evaluated by applying a routing algorithms to the
+clusters defined by the genome, and then applying the cost function to the resulting route.
 Figure~\ref{fig:GeneticClustering._evaluate_population} shows this route finding and evaluation.
 \begin{figure}[H]
     \centering
@@ -219,8 +252,12 @@ Figure~\ref{fig:GeneticClustering._evaluate_population} shows this route finding
 The methods called in figure~\ref{fig:GeneticClustering._evaluate_population} are those previously shown in
 figure~\ref{fig:Clustering.find_route_from_clusters} (find\_route\_from\_clusters) and
 figure~\ref{fig:Algorithm.evaluate_route} (evaluate\_route).
-Once the population has been evaluated, the best two individuals are chosen as parents, as figure~\ref{fig:GeneticClustering.find_clusters.select_parents}
-shows.
+\textcite{tang2000multiple}'s genetic algorithm featured a selection process involving choosing the best individual for
+one parent, with the other parent being selected via a semi-random process with bias based on the performance of each
+individual.
+For the genetic algorithms implemented in this project, the two best individuals of a population will be chosen as
+parents, without any random selection.
+Figure~\ref{fig:GeneticClustering.find_clusters.select_parents} shows this simple selection process in python.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering.find_clusters.select_parents}
@@ -231,10 +268,12 @@ shows.
 \noindent
 Excluding the two parents, who will be copied over, the next generation will be created via crossover and mutation,
 or through random generation.
-We include some randomly generated individuals in an effort to increase genetic diversity and exploration of the
-search space.
-Figure ~\ref{fig:GeneticClustering.find_clusters.crossover} shows how this is decided in our implementation.
-For each individual a random number is generated between 0 and 1, if this number is lower than our crossover rate
+By taking the two best individuals as parents, good solutions are likely to be maintained, but will trade off genetic
+diversity, perhaps leading the algorithm to get stuck in local optima and not sufficiently exploring the search space.
+To counter-act this, and boost the genetic diversity of each population some randomly generated individuals in an effort
+to increase genetic diversity and exploration of the search space.
+Figure ~\ref{fig:GeneticClustering.find_clusters.crossover} shows how this decision was implemented.
+For each individual a random number is generated between 0 and 1, if this number is lower than the crossover rate
 the individual is created via crossover, otherwise it will be randomly generated.
 \begin{figure}[H]
     \centering
@@ -244,14 +283,14 @@ the individual is created via crossover, otherwise it will be randomly generated
 \end{figure}
 
 \noindent
-For our implementation of crossover, we will be performing a uniform crossover, using crossover masks.
+For this implementation of crossover, a uniform crossover will be performed, using crossover masks.
 A crossover mask is a bit array the same length as the genome, with the parity of each bit indicating which parent
 to choose from for the corresponding bit in the created genome.
 In a uniform crossover mask, each bit has an 50\% chance of being a 0 or 1, meaning that each bit in the offspring
 genome has an equal chance of being from either parent~\parencite{syswerda1989uniform}.
-If the two parents, being the best individuals in a population, agree on a bit it then it would appear likely it's a
+If the two parents, being the best individuals in a population, agree on a bit it then it would appear likely to be a
 good choice.
-With our implementation of crossover, the offspring will always copy over the bits that parents agree on.
+With this implementation of crossover, the offspring will always copy over the bits that parents agree on.
 Figure~\ref{fig:Crossover_Mask_Example} shows an example of how a crossover mask can be used to create offspring from
 two parents, the example uses a hypothetical input including 6 locations and 3 clusters.
 \begin{figure}[H]
@@ -262,7 +301,7 @@ two parents, the example uses a hypothetical input including 6 locations and 3 c
 \end{figure}
 
 \noindent
-There is however, one slight issue with applying this method to our problem.
+There is however, one slight issue with directly applying this method.
 In the example shown in figure~\ref{fig:Crossover_Mask_Example}, parent 1's 0th cluster only includes the first
 location, similarly, parent 2's 2nd cluster also only includes the first location.
 Both parents are forming a cluster using these locations, however due to them being labelled differently, the
@@ -270,8 +309,7 @@ offspring produced did not continue this clustering.
 To solve this problem a genome's clusters will be relabelled in order of their appearance in the genome, ensuring
 consistency between parents.
 Figure~\ref{fig:Crossover_Mask_Relabelling_Example} shows an example of this applied to the parents in figure~\ref{fig:Crossover_Mask_Example},
-and figure~\ref{fig:GeneticClustering._relabel_individuals_clusters} shows how this is accomplished in our python
-implementation.
+and figure~\ref{fig:GeneticClustering._relabel_individuals_clusters} shows how this is accomplished in python.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Crossover_Mask_Relabelling_Example}
@@ -287,7 +325,7 @@ implementation.
 
 \noindent
 After this relabelling, crossover can be performed without issue.
-Figure~\ref{fig:GeneticClustering._crossover} shows our python implementation of this.
+Figure~\ref{fig:GeneticClustering._crossover} shows the python implementation of this.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GeneticClustering._crossover}
@@ -295,10 +333,10 @@ Figure~\ref{fig:GeneticClustering._crossover} shows our python implementation of
     \label{fig:GeneticClustering._crossover}
 \end{figure}
 
-After crossover is complete, we randomly mutate the created offspring in the hopes of increasing genetic diversity
+After crossover is complete, created offspring are randomly mutated in the hopes of increasing genetic diversity
 and escaping local optima.
-We mutate our genome by iterating through each gene and randomly deciding if it will mutate or not, the likeliness
-of mutation is decided by our mutation rate.
+The genome is mutated by iterating through each gene and randomly deciding if it will mutate or not, the likeliness
+of mutation is decided by the mutation rate.
 If a gene is chosen to mutate, it will assign itself to a random cluster.
 Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is implemented in python.
 \begin{figure}[H]
@@ -309,14 +347,14 @@ Figure~\ref{fig:GeneticClustering.find_clusters.mutation} shows how this is impl
 \end{figure}
 
 \noindent
-After the new population has been created, we restart the process for the next generation, repeating these steps
+After the new population has been created, the process is restarted for the next generation, repeating these steps
 until a maximum number of generations is reached.
 By time evolution is complete the population will hopefully have converged on a good solution.
-Figure~\ref{fig:GeneticClustering_London_Generation1} shows an example of genetic clustering using the same input as for the
-K-Means example in figure~\ref{fig:KMeans_London_Step1}.
-In the example, genetic clustering is used alongside greedy routing (to be covered in section~\ref{subsubsec:greedy-routing})
+Figure~\ref{fig:GeneticClustering_London_Generation1} shows an example of using Genetic Clustering the same input as
+for the K-Means example in figure~\ref{fig:KMeans_London_Step1}.
+In the example, Genetic Clustering is used alongside Greedy Routing (to be covered in section~\ref{subsubsec:greedy-routing})
 to form a complete trip, the best routes found within their respective generations are shown.
-The genetic clustering was run for 30 generations with a population size of 12, a crossover rate of 0.9 was used
+Genetic Clustering was run for 30 generations with a population size of 12, a crossover rate of 0.9 was used
 alongside a mutation rate of 0.1.
 Figure~\ref{fig:GeneticClustering_London_Evaluations} shows a line graph of the best evaluation found for each
 generation.
@@ -354,24 +392,36 @@ generation.
     \caption{Line graph showing the best evaluation for each generation of clusters evolution process.}
     \label{fig:GeneticClustering_London_Evaluations}
 \end{figure}
+
 \noindent
+Unlike K-Means, which finds optimal routes according to geographic base, Genetic Clustering is capable of optimising
+across both optimisation objectives, finding short routes and minimising daily variance.
+By evaluating each set of clusters according to the objective function, some assignment of locations to each day can be
+found that will produce a good overall trip.
+It is likely Genetic Clustering will run slower than traditional heuristic approaches such as K-Means, it will be of
+interest whether the genetic approach can produce significantly better results as a trade off.
 
-\todo{Discuss why chosen, no clue what to put here, I just did it bc it's cool.}
+Genetic algorithms are also highly versatile and by modifying aspects of the algorithm can find solutions across a
+number of problems.
+This adaptability allows the implementation of genetic algorithms for route finding and trip generation approaches, as well
+as performing a genetic centroid-based clustering similar to K-Means.
+By comparing the performance of genetic algorithms against their counterparts across different approaches where they
+perform best can be investigated.
 
-\subsubsection{Centroid-based Genetic Clustering}
-Inspired by K-Means, centroid-based genetic clustering uses a genetic algorithm to find the best set of centroids
+\subsubsection{Centroid-Based Genetic Clustering}
+Inspired by K-Means, Centroid-Based Genetic Clustering uses a genetic algorithm to find the best set of centroids
 to cluster the data.
 The same process of evolution is used, as described previously, except this time the genome will specify the
 centroids to use for clustering.
-With a different genome structure, we will have to reconsider our crossover and mutation methods.
-Centroid based genetic clustering keeps the same time complexity as genetic clustering, $O(g p r n)$, with $g$
+With a different genome structure, the crossover and mutation methods will need be reconsidered.
+Centroid Based Genetic Clustering keeps the same time complexity as Genetic Clustering, $O(g p r n)$, with $g$
 being the number of generations, $p$ being the population size, $r$ being the time complexity of the chosen
 routing algorithm and $n$ being number of locations and days.\\
-\todo{Figure out how to cite time complexity of genetic algorithms. Or go into explanation for our implementation.}
 
 \noindent
-Our new genome will be a list of coordinate pairs, representing the latitude and longitude of each centroid.
-Figure~\ref{fig:GeneticCentroids_Greenwich_Example} shows an example of how locations are clustered using our centroid-based genome.
+This genetic algorithms genome will be a list of coordinate pairs, representing the latitude and longitude of each
+centroid.
+Figure~\ref{fig:GeneticCentroids_Greenwich_Example} shows an example of how locations are clustered using a centroid-based genome.
 \begin{figure}[H]
     \centering
     Genome: $\begin{bmatrix}0.00 & 0.01 & -0.01 & 0.00 & 0.00\\51.477 & 51.477 & 51.477 & 51.482 & 51.472\end{bmatrix}$
@@ -381,11 +431,11 @@ Figure~\ref{fig:GeneticCentroids_Greenwich_Example} shows an example of how loca
 \end{figure}
 
 \noindent
-Once again, we will iteratively evolve our population through the process of selection, crossover and mutation.
-Our selection procedure is largely the same in that we evaluate each individual by generating a trip with the help
+Once again, the population will be iteratively evolved through the process of selection, crossover and mutation.
+The selection procedure here is largely the same in that each individual is evaluated by generating a trip with the help
 of its genome and calculating the associated cost of these trips.
-The only difference is that, because our genome is no longer a direct assignment of clusters, we first need to
-assign each location to its nearest centroid.
+The only difference is that, because this genome is no longer a direct assignment of clusters, each location will first
+need to be assigned to its nearest centroid.
 This is shown in figure~\ref{fig:GeneticCentroids._evaluate_population}.
 \begin{figure}[H]
     \centering
@@ -396,25 +446,24 @@ This is shown in figure~\ref{fig:GeneticCentroids._evaluate_population}.
 
 \noindent
 The `\_assign\_nodes\_to\_centroid' method shown in figure~\ref{fig:GeneticCentroids._evaluate_population} is the same
-method we used for K-Means, shown in figure~\ref{fig:Clustering._assign_nodes_to_centroid}.
-With the population evaluated we can select the best individuals for use in creating the next generation.
-To create the next generation we enact the same stages of copying over the best individuals, generating some new
+method used for K-Means, shown in figure~\ref{fig:Clustering._assign_nodes_to_centroid}.
+With the population evaluated the best individuals can be selected for use in creating the next generation.
+New generations are created via the same stages of copying over the best individuals, generating some new
 individual's randomly and creating the rest via crossover and mutation.
 
-For this implementation of crossover, instead of selecting random genes from each parent, we will be taking the
-values of both parents and merging them together.
+For this implementation of crossover, instead of selecting random genes from each parent, the values of both parents
+will be taken and merged together.
 In practice, this means taking the coordinates of each centroid from both parents and finding a point between them
 to generate a new centroid.
 How close this new centroid is to each parent is determined by generating a random weight, indicating how much
-influence each parent has on the offspring.
-\todo{Create and insert drawing of merging parent centroids}
+influence each parent has on the offspring.\\
 
 \noindent
-Similarly to the previous implementation of crossover, we need to reorder the centroids to ensure that both parents
-are consistent with each other.
-This time, because are genome isn't formed of discrete values we can rename, we will instead take an approach of
-finding the most similar centroids from each parent and merging them.
-This is performed by calculating the distances between each of parent 1s centroids to each of parent 2s, and
+Similarly to the previous implementation of crossover, the centroids will need to be reordered to ensure that both
+parents are consistent with each other.
+This time, because the genome isn't formed of discrete values that can be renamed, instead an approach of
+finding the most similar centroids from each parent and merging them is taken.
+This is performed by calculating the distances between each of parent 1's centroids to each of parent 2's, and
 reordering the genome to place the closest centroids together.
 Figure~\ref{fig:GeneticCentroids._crossover} shows this implementation of crossover, including how parents are
 reordered and merged together to produce offspring.
@@ -426,9 +475,9 @@ reordered and merged together to produce offspring.
 \end{figure}
 
 \noindent
-For mutation, we will go through each centroid of each individual and randomly decide if it will mutate or not.
-If a centroid is chosen to mutate, we will randomly select a new location for it within the bound of the input
-coordinates.
+For mutation, each centroid of every individual will be considered, and a random decision taken as to whether the
+centroid will mutate or not.
+If a centroid is chosen to mutate, a new location will be within the bound of the input coordinates will be selected.
 The minimum and maximum latitude and longitude of the input are used to form a region within which new centroids can
 be generated, ensuring that the mutation is still relevant to the input.
 Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of mutation.
@@ -441,14 +490,14 @@ Figure~\ref{fig:GeneticCentroids.find_clusters.mutation} shows this process of m
 
 \noindent
 Once again, this process of selection, crossover and mutation is repeated until a maximum number of generations is reached.
-By the end of this process, we will have a population of individuals that have been evolved to find good centroids
-for clustering the input.
+By the end of this process, a population of individuals that have been evolved to find good centroids for clustering the
+input will have been identified.
 Figure~\ref{fig:GeneticCentroids_London_Generation1} shows an example of genetic centroid-based clustering using the same
 input as for previous clustering examples.
 This example of genetic centroid-based clustering used the same hyperparameters as the previous genetic clustering
 example, evolving 30 generations with a population size of 12, a crossover rate of 0.9, a mutation rate of 0.1 and
-once again using greedy routing alongside our clustering to produce trips.
-Again, a line graph of the best evaluation found for each generation of the process, this is shown in
+once again using Greedy Routing alongside found clusters to produce trips.
+Again, a line graph of the best evaluation found for each generation of the process is shown in
 figure~\ref{fig:GeneticCentroids_London_Evaluations}.
 \begin{figure}[H]
     \ContinuedFloat*
@@ -487,7 +536,12 @@ figure~\ref{fig:GeneticCentroids_London_Evaluations}.
 \noindent
 
 \noindent
-\todo{Discuss why chosen, to investigate how a k-means like approach would work with a genetic algorithm and whether regular clustering is better.}
+Genetic Centroid Clustering was included in this project to explore how a centroid-based approach, inspired by
+K-Means, would perform when combined with a genetic algorithm.
+Of particular interest is seeing how this approach compares to both standard K-Means as well as the other genetic
+clustering approach.
+Hopefully, by optimising chosen centroids according to the objective function, and exploring a wider range of potential
+centroids, the quality of solution will be greater than that of regular K-Means.
 
 \subsection{Routing}\label{subsec:routing}
 The routing algorithms implemented in this project are TSP solvers, aiming to find a route with minimal travel time
@@ -495,34 +549,34 @@ that visits all given locations.
 There are two ways in which routing will be used to form a trip either by using a clustering algorithm and then
 finding a route for each cluster (as previously described in section~\ref{subsec:clustering}), or by finding a route
 that visits every location, before splitting the route into multiple days.
-This approach of splitting a route into multiple days will be covered as we introduce our greedy insertion
+This approach of splitting a route into multiple days will be covered Greedy Insertion is introduced.
 algorithm which, on top of finding routes of its own, can also be used to build upon existing routes.
 The routing algorithms implemented in this project are: Brute Force Routing, Greedy Routing, Greedy Insertion, Convex
 Hull-Based Routing and Genetic Routing.
 
-\subsubsection{Brute Force}\label{subsubsec:brute-force-routing}
-Brute Force is an exhaustive algorithm that tries every possible route to find one with the least cost.
+\subsubsection{Brute Force Routing}\label{subsubsec:brute-force-routing}
+Brute Force Routing is an exhaustive algorithm that tries every possible route to find one with the least cost.
 We find every route by generating all permutations of the locations to be visited, with the order of the locations
 in each permutation representing the order in which they will be visited.
 Each permutation is evaluated based on the amount of time it takes to travel the route, with the shortest route being
 returned.
-By checking every route Brute Force is guaranteed to find the best possible route, but has a time complexity of $O(n!)$.
-\todo{Maybe cite time complexity of brute force or permutations of a set?}\\
+By checking every route Brute Force is guaranteed to find the best possible route, but due to checking every permutation
+has a time complexity of $O(n!)$, where $n$ is the number of locations.
 
 \noindent
-It's worth noting that in our implementation, since all routes must return to the starting point, the final location
+It is worth noting that in this implementation, since all routes must return to the starting point, the final location
 of a route is fixed.
-Therefore, we only need to consider $n-1$ locations, resulting in $(n-1)!$ possible permutations.
+Therefore, only $n-1$ locations need considering, resulting in $(n-1)!$ possible permutations.
 To check every route, we'll be creating a mapping between every integer $\{0, 1, \mathellipsis, (n-1!)-1\}$ to every
 permutation.
-For a given integer $k$, and a list of possible locations $L: \{0, 1, \mathellipsis, n-1\}$ we can calculate $k$'s
-corresponding permutation through the following steps:
+For a given integer $k$, and a list of possible locations $L: \{0, 1, \mathellipsis, n-1\}$ $k$'s corresponding
+permutation can be obtained through the following steps:
 \begin{enumerate}
     \item Divide $k$ by $(n-2)$ to find $x_1: \{0\leq x<n-1\}$, and the remainder $r_1$.
-    \item $x_1$ is used to select a location for $L$, which will be the first location in our permutation. $L_{x_1}$ is
+    \item $x_1$ is used to select a location for $L$, which will be the first location in the permutation. $L_{x_1}$ is
     removed from L.
     \item Divide $r_1$ by $(n-3)!$ to find $x_2: \{0\leq x<n-2\}$, and the remainder $r_2$.
-    \item $x_2$ is used to select another location from $L$, which will be the second location in our permutation.
+    \item $x_2$ is used to select another location from $L$, which will be the second location in the permutation.
     Again, $L_{x_2}$ is removed from L.
     \item Repeat this process until all locations are assigned a position.
 \end{enumerate}
@@ -533,17 +587,17 @@ permutation $P$ of the set $L = \{a, b, c, d\}$ that maps to $k = 17$.
 \begin{figure}[H]
     \textbf{Step 1:} Divide $k = 17$ by $(n-1)! = 3! = 6$\\
     $17 \div 6 = 2$ with remainder $5$. Thus $x_1 = 2, r_1 = 5$\\
-    We select $L_{x_1} = L_2 = c$ as the first element of our permutation.\\
+    $L_{x_1} = L_2 = c$ is selected as the first element of the permutation.\\
     Updated sets: $L = \{a, b, d\}, P = \{c\}$\\
 
     \textbf{Step 2:} Divide $r_1 = 5$ by $(n-2)! = 2! = 2$\\
     $5 \div 2 = 2$ with remainder $1$. Thus $x_2 = 2, r_2 = 1$\\
-    We select $L_{x_2} = L_2 = d$ as the second element of our permutation.\\
+    $L_{x_2} = L_2 = d$ is selected as the second element of the permutation.\\
     Updated sets: $L = \{a, b\}, P = \{c, d\}$\\
 
     \textbf{Step 3:} Divide $r_2 = 1$ by $(n-3)! = 1! = 1$\\
     $1 \div 1 = 1$ with remainder $0$. Thus, $x_3 = 1, r_3 = 0$\\
-    We select $L_{x_3} = L_1 = b$ as the third element of our permutation.\\
+    $L_{x_3} = L_1 = b$ is selected as the third element of the permutation.\\
     Updated sets: $L = \{a\}, P = \{c, d, b\}$\\
 
     \textbf{Step 4:} There's only one element left, so $a$ becomes the last element.\\
@@ -553,8 +607,8 @@ permutation $P$ of the set $L = \{a, b, c, d\}$ that maps to $k = 17$.
 \end{figure}
 
 \noindent
-This method ensures that each integer maps to a unique permutation, allowing us to check every possible route.
-Our python version of this is shown in figure~\ref{fig:Algorithm.generate_route}.
+This method ensures that each integer maps to a unique permutation, allowing the checking of every possible route.
+The python version of this is shown in figure~\ref{fig:Algorithm.generate_route}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Algorithm.generate_route}
@@ -563,9 +617,9 @@ Our python version of this is shown in figure~\ref{fig:Algorithm.generate_route}
 \end{figure}
 
 \noindent
-With this method of generating routes in place, we just need to iterate through them all, evaluate them, and keep
-track of the best found.
-Our implementation of this is shown in figure~\ref{fig:Routing.brute_force}.
+With this method of generating routes in place, all that is required is to iterate through them all, evaluate them, and
+keep track of the best found.
+The implementation of this is shown in figure~\ref{fig:Routing.brute_force}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Routing.brute_force}
@@ -590,26 +644,29 @@ Being able to find a perfect route is certainly useful, but the computational co
 impractical as the input size grows.
 In calculating the 10 location route shown in figure~\ref{fig:Bruteforce_Birmingham_Example}, 362,880 possible routes
 were considered, taking around 15 seconds.
-If we were to use our maximum input size of 25 locations, over 620 sextillion routes would be considered \textemdash
+If the maximum input size of 25 locations were to be used, over 620 sextillion routes would be considered \textemdash
 which, assuming the same rate of routes evaluated per second, would take over 800 billion years.
 
-Brute force was included in this project for its use as a benchmark.
-Considering we will be evaluating algorithms based on their speed and the quality of their results, Brute Force offers
-both an upper bound for quality and a lower bound for speed.
+While Brute Force is impractical for routing between a large number of locations, is it still useful for smaller inputs.
+This may prove useful when combined with clustering algorithms, providing clusters are not too large, Brute Force
+may be able to effectively find intra-cluster routes.
+Furthermore, for small input sizes, Brute Force can be useful as a benchmark against which to compare other routing
+algorithms.
 
 \subsubsection{Greedy Routing}\label{subsubsec:greedy-routing}
-Greedy routing is a heuristic algorithm that builds a route iteratively, always choosing the next location according
+Greedy Routing is a heuristic algorithm that builds a route iteratively, always choosing the next location according
 to the shortest available path.
 This is done by starting at the first location and then repeatedly selecting the next closest location until all
 locations have been visited, then returning home.
-At every location, we are checking the distance of every other location to find the closest, giving our greedy
-algorithm a time complexity of $O(n^2)$.\\
+At every location, the distance to every other location is checked to find the closest, giving this greedy algorithm a
+time complexity of $O(n^2)$.\\
 
 \noindent
-Greedy routing was by far the simplest algorithm to implement, and does not require much explanation.
-For our implementation we will simply make a copy of our graph input, then iteratively find the closest locations.
+Greedy Routing was by far the simplest algorithm to implement, and does not require much explanation.
+This project's implementation will simply make a copy of the graph input, then iteratively find the closest location to
+add to the route.
 When a location is visited, the edges leading to it are given an infinite cost to ensure that it is not visited again.
-Our python implementation of greedy routing is shown in figure~\ref{fig:Routing.greedy_routing}.
+The python implementation of Greedy Routing is shown in figure~\ref{fig:Routing.greedy_routing}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Routing.greedy_routing}
@@ -618,41 +675,41 @@ Our python implementation of greedy routing is shown in figure~\ref{fig:Routing.
 \end{figure}
 
 \noindent
-Figure~\ref{fig:GreedyRouting_Birmingham_Example} shows an example of a route find by greedy routing, using the same
+Figure~\ref{fig:GreedyRouting_Birmingham_Example} shows an example of a route find by Greedy Routing, using the same
 Birmingham input as that shown for Brute Force in figure~\ref{fig:Bruteforce_Birmingham_Example}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GreedyRouting_Birmingham_Example}
-    \caption{Example of a route found visiting 10 locations around Birmingham using Greedy routing}
+    \caption{Example of a route found visiting 10 locations around Birmingham using Greedy Routing}
     \label{fig:GreedyRouting_Birmingham_Example}
 \end{figure}
 
 \noindent
-As is perhaps evident from its example, greedy routing isn't always a great fit, with the effectiveness of the
+As is perhaps evident from its example, Greedy Routing isn't always a great fit, with the effectiveness of the
 algorithm being highly dependent on the input.
 It may just happen that for some inputs the greedy algorithm will find a good route, but as input size grows and
 routes become more complex, this becomes increasingly unlikely.
 
-Where greedy routing does excell, and the reason for its inclusion in this project, is in its speed.
+Where Greedy Routing does excel, and the reason for its inclusion in this project, is in its speed.
 The algorithm found a route for the 10 location Birmingham input in less than a thousandth of a second, over 500,000
 times faster than Brute Force.
-Some fast routing algorithms are needed in order to use alongside our genetic clustering methods which, for
+Some fast routing algorithms are needed in order to use alongside the genetic clustering methods which, for
 evaluation, require a route to be found for every individual in a population.
 
 \subsubsection{Greedy Insertion}\label{subsubsec:greedy-insertion}
-Similar to greedy routing, greedy insertion is another heuristic algorithm that iteratively builds routes.
-This time, instead of selecting the next location to add into our route, we will be working through the set of
-unvisited locations and finding the best location to insert each one into our route.
-To find the best insertion point, we will evaluate the cost of the route if the location is inserted at every possible
-position.
-Compared to greedy routing, this adds an extra $O(n)$ step to each iteration, increasing the time complexity to
+Similar to Greedy Routing, Greedy Insertion is another heuristic algorithm that iteratively builds routes.
+This time, instead of selecting the next location to add into the route, the set of unvisited locations will be iterated
+through, finding the best location to insert each one into the route.
+To find the best insertion point, cost of the route produced by each possible insertion point will be calculated
+position, the cheapest insertion point will be chosen.
+Compared to Greedy Routing, this adds an extra $O(n)$ step to each iteration, increasing the time complexity to
 $O(n^3)$.\\
 
 \noindent
-While greedy insertion is a more complex algorithm than greedy routing, it is still relatively simple to implement.
+While Greedy Insertion is a more complex algorithm than Greedy Routing, it is still relatively simple to implement.
 All that's required is to iterate through the list of locations, evaluate the route created by inserting them at
 each position, and keeping the best route each time.
-The code used for greedy insertion can be seen in figure~\ref{fig:Routing.greedy_insertion}
+The code used for Greedy Insertion can be seen in figure~\ref{fig:Routing.greedy_insertion}
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Routing.greedy_insertion}
@@ -661,36 +718,36 @@ The code used for greedy insertion can be seen in figure~\ref{fig:Routing.greedy
 \end{figure}
 
 \noindent
-An example of a route found by applying greedy insertion to the 10 location Birmingam input is shown in figure\ref{fig:GreedyInsertion_Birmingham_Example}.
+An example of a route found by applying Greedy Insertion to the 10 location Birmingham input is shown in figure
+\ref{fig:GreedyInsertion_Birmingham_Example}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{GreedyInsertion_Birmingham_Example}
-    \caption{Example of a route found visiting 10 locations around Birmingham using greedy insertion}
+    \caption{Example of a route found visiting 10 locations around Birmingham using Greedy Insertion}
     \label{fig:GreedyInsertion_Birmingham_Example}
 \end{figure}
 
 \noindent
-For this input, greedy insertion was able to find the optimal solution, as indicated by it returning the same route
-as brute force.
-Finding said route took greedy insertion a few thousandths of a second, which while several times slower than greedy
-routing, is still a huge improvement on brute force.
-Hopefully greedy insertion can provide better results than greedy routing, without too much of a cost in terms of
+For this input, Greedy Insertion was able to find the optimal solution, as indicated by it returning the same route
+as Brute Force.
+Finding said route took Greedy Insertion a few thousandths of a second, which while several times slower than greedy
+routing, is still a huge improvement on Brute Force.
+Hopefully Greedy Insertion can provide better results than Greedy Routing, without too much of a cost in terms of
 time improvement.
 
 Finding routes isn't where insertion's usefulness ends though, it can also be used to build upon existing routes,
 or to split a route up into multiple days.
-Perhaps we have a route already, but want to add more locations for it, we can perform greedy insertion and find the
-best point for each location to insert into the pre-existing route.
-Furthermore, if for our new locations input, we provide a set consisting of a route's starting point $d$ number of
-times, we can add $d$ number of days to a trip.
-This allows us to create multi-day trips out of the routes found via our routing algorithms, by taking their routes
-and splitting them where greedy insertion believes is best.
+Perhaps a route has already been found, but there is a want to add more locations to it, Greedy Insertion can be
+performed to find the best point for each location to insert into the pre-existing route.
+Furthermore, if for Greedy Insertion's new locations input, a set consisting of a route's starting point $d$ number of
+times is provided,  $d$ number of days can be added to form a complete trip.
+This allows the creation of multi-day trips out of the routes found via the implemented routing algorithms, by taking
+their routes and splitting them where Greedy Insertion believes is best.
 
-\subsubsection{Convex Hull}\label{subsubsec:convex-hull}
+\subsubsection{Convex Hull Routing}\label{subsubsec:convex-hull}
 Given a set of points, its convex hull is the smallest border one can draw between them, such that all points are
 contained inside.
-For two-dimensional problems such as our own, it can be described as the shape a rubber band would take if stretched 
-around the points.
+For two-dimensional problems, it can be described as the shape a rubber band would take if stretched around the points.
 Figure~\ref{fig:ConvexHull_Example} shows a drawing of a convex hull surrounding a set of points
 \begin{figure}[H]
     \centering
@@ -704,23 +761,25 @@ If all locations happen to fall on the border of the convex hull, then the conve
 although, this is rather unlikely to happen.
 Regardless, the convex hull does still indicate that an optimal route will visit the border cities in the order they
 appear on the hull~\parencite[p. 46]{applegate2006traveling}.
-With this in mind, we can use the convex hull as a starting point, and then use greedy insertion to find a full route.
-The time complexity of finding a convex hull is $O(nh)$, where $n$ is the number of locations, and $h$ is the number
-of points on the hull. In the worst case, where all of the points are on the hull, this becomes $O(n^2)$.
-\todo{Cite time complexity?}
+With this in mind, the convex hull can be used as a starting point, before Greedy Insertion finds a complete route.
+The time complexity of finding a convex hull is $O(nh)$\parencite[p. 1029]{cormen2022introduction}, where $n$ is the
+number of locations, and $h$ is the number of points on the hull.
+In the worst case, where all the points are on the hull, this becomes $O(n^2)$.
 
-To find a convex hull we will be using a gift wrapping, or jarvis march, algorithm.
+To find a convex hull a Gift Wrapping, or Jarvis March, algorithm will be used.
 This algorithm works by finding the leftmost point in the set and then progressively finding the most counter-clockwise
 point to add to the hull.
-To discover the most counter-clockwise point we can arbitrarily select a point as a candidate for the next point on
-the hull, then calculating the cross product $\vec{HC} \times \vec{HI}$, where $H$ is the most recently added hull
-point, $C$ is the candidate point and $I$ is the point being evaluated.
-If the cross product is positive, then $I$ is more counter-clockwise than $C$, and we can replace $C$ with $I$ as
+To discover the most counter-clockwise point a candidate for the next point on the hull is arbitrarily selected.
+Then, for every other location not yet in the hull, the cross product is calculated: $\vec{HC} \times \vec{HI}$, where
+$H$ is the most recently added hull point, $C$ is the candidate point and $I$ is the location being evaluated.
+If the cross product is positive, then $I$ is more counter-clockwise than $C$, and $C$ can be replaced with $I$ as
 the new candidate to be added to the hull.
+When all possible values for $I$ produce a negative cross product, the candidate point is added to the hull and a new
+arbitrarily selected candidate is chosen.
 This process is repeated until the next hull candidate is the original starting point of the hull.
 
 Figures~\ref{fig:Routing.gift_wrapping} and~\ref{fig:ConvexHull_Birmingham_Hull} show how this was accomplished in
-python, and the hull formed around the birmingham example, respectively.
+python, and the hull formed around the Birmingham example, respectively.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Routing.gift_wrapping}
@@ -735,25 +794,25 @@ python, and the hull formed around the birmingham example, respectively.
 \end{figure}
 
 \noindent
-Once our hull is found, we can use it as a starting point for greedy insertion.
-We will use the hull as our starting route, and all the interior points as locations for insertion.
-Figure~\ref{fig:ConvexHull_Birmingham_Route} shows the route found by applying greedy insertion to the hull found
-around our birmingham example.
+Once the hull is found, it can be used as a starting point for Greedy Insertion.
+This hull will be used as a starting point for a route, and all the interior points as locations for insertion.
+Figure~\ref{fig:ConvexHull_Birmingham_Route} shows the route found by applying Greedy Insertion to the hull found
+around the Birmingham example.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{ConvexHull_Birmingham_Route}
-    \caption{Example of a route found using greedy insertion and the convex hull of 10 locations in Birmingham}
+    \caption{Example of a route found using Greedy Insertion and the convex hull of 10 locations in Birmingham}
     \label{fig:ConvexHull_Birmingham_Route}
 \end{figure}
 
 \noindent
-Convex hull was included in this project to investigate how well it would work as a starting point for greedy
+Convex Hull Routing was included in this project to investigate how well it would work as a starting point for greedy
 insertion.
 It will be interesting to see whether starting from a convex hull could improve the results and/or the speed of
-greedy insertion, as opposed to running greedy insertion on the whole set of locations.
+Greedy Insertion, as opposed to running Greedy Insertion on the whole set of locations.
 
 \subsubsection{Genetic Routing}\label{subsubsec:genetic-routing}
-As well as clustering, we can also use genetic algorithms for routing.
+As well as clustering, genetic algorithms can also be used for routing.
 We will evolve a population of potential routes similarly to before, this time with each genome representing a
 potential route, and with new crossover and mutation techniques to account for this.
 Without the need to use another routing algorithm in order to evaluate its population, genetic routing has a
@@ -761,19 +820,19 @@ slightly faster time complexity of $O(g p n)$, with $g$ being the number of gene
 size and $n$ being number of locations in the route.\\
 
 \noindent
-By finding a route directly, selection is simpler, no longer requiring us to use a routing algorithm on our genome
-and evaluate these routes.
+By finding a route directly, selection is simpler, no longer requiring the use a routing algorithm with each genome
+to find a route capable of evaluation.
 This time, a genome will represent a permutation of the locations to be visited, with the order of the locations in the
-genome representing the order in which they will be visited, similar to the brute force algorithm.
+genome representing the order in which they will be visited, similar to the Brute Force algorithm.
 We will be selecting the best individuals in a population by evaluating the route formed in their genome.
-Via crossover and mutation, we will be shuffling the order in which locations are visited to try and find a better
+Via crossover and mutation, the order in which locations are visited will be shuffled to try and find a better
 route.
-Our crossover algorithm will be a simple single-point crossover, a random point in the genome will be chosen and all
+The crossover algorithm will be a simple single-point crossover, a random point in the genome will be chosen and all
 locations up to that point will be taken from one parent.
 Then, all the remaining locations will be added in the order they appear in the second parent's genome.
 A simple example of single-point crossover is shown in figure~\ref{fig:Point_Crossover_Example}, using two
 hypothetical genomes with 6 locations.
-Our python implementation of this crossover method is shown in figure~\ref{fig:GeneticRouting._crossover}.
+The python implementation of this crossover method is shown in figure~\ref{fig:GeneticRouting._crossover}.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{Point_Crossover_Example}
@@ -788,10 +847,10 @@ Our python implementation of this crossover method is shown in figure~\ref{fig:G
 \end{figure}
 
 \noindent
-For mutation, we will randomly decide a number of individuals to mutate inline with the algorithms mutation
+For mutation, a number of individuals will be randomly chosen to mutate inline with the algorithms mutation
 probability.
 Chosen individuals will have two locations in their route randomly chosen and swapped.
-This implementation is shown in figure~ref{fig:GeneticRouting.mutation}, the final location isn't considered for
+This implementation is shown in figure~\ref{fig:GeneticRouting.mutation}, the final location isn't considered for
 swapping, as all routes end at the starting point.
 \begin{figure}[H]
     \centering
@@ -801,7 +860,7 @@ swapping, as all routes end at the starting point.
 \end{figure}
 
 \noindent
-By repeatedly performing selection, crossover and mutation our population will hopefully converge on a better route.
+By repeatedly performing selection, crossover and mutation the population will hopefully converge on a better route.
 Figure~\ref{fig:GeneticRouting_Birmingham_Generation1} shows an example of genetic routing performed on the 10
 location Birmingham input.
 For this example, 30 generations were evolved with a population size of 12, a crossover rate of 0.9 and a mutation
@@ -843,14 +902,31 @@ A line graph of the best evaluation found for each generation is shown in figure
 \end{figure}
 
 \noindent
-\todo{Discuss why chosen, seriously what do I put here? I just thought they were cool.}
+Having implemented a number of heuristic approaches to finding routes, as well as the exact Brute Force method,
+genetic routing was included to see how a more meta-heuristic algorithm might perform.
+Likely to take longer than the other approximate routing methods, we'll have to see if genetic routing can make up
+for this time with the quality of its results.
+Hopefully genetic routing can strike a balance between fast approximate methods and the slow, exact Brute Force method.
+
+Additionally, the suitability of genetic algorithms for routing purposes can be evaluated and compared with the
+implemented genetic clustering approaches.
+It is possible that genetic algorithms are only practically applicable to a certain approaches, being unable to form
+good solutions for others.
 
 \subsection{Trip Generation}\label{subsec:trip-generation}
 We have now discussed how routing can be combined with both clustering and insertion to form complete trips, but
 there is still one more approach that will be considered in this project.
-By modifying our permutation based routing algorithms, brute force and genetic routing, we can use them to generate
-full trips in one go.
-It was previously shown how, when given a set of locations, these algorithms attempt to find an optimal permutation
-of the set.
-If this set of locations is expanded, to include the starting point of the trip $d$ times, we can use the same
-algorithms to find a multi-day trip.
+By modifying a few existing routing algorithms namely Brute Force, Greedy Insertion and genetic routing, they can be
+used to generate full trips in one go.
+If the locations input for these algorithms is expanded, to include the starting point of the trip $d$ times, the same
+algorithms can be used to find a multi-day trip.
+For Brute Force and genetic routing, this means the permutations being considered is expanded to include returning to
+the starting point $d$ times.
+For Greedy Insertion, this means that all locations on the trip will first be inserted into the route, before inserting
+each return to the start.
+
+Trip generation methods directly produce whole trips instead of needing some compound approach of clustering
+and routing or routing and insertion.
+These algorithms were extended to include trip generation to investigate how the approach compared, by
+forming a route in one stage these algorithms may more effectively minimise cost than by combining two algorithms which
+take different approaches to finding an optimal solution.

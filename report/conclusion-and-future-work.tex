@@ -1,0 +1,25 @@
+The goal of this project was to investigate and compare different approaches to solving the proposed multi-day route
+planning problem.
+Throughout this project, a number of algorithms were investigated, implemented and evaluated to determine their
+effectiveness.
+From the results shown in section~\ref{subsec:results-and-analysis}, a conclusion can be drawn that the most
+promising approaches are those that first cluster locations, before finding routes between them.
+Genetic clustering methods proved particularly exemplary, often finding the best trips out of the approaches
+tested, while still maintaining a relatively fast computation speed.
+
+While the aims of this project have largely been accomplished, further study is required to resolve gaps in the
+potential solutions considered.
+Certain categories of approach are somewhat lacking in the diversity of algorithms implemented; clustering for
+example, only includes one conventional heuristic approach in the form of k-means, with other clustering algorithms
+being the meta-heuristic genetic algorithm approaches.
+Most notable is greedy insertion being the only implemented insertion algorithm.
+While Greedy Insertion proved effective when combined with a routing algorithm, it would have been interesting to
+have other insertion algorithms to compare it to.
+
+Future work on this problem should investigate additional clustering algorithms, of particular
+recommendation would be researching spectral clustering, a clustering technique that aims to group together graph
+nodes that are closely connected.
+It would also likely be of value to examine further local search techniques such as 2-opt that, similar to greedy
+insertion, could potentially be implemented to create multi-day trips from pre-existing TSP routes.
+Finally, considering the success of genetic algorithms in this project, it could be beneficial to consider other
+meta-heuristic approaches such as Ant Colony Optimisation or Neural Network approaches.

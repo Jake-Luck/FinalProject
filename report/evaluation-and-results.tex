@@ -1,0 +1,288 @@
+This section will contain an explanation of the methodology taken to evaluate different approaches to Multi Day Trip
+Planning.
+This explanation will include a description of the approaches to be evaluated, alongside the experiment procedure used
+and any constraints that were placed on the problem.
+Later in this section, the results of these experiments will be presented and discussed.
+
+\subsection{Methodology}\label{subsec:evaluation-methodology}
+The purpose of this evaluation is to compare the performance of different approaches to Multi Day Trip Planning.
+The experimental process aimed to answer the following questions:
+\begin{itemize}
+    \item How do the different approaches compare in terms of computation time?
+    \item How do the different approaches compare in terms of the quality of trips produced?
+    \item How does the performance of each approach scale with input complexity?
+\end{itemize}
+To answer these questions, each proposed approach will be applied to a range of different inputs, recording the
+computation time to produce a trip and the quality of the trip produced according to the cost function described in
+section~\ref{subsec:objective-function}.
+
+\noindent
+For use in these experiments 25 testing data sets were created, each representing inputs for trips to major cities
+around the world.
+Each data set includes:
+\begin{itemize}
+    \item A set of coordinates, representing different points of interest around the city.
+    \item A list of durations, representing the time to be spent at each point of interest.
+    \item A complete graph, containing the time taken to travel between each point of interest.
+\end{itemize}
+These were created using openrouteservice, the process of which was previously described in
+section~\ref{subsubsec:input-generation} titled ``Input Generation''.
+Due to previously discussed limitations of the openrouteservice API, each dataset was limited to 25 points of
+interest.\\
+
+\noindent
+To investigate how the performance of these algorithms scales with input complexity, experiments with a range of
+inputs for the number of locations and number of days in each trip were conducted.
+For these experiments, a subset of locations and their corresponding durations and graphs were selected from the 25
+datasets, each approach was run on the same subset.
+Every approach was run on every dataset for every combination of locations and days.
+A full list of the combinations of the number of locations and number of days is available in table~\ref{tab:locations-and-days}.
+\begin{table}[H]
+    \centering
+    \caption{Lists all combinations of the number of locations and number of days used in evaluation.}\label{tab:locations-and-days}
+    \begin{tabular}{ r | l }
+        Number of & Number of \\
+        Locations & Days \\
+        25 & 7, 6, 5, 4 \\
+        20 & 6, 5, 4, 3 \\
+        15 & 5, 4, 3, 2 \\
+        10 & 4, 3, 2 \\
+        8  & 3, 2 \\
+        5  & 2 \\
+    \end{tabular}
+\end{table}
+
+\noindent
+Using various combinations of the implemented clustering, routing and trip generation algorithms, a total of 16
+approaches were evaluated.
+The full list of these approaches and an explanation of each one, as well as the shorthand used to refer to each
+approach, is available in table~\ref{tab:approaches}.
+Most of these approaches are either trip generation methods, or different combinations of the clustering and routing
+algorithms previously described.
+The only exceptions to this are the `Genetic Algorithm Clustering + Greedy Routing + Brute Force' (GAC+GR+BF) and
+`Genetic Algorithm Centroid Clustering + Greedy Routing + Brute Force' (GACC+GR+BF) approaches.
+These approaches use greedy routing to evaluate the clusters found during the genetic algorithm process.
+Then, once evolution has completed, the resultant clusters are passed to Brute Force to find optimal routes within
+the clusters found.
+The hope is that greedy routing will allow a fast genetic algorithm, while using Brute Force will allow for an
+optimal final trip.
+
+\begin{center}
+    \caption{Lists and describes all approaches evaluated.}\label{tab:approaches}
+    \footnotesize
+    \begin{longtable}[H]{| p{6cm} | p{9cm} |}
+        \hline
+        Approach & Description \\
+        \hline
+        Genetic Algorithm Trip Generation (GATG) & Generates trip using Genetic Algorithm \\
+        \hline
+        Greedy Insertion Trip Generation (GITG) & Generates trip using Greedy Insertion \\
+        \hline
+        K-Means Clustering + Greedy Routing (KM+GR) & Finds clusters using K-Means then finds intra-cluster routes
+        Greedy Routing \\
+        \hline
+        K-Means Clustering + Greedy Insertion (KM+GI) & Finds clusters using K-Means then finds intra-cluster routes
+        using Greedy Insertion Routing \\
+        \hline
+        K-Means Clustering + Brute Force (KM+BF) & Finds clusters using K-Means then finds intra-cluster routes using
+        Brute Force Routing \\
+        \hline
+        K-Means Clustering + Convex Hull (KM+CH) & Finds clusters using K-Means then finds intra-cluster routes using
+        Convex Hull Routing \\
+        \hline
+        K-Means Clustering + Genetic Algorithm Routing (KM+GAR) & Finds clusters using K-Means then finds intra-cluster
+        routes using Genetic Algorithm Routing \\
+        \hline
+        Genetic Algorithm Clustering + Greedy Routing (GAC+GR) & Finds clusters using Genetic Clustering then finds
+        intra-cluster routes using Greedy Routing \\
+        \hline
+        Genetic Algorithm Clustering + Greedy Routing + Brute Force (GAC+GR+BF) & Finds clusters using Genetic
+        Clustering then finds intra-cluster routes using Greedy Routing - Once final clusters are obtained,
+        Brute Force is used to find final routes \\
+        \hline
+        Genetic Algorithm Clustering + Greedy Insertion (GAC+GI) & Finds clusters using Genetic Clustering then
+        finds intra-cluster routes using Greedy Insertion \\
+        \hline
+        Genetic Algorithm Centroid Clustering + Greedy Routing (GACC+GR) & Finds clusters using Genetic Centroid
+        Clustering then finds intra-cluster routes using Greedy Routing \\
+        \hline
+        Genetic Algorithm Centroid Clustering + Greedy Routing + Brute Force (GACC+GR+BF) & Finds clusters using Genetic
+        Centroid Clustering then finds intra-cluster routes using Greedy Routing - Once final clusters are obtained,
+        Brute Force is used to find final routes \\
+        \hline
+        Genetic Algorithm Centroid Clustering + Greedy Insertion (GACC+GI) & Finds clusters using Genetic Centroid
+        Clustering then finds intra-cluster routes using Greedy Insertion Routing \\
+        \hline
+        Greedy Routing + Greedy Insertion (GR+GI) & Finds route using Greedy Routing then splits route into a multi-day
+        trip using Greedy Insertion \\
+        \hline
+        Convex Hull + Greedy Insertion (CH+GI) & Finds route using Convex Hull Routing then splits route into a
+        multi-day trip using Greedy Insertion \\
+        \hline
+        Genetic Algorithm Routing + Greedy Insertion (GAR+GI) & Finds route using Genetic Algorithm Routing then splits
+        route into a multi-day trip using Greedy Insertion \\
+        \hline
+    \end{longtable}
+\end{center}
+
+During these experiments, genetic algorithms all shared the following hyperparameters:
+\begin{itemize}
+    \item Number of Generations: 150,
+    \item Population Size: 50,
+    \item Crossover Rate: 0.9.
+\end{itemize}
+Genetic Clustering approaches used a mutation rate of 0.1, while Genetic Routing approaches used a mutation rate of 0.4.
+
+\subsection{Results \& Analysis}\label{subsec:results-and-analysis}
+Through this experimentation each of the 25 datasets were tested using each combination of locations and days,
+resulting in a total of 450 inputs given to each approach.
+The average results of tests ran for several different combinations of locations and days are shown in
+tables~\ref{tab:averages-8-locations-3-days} (8 locations and 3 days),
+~\ref{tab:averages-15-locations-4-days} (15 locations and 4 days)
+and~\ref{tab:averages-25-locations-7-days} (25 locations and 7 days).
+The computation time and evaluation shown for each approach is the average of values obtained from all datasets ran
+with these location and day inputs.
+Also included are the standard deviation ($\sigma$), which represents the deviation in results between different
+location data sets, and the coefficient of variation ($\frac{\sigma}{\mu}$), which represents the ratio between mean
+values and their standard deviation.
+The results are sorted by evaluation, and the best and worst values in each row are highlighted in bold and italic
+respectively.
+Table~\ref{tab:averages-all-tests} shows average results across all data sets and input sizes.
+\begin{table}[H]
+    \centering
+    \caption{Lists average computation time and evaluation for each approach across tests using 8 locations and 3 days. This table also includes evaluations for Brute Force Trip Generation (BFTG) and Brute Force + Greedy Insertion (BF+GI)}\label{tab:averages-8-locations-3-days}
+    \scriptsize
+    \begin{tabular}{lllllll}
+        Approach   & Computation  & Computation & Computation & Evaluation - $\mu$ & Evaluation - $\sigma$ & Evaluation - $\frac{\sigma}{\mu}$ \\
+                   & Time - $\mu$ & Time - $\sigma$ & Time - $\frac{\sigma}{\mu}$ & & & \\
+        BFTG       & \textit{10.963727}                                                  & \textit{1.373076}                                                     & 0.125238083                                                                        & \textbf{580.843119} & \textbf{145.607101}   & 0.25068232                        \\
+        GAC+GR+BF  & 2.652661                                                            & 0.924027                                                              & 0.348339523                                                                        & 581.771109          & 147.287947            & 0.253171643                       \\
+        GATG       & 0.828975                                                            & 0.470336                                                              & 0.56737038                                                                         & 582.483376          & 146.081298            & 0.250790502                       \\
+        GAC+GR     & 2.652392                                                            & 0.924045                                                              & 0.348381659                                                                        & 583.209066          & 148.632858            & 0.254853476                       \\
+        GACC+GR+BF & 1.901471                                                            & 0.515371                                                              & 0.271037872                                                                        & 592.071590          & 146.909233            & 0.248127482                       \\
+        GACC+GR    & 1.901226                                                            & 0.515358                                                              & 0.271065947                                                                        & 593.390534          & 148.322398            & 0.249957472                       \\
+        GAR+GI     & 0.691986                                                            & 0.224216                                                              & 0.324017778                                                                        & 650.987103          & 158.635774            & 0.243684972                       \\
+        BF+GI      & 0.300547                                                            & 0.055220                                                              & 0.183732569                                                                        & 651.094458          & 160.621126            & 0.246694046                       \\
+        CH+GI      & 0.003120                                                            & 0.004787                                                              & \textit{1.534394689}                                                               & 657.864674          & 157.007055            & 0.238661629                       \\
+        GITG       & 0.004070                                                            & 0.004507                                                              & 1.107453904                                                                        & 661.532642          & 173.934502            & 0.26292656                        \\
+        GR+GI      & \textbf{0.000024}                                                   & \textbf{0.000003}                                                     & \textbf{0.121703435}                                                               & 666.328613          & 176.682224            & \textit{0.265157792}              \\
+        KM+GAR     & 1.287709                                                            & 0.576568                                                              & 0.447747083                                                                        & 670.487638          & 156.321777            & 0.233146398                       \\
+        KM+BF      & 0.013186                                                            & 0.002541                                                              & 0.192707762                                                                        & 670.653112          & 156.392637            & 0.233194529                       \\
+        KM+GR      & 0.011910                                                            & 0.001995                                                              & 0.167545233                                                                        & 672.931430          & 159.437076            & 0.236929156                       \\
+        KM+CH      & 0.013184                                                            & 0.002048                                                              & 0.155312695                                                                        & 674.160886          & 157.178385            & 0.233146699                       \\
+        GAC+GI     & 4.552093                                                            & 1.227828                                                              & 0.269728177                                                                        & 969.678679          & 214.733237            & 0.221447828                       \\
+        GACC+GI    & 3.908192                                                            & 0.733851                                                              & 0.187772562                                                                        & 970.224031          & 213.070291            & \textbf{0.219609373}              \\
+        KM+GI      & 0.012178                                                            & 0.002108                                                              & 0.173063036                                                                        & \textit{996.233150} & \textit{235.638250}   & 0.23652922
+    \end{tabular}
+\end{table}
+\begin{table}[H]
+    \centering
+    \caption{Lists average computation time and evaluation for each approach across tests using 15 locations and 4 days}\label{tab:averages-15-locations-4-days}
+    \scriptsize
+    \begin{tabular}{lllllll}
+        Approach   & Computation  & Computation & Computation & Evaluation - $\mu$ & Evaluation - $\sigma$ & Evaluation - $\frac{\sigma}{\mu}$ \\
+                   & Time - $\mu$ & Time - $\sigma$ & Time - $\frac{\sigma}{\mu}$ & & & \\
+        GAC+GR+BF  & 2.390620                                                            & 0.457114                                                              & 0.191211464                                                                        & \textbf{929.924224}  & 129.695911            & 0.139469333                       \\
+        GATG       & 0.999130                                                            & 0.155427                                                              & 0.155562286                                                                        & 931.678599           & 131.730899            & 0.141390925                       \\
+        GAC+GR     & 2.387176                                                            & 0.456494                                                              & 0.191227802                                                                        & 932.052914           & 129.772740            & 0.139233233                       \\
+        GACC+GR+BF & 2.160390                                                            & 0.434917                                                              & 0.201313923                                                                        & 941.841538           & 130.008533            & 0.138036524                       \\
+        GACC+GR    & 2.143543                                                            & 0.434804                                                              & 0.202843494                                                                        & 944.666649           & \textbf{129.641948}   & 0.137235657                       \\
+        GITG       & 0.012276                                                            & 0.003757                                                              & 0.306096212                                                                        & 952.964413           & 132.694472            & 0.13924389                        \\
+        CH+GI      & 0.008618                                                            & 0.002095                                                              & 0.243065556                                                                        & 959.980725           & 144.641551            & \textit{0.150671308}              \\
+        GR+GI      & \textbf{0.000039}                                                   & \textbf{0.000004}                                                     & \textbf{0.104597412}                                                               & 961.133817           & 135.196293            & 0.14066334                        \\
+        GAR+GI     & 0.939494                                                            & 0.159025                                                              & 0.169266722                                                                        & 963.440913           & 143.976282            & 0.14943966                        \\
+        KM+BF      & \textit{7.332659}                                                   & \textit{31.810776}                                                    & \textit{4.338231859}                                                               & 1113.188018          & 159.945485            & 0.143682363                       \\
+        KM+GAR     & 1.684152                                                            & 0.334373                                                              & 0.198540614                                                                        & 1113.690387          & 160.192210            & 0.143839088                       \\
+        KM+GR      & 0.013239                                                            & 0.004664                                                              & 0.352271037                                                                        & 1117.856057          & 159.415227            & 0.142608009                       \\
+        KM+CH      & 0.016252                                                            & 0.004993                                                              & 0.307194959                                                                        & 1121.260628          & 161.795389            & 0.144297753                       \\
+        GACC+GI    & 6.847682                                                            & 0.904047                                                              & 0.132022276                                                                        & 1647.327226          & 225.550233            & \textbf{0.1369189}                \\
+        GAC+GI     & 6.735855                                                            & 0.892049                                                              & 0.132432856                                                                        & 1654.194200          & 230.241480            & 0.139186487                       \\
+        KM+GI      & 0.013876                                                            & 0.004755                                                              & 0.342677914                                                                        & \textit{1680.691761} & \textit{232.201145}   & 0.138158079
+    \end{tabular}
+\end{table}
+\begin{table}[H]
+    \centering
+    \caption{Lists average computation time and evaluation for each approach across tests using 25 locations and 7 days}\label{tab:averages-25-locations-7-days}
+    \scriptsize
+    \begin{tabular}{lllllll}
+        Approach   & Computation  & Computation & Computation & Evaluation - $\mu$ & Evaluation - $\sigma$ & Evaluation - $\frac{\sigma}{\mu}$ \\
+                   & Time - $\mu$ & Time - $\sigma$ & Time - $\frac{\sigma}{\mu}$ & & & \\
+        GAC+GR+BF  & 2.757364                                                            & 0.070118                                                              & 0.025429523                                                                        & \textbf{1224.921655} & 218.453597            & 0.178340873                       \\
+        GAC+GR     & 2.752229                                                            & 0.069379                                                              & \textbf{0.025208386}                                                               & 1227.974831          & 219.077690            & 0.178405684                       \\
+        GATG       & 1.174132                                                            & 0.065157                                                              & 0.055493493                                                                        & 1249.211698          & 232.957427            & 0.186483546                       \\
+        GAR+GI     & 1.145115                                                            & 0.042931                                                              & 0.037490438                                                                        & 1298.771994          & 217.955721            & 0.16781677                        \\
+        GITG       & 0.037008                                                            & 0.004152                                                              & 0.112203647                                                                        & 1299.978163          & 229.402565            & 0.176466476                       \\
+        GACC+GR+BF & 2.322438                                                            & 0.354714                                                              & 0.152733636                                                                        & 1300.039380          & 256.373114            & 0.197204114                       \\
+        GR+GI      & \textbf{0.000055}                                                   & \textbf{0.000010}                                                     & 0.174405584                                                                        & 1303.278191          & 224.211835            & 0.172036819                       \\
+        GACC+GR    & 2.171517                                                            & 0.188289                                                              & 0.086708524                                                                        & 1303.379124          & 256.455549            & 0.196762051                       \\
+        CH+GI      & 0.023478                                                            & 0.003493                                                              & 0.148782618                                                                        & 1303.547054          & \textbf{216.694963}   & 0.166234861                       \\
+        KM+GAR     & 2.473922                                                            & 0.134556                                                              & 0.054389867                                                                        & 1423.636393          & 271.047180            & 0.190390735                       \\
+        KM+BF      & 1.697500                                                            & \textit{4.332882}                                                     & \textit{2.55250715}                                                                & 1427.268910          & 282.173377            & \textit{0.197701621}              \\
+        KM+GR      & 0.011821                                                            & 0.001488                                                              & 0.125869635                                                                        & 1428.105419          & 272.554303            & 0.190850269                       \\
+        KM+CH      & 0.016291                                                            & 0.001898                                                              & 0.116514653                                                                        & 1434.496055          & 272.688511            & 0.190093594                       \\
+        GACC+GI    & \textit{11.164482}                                                  & 1.662562                                                              & 0.148915268                                                                        & 2200.445359          & 321.745265            & \textbf{0.146218248}              \\
+        GAC+GI     & 9.161882                                                            & 0.358560                                                              & 0.039136028                                                                        & 2233.113133          & 344.559348            & 0.154295518                       \\
+        KM+GI      & 0.012839                                                            & 0.001507                                                              & 0.117347705                                                                        & \textit{2261.413558} & \textit{383.340894}   & 0.169513839
+    \end{tabular}
+\end{table}
+\begin{table}[H]
+    \centering
+    \caption{Lists average computation time and evaluation for each approach across all tests.}
+    \label{tab:averages-all-tests}
+    \scriptsize
+    \begin{tabular}{lllllll}
+        Approach   & Computation  & Computation & Computation & Evaluation - $\mu$ & Evaluation - $\sigma$ & Evaluation - $\frac{\sigma}{\mu}$ \\
+                   & Time - $\mu$ & Time - $\sigma$ & Time - $\frac{\sigma}{\mu}$ & & & \\
+        GAC+GR+BF  & 2.979977                 & 7.530829                    & 2.527143137                             & \textbf{1020.368065} & \textbf{375.291204} & 0.367799833                       \\
+        GAC+GR     & 2.449077                 & 0.573792                    & \textbf{0.234288951}                    & 1022.932742        & 376.517470            & 0.368076467                       \\
+        GATG       & 1.056100                 & 0.350635                    & 0.332009669                             & 1025.823776        & 377.272585            & 0.367775239                       \\
+        GACC+GR+BF & 3.283957                 & 11.213699                   & 3.414691397                             & 1026.018469        & 378.328927            & 0.368735007                       \\
+        GACC+GR    & 2.058841                 & 0.552098                    & 0.268159607                             & 1035.318311        & 384.760096            & 0.37163459                        \\
+        GITG       & 0.016816                 & 0.013973                    & 0.830951736                             & 1097.052085        & 404.128161            & 0.368376458                       \\
+        GAR+GI     & 0.979447                 & 0.291409                    & 0.297524026                             & 1098.753750        & 405.460659            & 0.36901868                        \\
+        GR+GI      & \textbf{0.000053}        & \textbf{0.000078}           & 1.472593046                             & 1101.631357        & 403.964025            & 0.366696193                       \\
+        CH+GI      & 0.012669                 & 0.010609                    & 0.837414977                             & 1101.948744        & 405.566210            & 0.368044532                       \\
+        KM+BF      & \textit{9.931990}        & \textit{35.391964}          & \textit{3.563431295}                    & 1142.732633        & 418.983039            & \textbf{0.366650104}              \\
+        KM+GAR     & 1.691711                 & 0.608345                    & 0.359603359                             & 1232.529265        & 461.950473            & 0.374798787                       \\
+        KM+GR      & 0.013553                 & 0.005196                    & 0.383363287                             & 1236.909841        & 463.293563            & 0.374557261                       \\
+        KM+CH      & 0.017589                 & 0.006696                    & 0.380662466                             & 1243.418740        & 466.350523            & 0.375055087                       \\
+        GACC+GI    & 8.228977                 & 3.850029                    & 0.467862454                             & 1792.357060        & 674.690213            & 0.376426231                       \\
+        GAC+GI     & 7.738760                 & 3.107706                    & 0.401576755                             & 1802.357683        & 686.223849            & 0.380736773                       \\
+        KM+GI      & 0.014386                 & 0.005420                    & 0.376779259                             & \textit{1830.032473} & \textit{701.160152} & \textit{0.383140825}
+    \end{tabular}
+\end{table}
+From analysing these results, there are a few approaches that stand out as being particularly effective.
+GAC+GR+BF consistently produces some of the best evaluations across all datasets, while also being relatively fast.
+In fact, approaches that utilise genetic algorithms for clustering or trip generation overwhelmingly outperform the
+conventional heuristic approaches; on every input with locations greater than 10, genetic algorithms held the top
+four spots for route evaluation.
+Other approaches of note are GITG, GR+GI and CH+GI, which all find trips within a few hundredths of a second, while
+remaining middle of the pack in terms of trip quality.
+
+By far the worst performing approaches are GACC+GI, GAC+GI and KM+GI\@.
+The quality of routes produced by the approaches that perform Greedy Insertion Routing are significant outliers amongst
+the other approaches, which begs the question as to why this is so.
+Logically, one would expect greedy insertion routing to produce a route at least as good and greedy routing, if not better.
+It is suggested that further investigation is needed to understand why this is the case, and whether this could be
+caused by a
+flawed implementation of the greedy insertion algorithm.
+
+Amongst algorithms that start by clustering locations, K-Means Clustering appears to produce significantly worse
+routes than those found with genetic approaches.
+K-Means approaches are much faster than their genetic counterparts, but this trade off doesn't appear to be worth it
+considering that Routing+Insertion approaches are even faster and produce better routes.
+Even the K-Means inspired genetic algorithms are outperformed by the standard genetic algorithm approaches,
+indicating that these geographic heuristics for clustering do not translate well to producing a good trip.
+
+Further evidence of this is how Convex Hull Routing produces the worst results out of Routing+Insertion approaches.
+Convex Hull Routing was included in this project to investigate whether a convex hull could provide a good starting
+point for greedy insertion, hopefully being able to speed up the process or produce better results.
+While convex hull routing does produce slightly worse results though, it did find routes around 25\% faster than
+Greedy Insertion Trip Generation.
+
+It is also worth noting that these geometric based heuristics often produced large coefficients of variation,
+indicating that compared to other approaches, different location inputs resulted in a larger difference in the quality
+of the routes produced.
+
+The full set of experiment results is available in this project's related gitlab repository, located in
+`data\textbackslash results.csv'.

@@ -1,7 +1,7 @@
 \subsection{Problem Description}\label{subsec:problem-description}
-Given a positive integer $d$ and a graph $G = (V, E)$, where $V$ is set of locations including a designated
-starting point $s$ and $E$ is a set of weighted edges linking every location to every other location, find a route
-that:
+Given a positive integer: $d$, the number of days in the trip; a graph $G = (V, E)$, where $V$ is set of locations
+including a designated starting point $s$, and $E$ is a set of weighted edges linking every location to every other
+location; and a duration function $D(v), v \in V$, which assigns a visit duration to each node $v$, find a route that:
 \begin{enumerate}
     \item Visits all nodes $V \setminus s$ once.
     \item Starts and finishes at $s$, having visited it $d$ times, without ever visiting consecutively.
@@ -10,11 +10,12 @@ that:
 \end{enumerate}
 
 \subsection{Inputs, Outputs and Design Variables}\label{subsec:inputs-and-outputs}
-\todo{Update so durations aren't in the graph, instead something like D, mapping a duration to each location.}
 Inputs:
 \begin{itemize}
     \item $d$: The number of times $s$ should be visited in a route.
     Contextually, $d$ represents the number of days a tourist will spend on their trip. $d \in \mathbb{Z}, d > 0$
+    \item $D(v)$: A duration functions that assigns a duration to each location.
+    Contextually this represents the amount of time a tourist would like to spend visiting each point of location.
     \item $G = (V, E)$: A pair comprising:
     \begin{itemize}
         \item[\textbullet] $V$: A set of nodes representing locations the tourist would like to visit.
@@ -24,8 +25,6 @@ Inputs:
             $x \in \mathbb{Q}, -180 \leq x \leq 180$.
             \item[\textbullet]$y$: Latitude, indicating the location's geographic north-south position on the earth
             $y \in \mathbb{Q}, -90 \leq y \leq 90$.
-            \item[\textbullet]$t$: Duration, in minutes, indicating how much time to spend at this location.\\
-            $t \in \mathbb{Z}, t > 0$.
         \end{itemize}
         \item[\textbullet] $E$: A set of edges $e \in E$ that connects every node to every other node,
         bidirectionally. $e = (v_1, v_2, w)$, a triple comprising:
@@ -50,17 +49,16 @@ Outputs:
 \end{itemize}
 
 \subsection{Objective Function}\label{subsec:objective-function}
-As previously mentioned in the \hyperref[subsec:problem-description]{Problem Description}, our goal is to find a
-route that minimises the cumulative weight and the variance in route weight between each visit to $s$.
+As previously mentioned in the \hyperref[subsec:problem-description]{Problem Description}, the goal of this problem is
+to find a route that minimises the cumulative weight and the variance in route weight between each visit to $s$.
 To accomplish this the following cost function is applied to each route:
-\todo{reword this}
 \begin{equation}
     Cost(R) = W/d \times (1 + \sigma^2)\label{eq:cost}
 \end{equation}
 Where $W$ is the sum of the weights of all edges traversed in the route and $\sigma^2$ is the variance of the
 sum of weights between each visit to $s$:
 \begin{equation}
-    W = \sum_{i=0}^{n-1} w(r_i, r_{i+1}), r_i \in R\label{eq:weight}
+    W = \sum_{i=0}^{n-1} w(r_i, r_{i+1}) + D(v_i), r_i \in R, v_i \in V\label{eq:weight}
 \end{equation}
 Where $w(r_i, r_{i+1})$ is the weight of the edge between $r_i$ and $r_{i+1}$.
 \begin{equation}
